@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg width="60" height="120" viewBox="0 0 60 120" version="1.1" id="svg1" sodipodi:docname="battery.svg" inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+   <sodipodi:namedview id="namedview1" pagecolor="#505050" bordercolor="#eeeeee" borderopacity="1" inkscape:showpageshadow="0" inkscape:pageopacity="0" inkscape:pagecheckerboard="0" inkscape:deskcolor="#3d3d3d" inkscape:zoom="2.7776877" inkscape:cx="11.520374" inkscape:cy="69.302248" inkscape:window-width="1352" inkscape:window-height="762" inkscape:window-x="88" inkscape:window-y="25" inkscape:window-maximized="0" inkscape:current-layer="svg1" showguides="false" />
+   <defs id="defs1" />
+   <metadata id="metadata1">
+      <info category="sources" duplicateTag="false" type="source" tagType = "powerSupply" width="60" height="120"  name="Battery" description="Battery" marginH="0" marginV="0" />
+      <nodes>
+         <node id="0" tag="+" direction="0" type="source" value="plus" dx="0.0" dy="-60.0" />
+         <node id="1" tag="-" direction="2" type="source" value="negative" dx="0.0" dy="60.0" />
+      </nodes>
+      <frames>
+         <frame id="0">
+            <pathFrame id="mainPath1" type="main" style="stroke" />
+         </frame>
+      </frames>
+   </metadata>
+   <path id="mainPath1" style="fill:none;stroke:#ffffff;stroke-width:2" d="m 0,52.5 h 60 m -45,15 H 45 M 30,52.5 V 0 m 0,67.5 V 120" inkscape:label="mainPath1" />
+</svg>

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg width="180" height="240" viewBox="0 0 180 240" version="1.1" id="svg1" sodipodi:docname="rcboBreaker.svg" inkscape:version="1.4 (e7c3feb1, 2024-10-09)" xml:space="preserve"
+      xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+      xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+      xmlns="http://www.w3.org/2000/svg"
+      xmlns:svg="http://www.w3.org/2000/svg">
+      <sodipodi:namedview id="namedview1" pagecolor="#505050" bordercolor="#eeeeee" borderopacity="1" inkscape:showpageshadow="0" inkscape:pageopacity="0" inkscape:pagecheckerboard="0" inkscape:deskcolor="#3d3d3d" inkscape:zoom="1.9590752" inkscape:cx="6.125339" inkscape:cy="141.64846" inkscape:window-width="1440" inkscape:window-height="762" inkscape:window-x="0" inkscape:window-y="25" inkscape:window-maximized="0" inkscape:current-layer="svg1" showguides="true" borderlayer="false" />
+      <defs id="defs1" />
+      <metadata id="metadata1">
+            <info category="protections" type="switch" tagType="breakers" width="180" height="240" name="RCBO Circuit Breaker 2P" description="RCBO Circuit Breaker 2P" />
+            <nodes>
+                  <node id="0" tag="1" direction="0" type="contact" dx="-30.0" dy="-120.0" />
+                  <node id="1" tag="2" direction="2" type="contact" dx="-30.0" dy="120.0" />
+                  <node id="2" tag="3" direction="0" type="contact" dx="30.0" dy="-120.0" />
+                  <node id="3" tag="4" direction="2" type="contact" dx="30.0" dy="120.0" />
+            </nodes>
+            <frames id="0">
+                  <frame id="0">
+                        <pathFrame id="mainPath1" type="main" style="stroke" />
+                  </frame>
+                  <frame id="1">
+                        <pathFrame id="mainPath2" type="main" style="stroke" />
+                  </frame>
+            </frames>
+            <contacts>
+                  <contact id="0" nodeId1="0" nodeId2="1" type="no" enableFrames="0,1" />
+                  <contact id="1" nodeId1="2" nodeId2="3" type="no" enableFrames="0,1" />
+            </contacts>
+      </metadata>
+
+
+
+
+
+      <path id="mainPath1" style="fill:none;stroke:#ffffff;stroke-width:2;stroke-dasharray:none" d="m 24.979763,150.00525 h 5 m -13,0 h 5 m -10.5,0 h 2.5 m 136.004507,0 c 0,16.57144 -26.86392,30.00524 -60.00225,30.00524 -33.13833,0 -60.00226,-13.4338 -60.00226,-30.00524 0,-16.57144 26.86393,-30.00524 60.00226,-30.00524 33.13833,0 60.00225,13.4338 60.00225,30.00524 z M 56.44198,32.464464 l 7.07106,7.071069 m 0,-7.071068 -7.07106,7.071068 m 60,-7.071068 7.07106,7.071068 m 0,-7.071068 -7.07106,7.071068 M -30.00225,50.999779 v 18.00045 m 24.0036,-9.000225 h 36.0009 M 12.0108,41.999553 V 78.000447 M -5.99865,41.999553 h 36.0009 V 78.000447 H -5.99865 Z M -13.35224,60 h 5 m -13,0 h 5 m -13,0 h 5 m 70.97719,0 h 5 m -13,0 h 5 m -13,0 h 5 m -23.62764,63.99962 v -5 m 0,13 v -5 m 0,-43 v -5 m 0,13 v -5 m 0,13 v -5 m 0,13 v -5 m 0,13 v -5 m 0,29 v -5 m 0,15.00563 v -7.00563 M 107.9775,59.999995 h 5 m -12.99999,0 h 4.99999 m -12.99999,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m 63,-59.99999450000003 V 35.999998 M 59.97751,4.9999997e-7 V 35.999998 M 120.00058,240 V 180.01049 M 59.97751,240 v -59.98951 m 45,-144.010491 15,48.000008 v 36.000003 l 0.0231,60.01048 m -75.0231,-144.010492 15,48.000008 v 36.000004 60.01049" inkscape:label="mainPath1" />
+      <path id="mainPath2" style="display:none;fill:none;stroke:#800000;stroke-width:2;stroke-dasharray:none" d="m 24.979763,150.00525 h 5 m -13,0 h 5 m 37.997745,-30.00524 v 60.01049 m 60.000002,-60.01049 0.0231,60.01049 M 56.441978,32.464465 l 7.07106,7.071068 m 0,-7.071068 -7.07106,7.071068 m 60.000002,-7.071068 7.07106,7.071068 m 0,-7.071068 -7.07106,7.071068 M -26.002252,50.99978 V 69.00023 M -5.998653,60.000005 H 30.002252 M 16.010801,41.999554 V 78.000448 M -1.998653,41.999554 H 34.002252 V 78.000448 H -1.998653 Z m -7.353583,18.000447 h 5 m -13,0 h 5 m -13,0 h 5 m 70.977184,0 h 5 m -13,0 h 2.5 2.5 m -17.622696,4e-6 9.622696,-4e-6 M 15.997312,123.99963 v -5 m 0,13 v -5 m 0,-43.000009 v -5 m 0,13 v -5 m 0,13 v -5 m 0,13.000009 v -5 m 0,13 v -5 m 0,29 v -5 m 0,15 v -7 M 111.9775,59.999995 h 5 m -12.99999,0 h 4.99999 m -12.99999,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13.000002,0 h 5.000002 m -13.000002,0 h 5 m -13,0 h 5 M 113.97751,34 l 6,50.000007 v 36.000003 m 0,-120.000009 V 35.999999 M 53.9775,34 59.977508,84.000007 v 36.000003 m 0,-120.000009 V 35.999999 M 120.00058,240.00001 V 180.0105 M 59.977508,240.00001 V 180.0105 m 90.006762,-30.00525 c 0,16.57144 -26.86392,30.00524 -60.002252,30.00524 -33.138331,0 -60.002256,-13.4338 -60.002255,-30.00524 -10e-7,-16.57144 26.863924,-30.00524 60.002255,-30.00524 33.138332,0 60.002252,13.4338 60.002252,30.00524 z" inkscape:label="mainPath2" />
+</svg>

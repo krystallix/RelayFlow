@@ -1,0 +1,7163 @@
+{
+  "arrowDestination": {
+    "id": "arrowDestination",
+    "name": "Destination Arrow",
+    "description": "Destination Arrow",
+    "category": "others",
+    "type": "arrow",
+    "tagType": "arrows",
+    "width": 60,
+    "height": 120,
+    "svgPath": "/symbols/arrowDestination.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "",
+        "direction": 0,
+        "type": "arrow",
+        "dx": 0,
+        "dy": -60
+      }
+    ],
+    "contacts": [],
+    "framesCount": 1
+  },
+  "arrowSource": {
+    "id": "arrowSource",
+    "name": "Source Arrow",
+    "description": "Source Arrow",
+    "category": "others",
+    "type": "arrow",
+    "tagType": "arrows",
+    "width": 60,
+    "height": 120,
+    "svgPath": "/symbols/arrowSource.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "",
+        "direction": 0,
+        "type": "arrow",
+        "dx": 0,
+        "dy": -60
+      }
+    ],
+    "contacts": [],
+    "framesCount": 1
+  },
+  "battery": {
+    "id": "battery",
+    "name": "Battery",
+    "description": "Battery",
+    "category": "sources",
+    "type": "source",
+    "tagType": "powerSupply",
+    "width": 60,
+    "height": 120,
+    "svgPath": "/symbols/battery.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "+",
+        "direction": 0,
+        "type": "source",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "-",
+        "direction": 2,
+        "type": "source",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [],
+    "framesCount": 1
+  },
+  "breaker": {
+    "id": "breaker",
+    "name": "coil",
+    "description": "Coil",
+    "category": "protections",
+    "type": "switch",
+    "tagType": "breakers",
+    "width": 240,
+    "height": 240,
+    "svgPath": "/symbols/breaker.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "motor",
+        "dx": -60,
+        "dy": -120
+      },
+      {
+        "id": 1,
+        "tag": "3",
+        "direction": 0,
+        "type": "motor",
+        "dx": 0,
+        "dy": -120
+      },
+      {
+        "id": 2,
+        "tag": "5",
+        "direction": 0,
+        "type": "motor",
+        "dx": 60,
+        "dy": -120
+      },
+      {
+        "id": 3,
+        "tag": "2",
+        "direction": 2,
+        "type": "motor",
+        "dx": -60,
+        "dy": 120
+      },
+      {
+        "id": 4,
+        "tag": "4",
+        "direction": 2,
+        "type": "motor",
+        "dx": 0,
+        "dy": 120
+      },
+      {
+        "id": 5,
+        "tag": "6",
+        "direction": 2,
+        "type": "motor",
+        "dx": 60,
+        "dy": 120
+      }
+    ],
+    "contacts": [],
+    "framesCount": 1
+  },
+  "breaker1p": {
+    "id": "breaker1p",
+    "name": "Circuit Breaker 1P",
+    "description": "Circuit Breaker 1P",
+    "category": "protections",
+    "type": "switch",
+    "tagType": "breakers",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/breaker1p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "breaker2p": {
+    "id": "breaker2p",
+    "name": "Circuit Breaker 2P",
+    "description": "Circuit Breaker 2P",
+    "category": "protections",
+    "type": "switch",
+    "tagType": "breakers",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/breaker2p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "3",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "4",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "breaker3p": {
+    "id": "breaker3p",
+    "name": "Circuit Breaker 3P",
+    "description": "Circuit Breaker 3P",
+    "category": "protections",
+    "type": "switch",
+    "tagType": "breakers",
+    "width": 180,
+    "height": 120,
+    "svgPath": "/symbols/breaker3p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": -60,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": -60,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "3",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "4",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      },
+      {
+        "id": 4,
+        "tag": "5",
+        "direction": 0,
+        "type": "contact",
+        "dx": 60,
+        "dy": -60
+      },
+      {
+        "id": 5,
+        "tag": "6",
+        "direction": 2,
+        "type": "contact",
+        "dx": 60,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 2,
+        "nodeId1": 4,
+        "nodeId2": 5,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "breaker4p": {
+    "id": "breaker4p",
+    "name": "Circuit Breaker 4P",
+    "description": "Circuit Breaker 4P",
+    "category": "protections",
+    "type": "switch",
+    "tagType": "breakers",
+    "width": 240,
+    "height": 120,
+    "svgPath": "/symbols/breaker4p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": -90,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": -90,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "3",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "4",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 4,
+        "tag": "5",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 5,
+        "tag": "6",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      },
+      {
+        "id": 6,
+        "tag": "7",
+        "direction": 0,
+        "type": "contact",
+        "dx": 90,
+        "dy": -60
+      },
+      {
+        "id": 7,
+        "tag": "8",
+        "direction": 2,
+        "type": "contact",
+        "dx": 90,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 2,
+        "nodeId1": 4,
+        "nodeId2": 5,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 3,
+        "nodeId1": 6,
+        "nodeId2": 7,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "buttonCON": {
+    "id": "buttonCON",
+    "name": "Push Button CON",
+    "description": "Push Button CON",
+    "category": "switches",
+    "type": "button",
+    "tagType": "switches",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/buttonCON.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "11",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "12",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "14",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "nc",
+        "enableFrames": "1,0"
+      },
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 2,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "buttonCrossover": {
+    "id": "buttonCrossover",
+    "name": "Push Button Crossover",
+    "description": "Push Button Crossover",
+    "category": "switches",
+    "type": "button",
+    "tagType": "switches",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/buttonCrossover.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "3",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "4",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 3,
+        "type": "nc",
+        "enableFrames": "1,0"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 1,
+        "type": "nc",
+        "enableFrames": "1,0"
+      },
+      {
+        "id": 2,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 3,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "buttonNC": {
+    "id": "buttonNC",
+    "name": "Push Button NC",
+    "description": "Push Button NC",
+    "category": "switches",
+    "type": "button",
+    "tagType": "switches",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/buttonNC.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "11",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "12",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "nc",
+        "enableFrames": "1,0"
+      }
+    ],
+    "framesCount": 2
+  },
+  "buttonNO": {
+    "id": "buttonNO",
+    "name": "Push Button NO",
+    "description": "Push Button NO",
+    "category": "switches",
+    "type": "button",
+    "tagType": "switches",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/buttonNO.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "13",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "14",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "buttonNONC": {
+    "id": "buttonNONC",
+    "name": "Push Button NCNO",
+    "description": "Push Button NCNO",
+    "category": "switches",
+    "type": "button",
+    "tagType": "switches",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/buttonNONC.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "11",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "12",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "13",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "14",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "nc",
+        "enableFrames": "1,0"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "buzzer": {
+    "id": "buzzer",
+    "name": "Buzzer",
+    "description": "Buzzer",
+    "category": "loads",
+    "type": "load",
+    "tagType": "loads",
+    "width": 60,
+    "height": 120,
+    "svgPath": "/symbols/buzzer.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "X1",
+        "direction": 0,
+        "type": "load",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "X2",
+        "direction": 2,
+        "type": "load",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [],
+    "framesCount": 7
+  },
+  "coil": {
+    "id": "coil",
+    "name": "Coil",
+    "description": "Coil",
+    "category": "coils",
+    "type": "coil",
+    "tagType": "coils",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/coil.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "A1",
+        "direction": 0,
+        "type": "load",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "A2",
+        "direction": 2,
+        "type": "load",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [],
+    "framesCount": 2
+  },
+  "coilDelayOff": {
+    "id": "coilDelayOff",
+    "name": "Off-Delay Relay Coil",
+    "description": "Off-Delay Relay Coil",
+    "category": "coils",
+    "type": "coil",
+    "tagType": "timerCoils",
+    "timerType": "delayOff",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/coilDelayOff.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "A1",
+        "direction": 0,
+        "type": "load",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "A2",
+        "direction": 2,
+        "type": "load",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [],
+    "framesCount": 2
+  },
+  "coilDelayOn": {
+    "id": "coilDelayOn",
+    "name": "On-Delay Relay Coil",
+    "description": "On-Delay Relay Coil",
+    "category": "coils",
+    "type": "coil",
+    "tagType": "timerCoils",
+    "timerType": "delayOn",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/coilDelayOn.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "A1",
+        "direction": 0,
+        "type": "load",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "A2",
+        "direction": 2,
+        "type": "load",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [],
+    "framesCount": 2
+  },
+  "coilDelayOnOff": {
+    "id": "coilDelayOnOff",
+    "name": "On-Off-Delay Relay Coil",
+    "description": "On-Off-Delay Relay Coil",
+    "category": "coils",
+    "type": "coil",
+    "tagType": "timerCoils",
+    "timerType": "delayOnOff",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/coilDelayOnOff.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "A1",
+        "direction": 0,
+        "type": "load",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "A2",
+        "direction": 2,
+        "type": "load",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [],
+    "framesCount": 2
+  },
+  "coilFlasher": {
+    "id": "coilFlasher",
+    "name": "Flasher Relay Coil",
+    "description": "Flasher Relay Coil",
+    "category": "coils",
+    "type": "coil",
+    "tagType": "timerCoils",
+    "timerType": "flash",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/coilFlasher.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "A1",
+        "direction": 0,
+        "type": "load",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "A2",
+        "direction": 2,
+        "type": "load",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [],
+    "framesCount": 2
+  },
+  "coilLatch": {
+    "id": "coilLatch",
+    "name": "Impulse Relay Coil",
+    "description": "Impulse Relay Coil",
+    "category": "coils",
+    "type": "coil",
+    "tagType": "coils",
+    "timerType": "latch",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/coilLatch.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "A1",
+        "direction": 0,
+        "type": "load",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "A2",
+        "direction": 2,
+        "type": "load",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [],
+    "framesCount": 2
+  },
+  "coilSolenoid": {
+    "id": "coilSolenoid",
+    "name": "Solenoid Coil",
+    "description": "Solenoid Coil",
+    "category": "coils",
+    "type": "coil",
+    "tagType": "coilsSolenoid",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/coilSolenoid.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "A1",
+        "direction": 0,
+        "type": "load",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "A2",
+        "direction": 2,
+        "type": "load",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [],
+    "framesCount": 2
+  },
+  "contactCON": {
+    "id": "contactCON",
+    "name": "Contact CON",
+    "description": "Contact CON",
+    "category": "auxiliaries",
+    "type": "relayContact",
+    "tagType": "contacts",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/contactCON.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "11",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "12",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "13",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      },
+      {
+        "id": 0,
+        "tag": "15",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "16",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "18",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      },
+      {
+        "id": 0,
+        "tag": "15",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "16",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "18",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      },
+      {
+        "id": 0,
+        "tag": "15",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "16",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "18",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      },
+      {
+        "id": 0,
+        "tag": "95",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "96",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "98",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "nc",
+        "enableFrames": "1,0"
+      },
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 2,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 1
+  },
+  "contactCONDelayOff": {
+    "id": "contactCONDelayOff",
+    "name": "Off-Delay Contact CON for Contactors",
+    "description": "Off-Delay Contact CON for Contactors",
+    "category": "auxiliaries",
+    "type": "relayContact",
+    "tagType": "contactors",
+    "timerType": "delayOff",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/contactCONDelayOff.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "55",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "56",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "58",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "nc",
+        "enableFrames": "1,0"
+      },
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 2,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "contactCONDelayOn": {
+    "id": "contactCONDelayOn",
+    "name": "On-Delay Contact CON for Contactors",
+    "description": "On-Delay Contact CON for Contactors",
+    "category": "auxiliaries",
+    "type": "relayContact",
+    "tagType": "contactors",
+    "timerType": "delayOn",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/contactCONDelayOn.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "55",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "56",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "58",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "nc",
+        "enableFrames": "1,0"
+      },
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 2,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "contactNC": {
+    "id": "contactNC",
+    "name": "Contact NC",
+    "description": "Contact NC",
+    "category": "auxiliaries",
+    "type": "relayContact",
+    "tagType": "contacts",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/contactNC.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "11",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "12",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      },
+      {
+        "id": 0,
+        "tag": "15",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "16",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      },
+      {
+        "id": 0,
+        "tag": "15",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "16",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      },
+      {
+        "id": 0,
+        "tag": "15",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "16",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      },
+      {
+        "id": 0,
+        "tag": "95",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "96",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "1,0"
+      }
+    ],
+    "framesCount": 1
+  },
+  "contactNCDelayOff": {
+    "id": "contactNCDelayOff",
+    "name": "Off-Delay Contact NC for Contactors",
+    "description": "Off-Delay Contact NC for Contactors",
+    "category": "auxiliaries",
+    "type": "relayContact",
+    "tagType": "contactors",
+    "timerType": "delayOff",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/contactNCDelayOff.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "55",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "56",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "nc",
+        "enableFrames": "1,0"
+      }
+    ],
+    "framesCount": 2
+  },
+  "contactNCDelayOn": {
+    "id": "contactNCDelayOn",
+    "name": "On-Delay Contact NC for Contactors",
+    "description": "On-Delay Contact NC for Contactors",
+    "category": "auxiliaries",
+    "type": "relayContact",
+    "tagType": "contactors",
+    "timerType": "delayOn",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/contactNCDelayOn.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "55",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "56",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "nc",
+        "enableFrames": "1,0"
+      }
+    ],
+    "framesCount": 2
+  },
+  "contactNO": {
+    "id": "contactNO",
+    "name": "Contact NO",
+    "description": "Contact NO",
+    "category": "auxiliaries",
+    "type": "relayContact",
+    "tagType": "contacts",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/contactNO.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "13",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "14",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      },
+      {
+        "id": 0,
+        "tag": "17",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "18",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      },
+      {
+        "id": 0,
+        "tag": "17",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "18",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      },
+      {
+        "id": 0,
+        "tag": "17",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "18",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      },
+      {
+        "id": 0,
+        "tag": "97",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "98",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 1
+  },
+  "contactNODelayOff": {
+    "id": "contactNODelayOff",
+    "name": "Off-Delay Contact NO for Contactors",
+    "description": "Off-Delay Contact NO for Contactors",
+    "category": "auxiliaries",
+    "type": "relayContact",
+    "tagType": "contactors",
+    "timerType": "delayOff",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/contactNODelayOff.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "67",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "68",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "contactNODelayOn": {
+    "id": "contactNODelayOn",
+    "name": "On-Delay Contact NO for Contactors",
+    "description": "On-Delay Contact NO for Contactors",
+    "category": "auxiliaries",
+    "type": "relayContact",
+    "tagType": "contactors",
+    "timerType": "delayOn",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/contactNODelayOn.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "67",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "68",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "contactNONC": {
+    "id": "contactNONC",
+    "name": "Contact NCNO",
+    "description": "Contact NCNO",
+    "category": "auxiliaries",
+    "type": "relayContact",
+    "tagType": "contacts",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/contactNONC.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "11",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "12",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "13",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "14",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      },
+      {
+        "id": 0,
+        "tag": "15",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "16",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "17",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "18",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      },
+      {
+        "id": 0,
+        "tag": "15",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "16",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "17",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "18",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      },
+      {
+        "id": 0,
+        "tag": "15",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "16",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "17",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "18",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      },
+      {
+        "id": 0,
+        "tag": "95",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "96",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "97",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "98",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "nc",
+        "enableFrames": "1,0"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 1
+  },
+  "contactNONCDelayOff": {
+    "id": "contactNONCDelayOff",
+    "name": "Off-Delay Contact NCNO for Contactors",
+    "description": "Off-Delay Contact NCNO for Contactors",
+    "category": "auxiliaries",
+    "type": "relayContact",
+    "tagType": "contactors",
+    "timerType": "delayOff",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/contactNONCDelayOff.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "55",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "56",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "67",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "68",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "nc",
+        "enableFrames": "1,0"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "contactNONCDelayOn": {
+    "id": "contactNONCDelayOn",
+    "name": "On-Delay Contact NCNO for Contactors",
+    "description": "On-Delay Contact NCNO for Contactors",
+    "category": "auxiliaries",
+    "type": "relayContact",
+    "tagType": "contactors",
+    "timerType": "delayOn",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/contactNONCDelayOn.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "55",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "56",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "67",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "68",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "nc",
+        "enableFrames": "1,0"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "contactor1p": {
+    "id": "contactor1p",
+    "name": "Contactor 1P",
+    "description": "Contactor 1P",
+    "category": "contactors",
+    "type": "relayContact",
+    "tagType": "contactors",
+    "width": 60,
+    "height": 120,
+    "svgPath": "/symbols/contactor1p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "contactor2p": {
+    "id": "contactor2p",
+    "name": "Contactor 2P",
+    "description": "Contactor 2P",
+    "category": "contactors",
+    "type": "relayContact",
+    "tagType": "contactors",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/contactor2p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "3",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "4",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "contactor3p": {
+    "id": "contactor3p",
+    "name": "Contactor 3P",
+    "description": "Contactor 3P",
+    "category": "contactors",
+    "type": "relayContact",
+    "tagType": "contactors",
+    "width": 180,
+    "height": 120,
+    "svgPath": "/symbols/contactor3p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": -60,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": -60,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "3",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "4",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      },
+      {
+        "id": 4,
+        "tag": "5",
+        "direction": 0,
+        "type": "contact",
+        "dx": 60,
+        "dy": -60
+      },
+      {
+        "id": 5,
+        "tag": "6",
+        "direction": 2,
+        "type": "contact",
+        "dx": 60,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 2,
+        "nodeId1": 4,
+        "nodeId2": 5,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "contactor4p": {
+    "id": "contactor4p",
+    "name": "Contactor 4P",
+    "description": "Contactor 4P",
+    "category": "contactors",
+    "type": "relayContact",
+    "tagType": "contactors",
+    "width": 240,
+    "height": 120,
+    "svgPath": "/symbols/contactor4p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": -90,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": -90,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "3",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "4",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 4,
+        "tag": "5",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 5,
+        "tag": "6",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      },
+      {
+        "id": 6,
+        "tag": "7",
+        "direction": 0,
+        "type": "contact",
+        "dx": 90,
+        "dy": -60
+      },
+      {
+        "id": 7,
+        "tag": "8",
+        "direction": 2,
+        "type": "contact",
+        "dx": 90,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 2,
+        "nodeId1": 4,
+        "nodeId2": 5,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 3,
+        "nodeId1": 6,
+        "nodeId2": 7,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "contactorNC1p": {
+    "id": "contactorNC1p",
+    "name": "Contactor NC 1P",
+    "description": "Contactor NC 1P",
+    "category": "contactors",
+    "type": "relayContact",
+    "tagType": "contactors",
+    "width": 60,
+    "height": 120,
+    "svgPath": "/symbols/contactorNC1p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "1,0"
+      }
+    ],
+    "framesCount": 2
+  },
+  "contactorNC2p": {
+    "id": "contactorNC2p",
+    "name": "Contactor NC 2P",
+    "description": "Contactor NC 2P",
+    "category": "contactors",
+    "type": "relayContact",
+    "tagType": "contactors",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/contactorNC2p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "3",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "4",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "1,0"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "1,0"
+      }
+    ],
+    "framesCount": 2
+  },
+  "contactorNC3p": {
+    "id": "contactorNC3p",
+    "name": "Contactor NC 3P",
+    "description": "Contactor NC 3P",
+    "category": "contactors",
+    "type": "relayContact",
+    "tagType": "contactors",
+    "width": 180,
+    "height": 120,
+    "svgPath": "/symbols/contactorNC3p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": -60,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": -60,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "3",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "4",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      },
+      {
+        "id": 4,
+        "tag": "5",
+        "direction": 0,
+        "type": "contact",
+        "dx": 60,
+        "dy": -60
+      },
+      {
+        "id": 5,
+        "tag": "6",
+        "direction": 2,
+        "type": "contact",
+        "dx": 60,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "1,0"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "1,0"
+      },
+      {
+        "id": 2,
+        "nodeId1": 4,
+        "nodeId2": 5,
+        "type": "no",
+        "enableFrames": "1,0"
+      }
+    ],
+    "framesCount": 2
+  },
+  "contactorNC4p": {
+    "id": "contactorNC4p",
+    "name": "Contactor NC 4P",
+    "description": "Contactor NC 4P",
+    "category": "contactors",
+    "type": "relayContact",
+    "tagType": "contactors",
+    "width": 240,
+    "height": 120,
+    "svgPath": "/symbols/contactorNC4p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": -90,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": -90,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "3",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "4",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 4,
+        "tag": "5",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 5,
+        "tag": "6",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      },
+      {
+        "id": 6,
+        "tag": "7",
+        "direction": 0,
+        "type": "contact",
+        "dx": 90,
+        "dy": -60
+      },
+      {
+        "id": 7,
+        "tag": "8",
+        "direction": 2,
+        "type": "contact",
+        "dx": 90,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "1,0"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "1,0"
+      },
+      {
+        "id": 2,
+        "nodeId1": 4,
+        "nodeId2": 5,
+        "type": "no",
+        "enableFrames": "1,0"
+      },
+      {
+        "id": 3,
+        "nodeId1": 6,
+        "nodeId2": 7,
+        "type": "no",
+        "enableFrames": "1,0"
+      }
+    ],
+    "framesCount": 2
+  },
+  "diode": {
+    "id": "diode",
+    "name": "Diode",
+    "description": "Diode",
+    "category": "others",
+    "type": "diode",
+    "tagType": "diodes",
+    "width": 60,
+    "height": 120,
+    "svgPath": "/symbols/diode.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "",
+        "direction": 0,
+        "type": "diodePositive",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "",
+        "direction": 2,
+        "type": "diodeNegative",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [],
+    "framesCount": 1
+  },
+  "emergencyCON": {
+    "id": "emergencyCON",
+    "name": "Switch CON",
+    "description": "Switch CON",
+    "category": "switches",
+    "type": "switch",
+    "tagType": "switches",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/emergencyCON.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "11",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "12",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "14",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "nc",
+        "enableFrames": "1,0"
+      },
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 2,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "emergencyNC": {
+    "id": "emergencyNC",
+    "name": "Switch NC",
+    "description": "Switch NC",
+    "category": "switches",
+    "type": "switch",
+    "tagType": "switches",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/emergencyNC.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "11",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "12",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "nc",
+        "enableFrames": "1,0"
+      }
+    ],
+    "framesCount": 2
+  },
+  "emergencyNO": {
+    "id": "emergencyNO",
+    "name": "Switch NO",
+    "description": "Switch NO",
+    "category": "switches",
+    "type": "switch",
+    "tagType": "switches",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/emergencyNO.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "13",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "14",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "emergencyNONC": {
+    "id": "emergencyNONC",
+    "name": "Switch NCNO",
+    "description": "Switch NCNO",
+    "category": "switches",
+    "type": "switch",
+    "tagType": "switches",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/emergencyNONC.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "11",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "12",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "13",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "14",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "nc",
+        "enableFrames": "1,0"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "fuse1p": {
+    "id": "fuse1p",
+    "name": "Fuse 1P",
+    "description": "Fuse 1P",
+    "category": "protections",
+    "type": "switch",
+    "tagType": "fuses",
+    "width": 60,
+    "height": 120,
+    "svgPath": "/symbols/fuse1p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "1,0"
+      }
+    ],
+    "framesCount": 2
+  },
+  "fuse2p": {
+    "id": "fuse2p",
+    "name": "Fuse 2P",
+    "description": "Fuse 2P",
+    "category": "protections",
+    "type": "switch",
+    "tagType": "fuses",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/fuse2p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "3",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "4",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "1,0"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "1,0"
+      }
+    ],
+    "framesCount": 2
+  },
+  "fuse3p": {
+    "id": "fuse3p",
+    "name": "Fuse 3P",
+    "description": "Fuse 3P",
+    "category": "protections",
+    "type": "switch",
+    "tagType": "fuses",
+    "width": 180,
+    "height": 120,
+    "svgPath": "/symbols/fuse3p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": -60,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": -60,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "3",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "4",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      },
+      {
+        "id": 4,
+        "tag": "5",
+        "direction": 0,
+        "type": "contact",
+        "dx": 60,
+        "dy": -60
+      },
+      {
+        "id": 5,
+        "tag": "6",
+        "direction": 2,
+        "type": "contact",
+        "dx": 60,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "1,0"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "1,0"
+      },
+      {
+        "id": 2,
+        "nodeId1": 4,
+        "nodeId2": 5,
+        "type": "no",
+        "enableFrames": "1,0"
+      }
+    ],
+    "framesCount": 2
+  },
+  "fuse4p": {
+    "id": "fuse4p",
+    "name": "Fuse 4P",
+    "description": "Fuse 4P",
+    "category": "protections",
+    "type": "switch",
+    "tagType": "fuses",
+    "width": 240,
+    "height": 120,
+    "svgPath": "/symbols/fuse4p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": -90,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": -90,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "3",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "4",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 4,
+        "tag": "5",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 5,
+        "tag": "6",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      },
+      {
+        "id": 6,
+        "tag": "7",
+        "direction": 0,
+        "type": "contact",
+        "dx": 90,
+        "dy": -60
+      },
+      {
+        "id": 7,
+        "tag": "8",
+        "direction": 2,
+        "type": "contact",
+        "dx": 90,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "1,0"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "1,0"
+      },
+      {
+        "id": 2,
+        "nodeId1": 4,
+        "nodeId2": 5,
+        "type": "no",
+        "enableFrames": "1,0"
+      },
+      {
+        "id": 3,
+        "nodeId1": 6,
+        "nodeId2": 7,
+        "type": "no",
+        "enableFrames": "1,0"
+      }
+    ],
+    "framesCount": 2
+  },
+  "fuseSwitch1p": {
+    "id": "fuseSwitch1p",
+    "name": "Fuse Switch 1P",
+    "description": "Fuse Switch 1P",
+    "category": "protections",
+    "type": "switch",
+    "tagType": "fuses",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/fuseSwitch1p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "fuseSwitch1pn": {
+    "id": "fuseSwitch1pn",
+    "name": "Fuse Switch 1P+N",
+    "description": "Fuse Switch 1P+N",
+    "category": "protections",
+    "type": "switch",
+    "tagType": "fuses",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/fuseSwitch1pn.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "3",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "4",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "fuseSwitch2p": {
+    "id": "fuseSwitch2p",
+    "name": "Fuse Switch 2P",
+    "description": "Fuse Switch 2P",
+    "category": "protections",
+    "type": "switch",
+    "tagType": "fuses",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/fuseSwitch2p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "3",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "4",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "fuseSwitch3p": {
+    "id": "fuseSwitch3p",
+    "name": "Fuse Switch 3P",
+    "description": "Fuse Switch 3P",
+    "category": "protections",
+    "type": "switch",
+    "tagType": "fuses",
+    "width": 180,
+    "height": 120,
+    "svgPath": "/symbols/fuseSwitch3p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": -60,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": -60,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "3",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "4",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      },
+      {
+        "id": 4,
+        "tag": "5",
+        "direction": 0,
+        "type": "contact",
+        "dx": 60,
+        "dy": -60
+      },
+      {
+        "id": 5,
+        "tag": "6",
+        "direction": 2,
+        "type": "contact",
+        "dx": 60,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 2,
+        "nodeId1": 4,
+        "nodeId2": 5,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "fuseSwitch3pn": {
+    "id": "fuseSwitch3pn",
+    "name": "Fuse Switch 3P+N",
+    "description": "Fuse Switch 3P+N",
+    "category": "protections",
+    "type": "switch",
+    "tagType": "fuses",
+    "width": 240,
+    "height": 120,
+    "svgPath": "/symbols/fuseSwitch3pn.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": -90,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": -90,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "3",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "4",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 4,
+        "tag": "5",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 5,
+        "tag": "6",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      },
+      {
+        "id": 6,
+        "tag": "7",
+        "direction": 0,
+        "type": "contact",
+        "dx": 90,
+        "dy": -60
+      },
+      {
+        "id": 7,
+        "tag": "8",
+        "direction": 2,
+        "type": "contact",
+        "dx": 90,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 2,
+        "nodeId1": 4,
+        "nodeId2": 5,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 3,
+        "nodeId1": 6,
+        "nodeId2": 7,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "fuseSwitch4p": {
+    "id": "fuseSwitch4p",
+    "name": "Fuse Switch 4P",
+    "description": "Fuse Switch 4P",
+    "category": "protections",
+    "type": "switch",
+    "tagType": "fuses",
+    "width": 240,
+    "height": 120,
+    "svgPath": "/symbols/fuseSwitch4p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": -90,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": -90,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "3",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "4",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 4,
+        "tag": "5",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 5,
+        "tag": "6",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      },
+      {
+        "id": 6,
+        "tag": "7",
+        "direction": 0,
+        "type": "contact",
+        "dx": 90,
+        "dy": -60
+      },
+      {
+        "id": 7,
+        "tag": "8",
+        "direction": 2,
+        "type": "contact",
+        "dx": 90,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 2,
+        "nodeId1": 4,
+        "nodeId2": 5,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 3,
+        "nodeId1": 6,
+        "nodeId2": 7,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "generator3ph": {
+    "id": "generator3ph",
+    "name": "Three-Phase Generator (C1-C2 for Auto Mode)",
+    "description": "Three-Phase Generator (C1-C2 for Auto Mode)",
+    "category": "sources",
+    "type": "generator",
+    "tagType": "generators",
+    "width": 240,
+    "height": 180,
+    "svgPath": "/symbols/generator3ph.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "L1",
+        "direction": 0,
+        "type": "none",
+        "dx": -90,
+        "dy": -90
+      },
+      {
+        "id": 1,
+        "tag": "L2",
+        "direction": 0,
+        "type": "none",
+        "dx": -30,
+        "dy": -90
+      },
+      {
+        "id": 2,
+        "tag": "L3",
+        "direction": 0,
+        "type": "none",
+        "dx": 30,
+        "dy": -90
+      },
+      {
+        "id": 3,
+        "tag": "N",
+        "direction": 0,
+        "type": "none",
+        "dx": 90,
+        "dy": -90
+      },
+      {
+        "id": 4,
+        "tag": "C1",
+        "direction": 2,
+        "type": "source",
+        "dx": -60,
+        "dy": 90
+      },
+      {
+        "id": 5,
+        "tag": "C2",
+        "direction": 2,
+        "type": "load",
+        "dx": 0,
+        "dy": 90
+      }
+    ],
+    "contacts": [],
+    "framesCount": 2
+  },
+  "icon%201024": {
+    "id": "icon%201024",
+    "name": "coil",
+    "description": "Coil",
+    "category": "general",
+    "type": "delayOn",
+    "tagType": "2",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/icon_1024.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "A1",
+        "direction": 0,
+        "type": "load",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "A2",
+        "direction": 2,
+        "type": "load",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [],
+    "framesCount": 2
+  },
+  "icon": {
+    "id": "icon",
+    "name": "coil",
+    "description": "Coil",
+    "category": "general",
+    "type": "delayOn",
+    "tagType": "2",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/icon.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "A1",
+        "direction": 0,
+        "type": "load",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "A2",
+        "direction": 2,
+        "type": "load",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [],
+    "framesCount": 2
+  },
+  "icon_1024": {
+    "id": "icon_1024",
+    "name": "coil",
+    "description": "Coil",
+    "category": "general",
+    "type": "delayOn",
+    "tagType": "2",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/icon_1024.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "A1",
+        "direction": 0,
+        "type": "load",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "A2",
+        "direction": 2,
+        "type": "load",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [],
+    "framesCount": 2
+  },
+  "isolator1p": {
+    "id": "isolator1p",
+    "name": "Isolator 1P",
+    "description": "Isolator 1P",
+    "category": "protections",
+    "type": "switch",
+    "tagType": "switches",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/isolator1p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "13",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "14",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "isolator2p": {
+    "id": "isolator2p",
+    "name": "Isolator 2P",
+    "description": "Isolator 2P",
+    "category": "protections",
+    "type": "switch",
+    "tagType": "switches",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/isolator2p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "3",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "4",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "isolator3p": {
+    "id": "isolator3p",
+    "name": "Isolator 3P",
+    "description": "Isolator 3P",
+    "category": "protections",
+    "type": "switch",
+    "tagType": "switches",
+    "width": 180,
+    "height": 120,
+    "svgPath": "/symbols/isolator3p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": -60,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": -60,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "3",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "4",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      },
+      {
+        "id": 4,
+        "tag": "5",
+        "direction": 0,
+        "type": "contact",
+        "dx": 60,
+        "dy": -60
+      },
+      {
+        "id": 5,
+        "tag": "6",
+        "direction": 2,
+        "type": "contact",
+        "dx": 60,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 2,
+        "nodeId1": 4,
+        "nodeId2": 5,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "isolator4p": {
+    "id": "isolator4p",
+    "name": "Isolator 4P",
+    "description": "Isolator 4P",
+    "category": "protections",
+    "type": "switch",
+    "tagType": "switches",
+    "width": 240,
+    "height": 120,
+    "svgPath": "/symbols/isolator4p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": -90,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": -90,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "3",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "4",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 4,
+        "tag": "5",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 5,
+        "tag": "6",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      },
+      {
+        "id": 6,
+        "tag": "7",
+        "direction": 0,
+        "type": "contact",
+        "dx": 90,
+        "dy": -60
+      },
+      {
+        "id": 7,
+        "tag": "8",
+        "direction": 2,
+        "type": "contact",
+        "dx": 90,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 2,
+        "nodeId1": 4,
+        "nodeId2": 5,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 3,
+        "nodeId1": 6,
+        "nodeId2": 7,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "junction2p": {
+    "id": "junction2p",
+    "name": "Connection 2P",
+    "description": "Connection 2P",
+    "category": "others",
+    "type": "junction",
+    "tagType": "junctions",
+    "width": 60,
+    "height": 120,
+    "svgPath": "/symbols/junction2p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "",
+        "direction": 0,
+        "type": "junction",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "",
+        "direction": 2,
+        "type": "junction",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [],
+    "framesCount": 1
+  },
+  "junction2p90": {
+    "id": "junction2p90",
+    "name": "Connection 2P 90°",
+    "description": "Connection 2P 90°",
+    "category": "others",
+    "type": "junction",
+    "tagType": "junctions",
+    "width": 60,
+    "height": 60,
+    "svgPath": "/symbols/junction2p90.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "",
+        "direction": 0,
+        "type": "junction",
+        "dx": -30,
+        "dy": -30
+      },
+      {
+        "id": 1,
+        "tag": "",
+        "direction": 1,
+        "type": "junction",
+        "dx": 30,
+        "dy": 30
+      }
+    ],
+    "contacts": [],
+    "framesCount": 1
+  },
+  "junction3p": {
+    "id": "junction3p",
+    "name": "Connection 3P",
+    "description": "Connection 3P",
+    "category": "others",
+    "type": "junction",
+    "tagType": "junctions",
+    "width": 60,
+    "height": 120,
+    "svgPath": "/symbols/junction3p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "",
+        "direction": 0,
+        "type": "junction",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "",
+        "direction": 2,
+        "type": "junction",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "",
+        "direction": 1,
+        "type": "junction",
+        "dx": 30,
+        "dy": 0
+      }
+    ],
+    "contacts": [],
+    "framesCount": 1
+  },
+  "junction4p": {
+    "id": "junction4p",
+    "name": "Connection 4P",
+    "description": "Connection 4P",
+    "category": "others",
+    "type": "junction",
+    "tagType": "junctions",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/junction4p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "",
+        "direction": 0,
+        "type": "junction",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "",
+        "direction": 2,
+        "type": "junction",
+        "dx": 0,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "",
+        "direction": 1,
+        "type": "junction",
+        "dx": 60,
+        "dy": 0
+      },
+      {
+        "id": 3,
+        "tag": "",
+        "direction": 3,
+        "type": "junction",
+        "dx": -60,
+        "dy": 0
+      }
+    ],
+    "contacts": [],
+    "framesCount": 1
+  },
+  "junctionPE": {
+    "id": "junctionPE",
+    "name": "Connection Ground",
+    "description": "Connection Ground",
+    "category": "others",
+    "type": "junction",
+    "tagType": "junctions",
+    "width": 60,
+    "height": 60,
+    "svgPath": "/symbols/junctionPE.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "PE",
+        "direction": 2,
+        "type": "junction",
+        "dx": 0,
+        "dy": 30
+      }
+    ],
+    "contacts": [],
+    "framesCount": 1
+  },
+  "lamp": {
+    "id": "lamp",
+    "name": "Light",
+    "description": "Light",
+    "category": "loads",
+    "type": "load",
+    "tagType": "loads",
+    "width": 60,
+    "height": 120,
+    "svgPath": "/symbols/lamp.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "X1",
+        "direction": 0,
+        "type": "load",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "X2",
+        "direction": 2,
+        "type": "load",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [],
+    "framesCount": 7
+  },
+  "lampBlink": {
+    "id": "lampBlink",
+    "name": "Light Blink",
+    "description": "Light Blink",
+    "category": "loads",
+    "type": "load",
+    "tagType": "loads",
+    "timerType": "flashLight",
+    "width": 60,
+    "height": 120,
+    "svgPath": "/symbols/lampBlink.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "X1",
+        "direction": 0,
+        "type": "load",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "X2",
+        "direction": 2,
+        "type": "load",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [],
+    "framesCount": 7
+  },
+  "motor": {
+    "id": "motor",
+    "name": "coil",
+    "description": "Coil",
+    "category": "general",
+    "type": "component",
+    "tagType": "2",
+    "width": 240,
+    "height": 240,
+    "svgPath": "/symbols/motor.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "U1",
+        "direction": 0,
+        "type": "motor",
+        "dx": -60,
+        "dy": -120
+      },
+      {
+        "id": 1,
+        "tag": "V1",
+        "direction": 0,
+        "type": "motor",
+        "dx": 0,
+        "dy": -120
+      },
+      {
+        "id": 2,
+        "tag": "W1",
+        "direction": 0,
+        "type": "motor",
+        "dx": 60,
+        "dy": -120
+      },
+      {
+        "id": 3,
+        "tag": "U2",
+        "direction": 2,
+        "type": "motor",
+        "dx": -60,
+        "dy": 120
+      },
+      {
+        "id": 4,
+        "tag": "V2",
+        "direction": 2,
+        "type": "motor",
+        "dx": 0,
+        "dy": 120
+      },
+      {
+        "id": 5,
+        "tag": "W2",
+        "direction": 2,
+        "type": "motor",
+        "dx": 60,
+        "dy": 120
+      }
+    ],
+    "contacts": [],
+    "framesCount": 6
+  },
+  "motor1ph": {
+    "id": "motor1ph",
+    "name": "Single-Phase Motor",
+    "description": "Single-Phase Motor",
+    "category": "motors",
+    "type": "motor3ph",
+    "tagType": "motors",
+    "width": 180,
+    "height": 180,
+    "svgPath": "/symbols/motor1ph.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "load",
+        "dx": -30,
+        "dy": -90
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 0,
+        "type": "load",
+        "dx": 30,
+        "dy": -90
+      }
+    ],
+    "contacts": [],
+    "framesCount": 3
+  },
+  "motor3ph": {
+    "id": "motor3ph",
+    "name": "Three-Phase Motor",
+    "description": "Three-Phase Motor",
+    "category": "motors",
+    "type": "motor3ph",
+    "tagType": "motors",
+    "width": 180,
+    "height": 180,
+    "svgPath": "/symbols/motor3ph.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "U",
+        "direction": 0,
+        "type": "load",
+        "dx": -60,
+        "dy": -90
+      },
+      {
+        "id": 1,
+        "tag": "V",
+        "direction": 0,
+        "type": "load",
+        "dx": 0,
+        "dy": -90
+      },
+      {
+        "id": 2,
+        "tag": "W",
+        "direction": 0,
+        "type": "load",
+        "dx": 60,
+        "dy": -90
+      }
+    ],
+    "contacts": [],
+    "framesCount": 3
+  },
+  "motorBreaker1p": {
+    "id": "motorBreaker1p",
+    "name": "Motor-Breaker 1P",
+    "description": "Motor-Breaker 1P",
+    "category": "protections",
+    "type": "switch",
+    "tagType": "breakers",
+    "width": 120,
+    "height": 240,
+    "svgPath": "/symbols/motorBreaker1p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -120
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 120
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "motorBreaker2p": {
+    "id": "motorBreaker2p",
+    "name": "Motor-Breaker 2P",
+    "description": "Motor-Breaker 2P",
+    "category": "protections",
+    "type": "switch",
+    "tagType": "breakers",
+    "width": 180,
+    "height": 240,
+    "svgPath": "/symbols/motorBreaker2p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -120
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 120
+      },
+      {
+        "id": 2,
+        "tag": "3",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -120
+      },
+      {
+        "id": 3,
+        "tag": "4",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 120
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "motorBreaker3p": {
+    "id": "motorBreaker3p",
+    "name": "Motor-Breaker 3P",
+    "description": "Motor-Breaker 3P",
+    "category": "protections",
+    "type": "switch",
+    "tagType": "breakers",
+    "width": 240,
+    "height": 240,
+    "svgPath": "/symbols/motorBreaker3p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": -60,
+        "dy": -120
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": -60,
+        "dy": 120
+      },
+      {
+        "id": 2,
+        "tag": "3",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -120
+      },
+      {
+        "id": 3,
+        "tag": "4",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 120
+      },
+      {
+        "id": 4,
+        "tag": "5",
+        "direction": 0,
+        "type": "contact",
+        "dx": 60,
+        "dy": -120
+      },
+      {
+        "id": 5,
+        "tag": "6",
+        "direction": 2,
+        "type": "contact",
+        "dx": 60,
+        "dy": 120
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 2,
+        "nodeId1": 4,
+        "nodeId2": 5,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "motorBreaker4p": {
+    "id": "motorBreaker4p",
+    "name": "Motor-Breaker 4P",
+    "description": "Motor-Breaker 4P",
+    "category": "protections",
+    "type": "switch",
+    "tagType": "breakers",
+    "width": 300,
+    "height": 240,
+    "svgPath": "/symbols/motorBreaker4p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": -90,
+        "dy": -120
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": -90,
+        "dy": 120
+      },
+      {
+        "id": 2,
+        "tag": "3",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -120
+      },
+      {
+        "id": 3,
+        "tag": "4",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 120
+      },
+      {
+        "id": 4,
+        "tag": "5",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -120
+      },
+      {
+        "id": 5,
+        "tag": "6",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 120
+      },
+      {
+        "id": 6,
+        "tag": "7",
+        "direction": 0,
+        "type": "contact",
+        "dx": 90,
+        "dy": -120
+      },
+      {
+        "id": 7,
+        "tag": "8",
+        "direction": 2,
+        "type": "contact",
+        "dx": 90,
+        "dy": 120
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 2,
+        "nodeId1": 4,
+        "nodeId2": 5,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 3,
+        "nodeId1": 6,
+        "nodeId2": 7,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "motorDC": {
+    "id": "motorDC",
+    "name": "DC Motor",
+    "description": "DC Motor",
+    "category": "motors",
+    "type": "motorDc",
+    "tagType": "loads",
+    "width": 120,
+    "height": 180,
+    "svgPath": "/symbols/motorDC.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "X1",
+        "direction": 0,
+        "type": "load",
+        "dx": 0,
+        "dy": -90
+      },
+      {
+        "id": 1,
+        "tag": "X2",
+        "direction": 2,
+        "type": "load",
+        "dx": 0,
+        "dy": 90
+      }
+    ],
+    "contacts": [],
+    "framesCount": 3
+  },
+  "motorDhalander": {
+    "id": "motorDhalander",
+    "name": "Three-Phase Motor Dahlander",
+    "description": "Three-Phase Motor Dahlander",
+    "category": "motors",
+    "type": "motor3ph",
+    "tagType": "motors",
+    "width": 180,
+    "height": 180,
+    "svgPath": "/symbols/motorDhalander.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "U1",
+        "direction": 0,
+        "type": "load",
+        "dx": -60,
+        "dy": -90
+      },
+      {
+        "id": 1,
+        "tag": "V1",
+        "direction": 0,
+        "type": "load",
+        "dx": 0,
+        "dy": -90
+      },
+      {
+        "id": 2,
+        "tag": "W1",
+        "direction": 0,
+        "type": "load",
+        "dx": 60,
+        "dy": -90
+      },
+      {
+        "id": 3,
+        "tag": "U2",
+        "direction": 2,
+        "type": "load",
+        "dx": -60,
+        "dy": 90
+      },
+      {
+        "id": 4,
+        "tag": "V2",
+        "direction": 2,
+        "type": "load",
+        "dx": 0,
+        "dy": 90
+      },
+      {
+        "id": 5,
+        "tag": "W2",
+        "direction": 2,
+        "type": "load",
+        "dx": 60,
+        "dy": 90
+      }
+    ],
+    "contacts": [],
+    "framesCount": 6
+  },
+  "motorStarDelta": {
+    "id": "motorStarDelta",
+    "name": "Three-Phase Motor Star/Delta",
+    "description": "Three-Phase Motor Star/Delta",
+    "category": "motors",
+    "type": "motor3ph",
+    "tagType": "motors",
+    "width": 180,
+    "height": 180,
+    "svgPath": "/symbols/motorStarDelta.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "U1",
+        "direction": 0,
+        "type": "load",
+        "dx": -60,
+        "dy": -90
+      },
+      {
+        "id": 1,
+        "tag": "V1",
+        "direction": 0,
+        "type": "load",
+        "dx": 0,
+        "dy": -90
+      },
+      {
+        "id": 2,
+        "tag": "W1",
+        "direction": 0,
+        "type": "load",
+        "dx": 60,
+        "dy": -90
+      },
+      {
+        "id": 3,
+        "tag": "W2",
+        "direction": 2,
+        "type": "load",
+        "dx": -60,
+        "dy": 90
+      },
+      {
+        "id": 4,
+        "tag": "U2",
+        "direction": 2,
+        "type": "load",
+        "dx": 0,
+        "dy": 90
+      },
+      {
+        "id": 5,
+        "tag": "V2",
+        "direction": 2,
+        "type": "load",
+        "dx": 60,
+        "dy": 90
+      }
+    ],
+    "contacts": [],
+    "framesCount": 6
+  },
+  "motorTwoSpeeds": {
+    "id": "motorTwoSpeeds",
+    "name": "Three-Phase Motor Two speeds (Separated Winding)",
+    "description": "Three-Phase Motor Two speeds (Separated Winding)",
+    "category": "motors",
+    "type": "motor3ph",
+    "tagType": "motors",
+    "width": 180,
+    "height": 180,
+    "svgPath": "/symbols/motorTwoSpeeds.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "U1",
+        "direction": 0,
+        "type": "load",
+        "dx": -60,
+        "dy": -90
+      },
+      {
+        "id": 1,
+        "tag": "V1",
+        "direction": 0,
+        "type": "load",
+        "dx": 0,
+        "dy": -90
+      },
+      {
+        "id": 2,
+        "tag": "W1",
+        "direction": 0,
+        "type": "load",
+        "dx": 60,
+        "dy": -90
+      },
+      {
+        "id": 3,
+        "tag": "U2",
+        "direction": 2,
+        "type": "load",
+        "dx": -60,
+        "dy": 90
+      },
+      {
+        "id": 4,
+        "tag": "V2",
+        "direction": 2,
+        "type": "load",
+        "dx": 0,
+        "dy": 90
+      },
+      {
+        "id": 5,
+        "tag": "W2",
+        "direction": 2,
+        "type": "load",
+        "dx": 60,
+        "dy": 90
+      }
+    ],
+    "contacts": [],
+    "framesCount": 6
+  },
+  "overload1p": {
+    "id": "overload1p",
+    "name": "Overload Relay 1P",
+    "description": "Overload Relay 1P",
+    "category": "protections",
+    "type": "switch",
+    "tagType": "fuses",
+    "width": 60,
+    "height": 120,
+    "svgPath": "/symbols/overload1p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "enableFrames": "1,0"
+      }
+    ],
+    "framesCount": 2
+  },
+  "overload2p": {
+    "id": "overload2p",
+    "name": "Overload Relay 2P",
+    "description": "Overload Relay 2P",
+    "category": "protections",
+    "type": "switch",
+    "tagType": "fuses",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/overload2p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "3",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "4",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "enableFrames": "1,0"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "enableFrames": "1,0"
+      }
+    ],
+    "framesCount": 2
+  },
+  "overload3p": {
+    "id": "overload3p",
+    "name": "Overload Relay 3P",
+    "description": "Overload Relay 3P",
+    "category": "protections",
+    "type": "switch",
+    "tagType": "fuses",
+    "width": 180,
+    "height": 120,
+    "svgPath": "/symbols/overload3p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": -60,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": -60,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "3",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "4",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      },
+      {
+        "id": 4,
+        "tag": "5",
+        "direction": 0,
+        "type": "contact",
+        "dx": 60,
+        "dy": -60
+      },
+      {
+        "id": 5,
+        "tag": "6",
+        "direction": 2,
+        "type": "contact",
+        "dx": 60,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "enableFrames": "1,0"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "enableFrames": "1,0"
+      },
+      {
+        "id": 2,
+        "nodeId1": 4,
+        "nodeId2": 5,
+        "enableFrames": "1,0"
+      }
+    ],
+    "framesCount": 2
+  },
+  "phaseFailure": {
+    "id": "phaseFailure",
+    "name": "Phase Failure Relay",
+    "description": "Phase Failure Relay",
+    "category": "protections",
+    "type": "coil",
+    "tagType": "devices",
+    "timerType": "phase",
+    "width": 180,
+    "height": 120,
+    "svgPath": "/symbols/phaseFailure.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "L1",
+        "direction": 0,
+        "type": "load",
+        "dx": -60,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "L2",
+        "direction": 0,
+        "type": "load",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 2,
+        "tag": "L3",
+        "direction": 0,
+        "type": "load",
+        "dx": 60,
+        "dy": -60
+      }
+    ],
+    "contacts": [],
+    "framesCount": 3
+  },
+  "powerSupply": {
+    "id": "powerSupply",
+    "name": "Power Supply",
+    "description": "Power Supply",
+    "category": "sources",
+    "type": "powerSupply",
+    "tagType": "powerSupply",
+    "width": 210,
+    "height": 180,
+    "svgPath": "/symbols/powerSupply.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "LV",
+        "direction": 0,
+        "type": "load",
+        "dx": -90,
+        "dy": -90
+      },
+      {
+        "id": 1,
+        "tag": "+",
+        "direction": 2,
+        "type": "none",
+        "dx": -90,
+        "dy": 90
+      },
+      {
+        "id": 2,
+        "tag": "C",
+        "direction": 0,
+        "type": "load",
+        "dx": -30,
+        "dy": -90
+      },
+      {
+        "id": 3,
+        "tag": "+",
+        "direction": 2,
+        "type": "none",
+        "dx": -30,
+        "dy": 90
+      },
+      {
+        "id": 4,
+        "tag": "HV",
+        "direction": 0,
+        "type": "load",
+        "dx": 30,
+        "dy": -90
+      },
+      {
+        "id": 5,
+        "tag": "-",
+        "direction": 2,
+        "type": "none",
+        "dx": 30,
+        "dy": 90
+      },
+      {
+        "id": 6,
+        "tag": "PE",
+        "direction": 0,
+        "type": "none",
+        "dx": 90,
+        "dy": -90
+      },
+      {
+        "id": 7,
+        "tag": "-",
+        "direction": 2,
+        "type": "none",
+        "dx": 90,
+        "dy": 90
+      }
+    ],
+    "contacts": [],
+    "framesCount": 1
+  },
+  "powerSupply2": {
+    "id": "powerSupply2",
+    "name": "Power Supply",
+    "description": "Power Supply",
+    "category": "sources",
+    "type": "powerSupply2",
+    "tagType": "powerSupply",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/powerSupply2.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "L",
+        "direction": 0,
+        "type": "load",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "+",
+        "direction": 2,
+        "type": "none",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "N",
+        "direction": 0,
+        "type": "load",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "-",
+        "direction": 2,
+        "type": "none",
+        "dx": 30,
+        "dy": 60
+      }
+    ],
+    "contacts": [],
+    "framesCount": 1
+  },
+  "rcboBreaker2p": {
+    "id": "rcboBreaker2p",
+    "name": "RCBO Circuit Breaker 2P",
+    "description": "RCBO Circuit Breaker 2P",
+    "category": "protections",
+    "type": "switch",
+    "tagType": "breakers",
+    "width": 180,
+    "height": 240,
+    "svgPath": "/symbols/rcboBreaker2p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -120
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 120
+      },
+      {
+        "id": 2,
+        "tag": "3",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -120
+      },
+      {
+        "id": 3,
+        "tag": "4",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 120
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "rcboBreaker4p": {
+    "id": "rcboBreaker4p",
+    "name": "RCBO Circuit Breaker 4P",
+    "description": "RCBO Circuit Breaker 4P",
+    "category": "protections",
+    "type": "switch",
+    "tagType": "breakers",
+    "width": 300,
+    "height": 240,
+    "svgPath": "/symbols/rcboBreaker4p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": -90,
+        "dy": -120
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": -90,
+        "dy": 120
+      },
+      {
+        "id": 2,
+        "tag": "3",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -120
+      },
+      {
+        "id": 3,
+        "tag": "4",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 120
+      },
+      {
+        "id": 4,
+        "tag": "5",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -120
+      },
+      {
+        "id": 5,
+        "tag": "6",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 120
+      },
+      {
+        "id": 6,
+        "tag": "7",
+        "direction": 0,
+        "type": "contact",
+        "dx": 90,
+        "dy": -120
+      },
+      {
+        "id": 7,
+        "tag": "8",
+        "direction": 2,
+        "type": "contact",
+        "dx": 90,
+        "dy": 120
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 2,
+        "nodeId1": 4,
+        "nodeId2": 5,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 3,
+        "nodeId1": 6,
+        "nodeId2": 7,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "rccbBreaker2p": {
+    "id": "rccbBreaker2p",
+    "name": "RCCB Circuit Breaker 2P",
+    "description": "RCCB Circuit Breaker 2P",
+    "category": "protections",
+    "type": "switch",
+    "tagType": "breakers",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/rccbBreaker2p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "3",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "4",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "rccbBreaker4p": {
+    "id": "rccbBreaker4p",
+    "name": "RCCB Circuit Breaker 4P",
+    "description": "RCCB Circuit Breaker 4P",
+    "category": "protections",
+    "type": "switch",
+    "tagType": "breakers",
+    "width": 240,
+    "height": 120,
+    "svgPath": "/symbols/rccbBreaker4p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": -90,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": -90,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "3",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "4",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 4,
+        "tag": "5",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 5,
+        "tag": "6",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      },
+      {
+        "id": 6,
+        "tag": "7",
+        "direction": 0,
+        "type": "contact",
+        "dx": 90,
+        "dy": -60
+      },
+      {
+        "id": 7,
+        "tag": "8",
+        "direction": 2,
+        "type": "contact",
+        "dx": 90,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 2,
+        "nodeId1": 4,
+        "nodeId2": 5,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 3,
+        "nodeId1": 6,
+        "nodeId2": 7,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "ring": {
+    "id": "ring",
+    "name": "Bell Ring",
+    "description": "Bell Ring",
+    "category": "loads",
+    "type": "load",
+    "tagType": "loads",
+    "width": 60,
+    "height": 120,
+    "svgPath": "/symbols/ring.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "X1",
+        "direction": 0,
+        "type": "load",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "X2",
+        "direction": 2,
+        "type": "load",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [],
+    "framesCount": 7
+  },
+  "rollerCON": {
+    "id": "rollerCON",
+    "name": "Switch CON",
+    "description": "Switch CON",
+    "category": "switches",
+    "type": "switch",
+    "tagType": "switches",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/rollerCON.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "11",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "12",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "13",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      },
+      {
+        "id": 0,
+        "tag": "11",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "12",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "13",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      },
+      {
+        "id": 0,
+        "tag": "11",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "12",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "13",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      },
+      {
+        "id": 0,
+        "tag": "11",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "12",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "13",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      },
+      {
+        "id": 0,
+        "tag": "11",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "12",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "13",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      },
+      {
+        "id": 0,
+        "tag": "11",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "12",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "13",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "nc",
+        "enableFrames": "1,0"
+      },
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 2,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 1
+  },
+  "rollerNC": {
+    "id": "rollerNC",
+    "name": "Switch NC",
+    "description": "Switch NC",
+    "category": "switches",
+    "type": "switch",
+    "tagType": "switches",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/rollerNC.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "11",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "12",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      },
+      {
+        "id": 0,
+        "tag": "11",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "12",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      },
+      {
+        "id": 0,
+        "tag": "11",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "12",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      },
+      {
+        "id": 0,
+        "tag": "11",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "12",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      },
+      {
+        "id": 0,
+        "tag": "11",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "12",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      },
+      {
+        "id": 0,
+        "tag": "11",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "12",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "1,0"
+      }
+    ],
+    "framesCount": 1
+  },
+  "rollerNO": {
+    "id": "rollerNO",
+    "name": "Switch NO",
+    "description": "Switch NO",
+    "category": "switches",
+    "type": "switch",
+    "tagType": "switches",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/rollerNO.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "13",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "14",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      },
+      {
+        "id": 0,
+        "tag": "13",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "14",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      },
+      {
+        "id": 0,
+        "tag": "13",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "14",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      },
+      {
+        "id": 0,
+        "tag": "13",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "14",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      },
+      {
+        "id": 0,
+        "tag": "13",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "14",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      },
+      {
+        "id": 0,
+        "tag": "13",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "14",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 1
+  },
+  "rollerNONC": {
+    "id": "rollerNONC",
+    "name": "Switch NCNO",
+    "description": "Switch NCNO",
+    "category": "switches",
+    "type": "switch",
+    "tagType": "switches",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/rollerNONC.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "11",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "12",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "13",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "14",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      },
+      {
+        "id": 0,
+        "tag": "11",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "12",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "13",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "14",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      },
+      {
+        "id": 0,
+        "tag": "11",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "12",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "13",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "14",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      },
+      {
+        "id": 0,
+        "tag": "11",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "12",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "13",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "14",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      },
+      {
+        "id": 0,
+        "tag": "11",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "12",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "13",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "14",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      },
+      {
+        "id": 0,
+        "tag": "11",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "12",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "13",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "14",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "nc",
+        "enableFrames": "1,0"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 1
+  },
+  "siren": {
+    "id": "siren",
+    "name": "Siren",
+    "description": "Siren",
+    "category": "loads",
+    "type": "load",
+    "tagType": "loads",
+    "width": 60,
+    "height": 120,
+    "svgPath": "/symbols/siren.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "X1",
+        "direction": 0,
+        "type": "load",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "X2",
+        "direction": 2,
+        "type": "load",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [],
+    "framesCount": 7
+  },
+  "sourceGnd": {
+    "id": "sourceGnd",
+    "name": "Protection Earth",
+    "description": "Protection Earth",
+    "category": "sources",
+    "type": "source",
+    "tagType": "sources",
+    "width": 60,
+    "height": 120,
+    "svgPath": "/symbols/sourceGnd.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "",
+        "direction": 0,
+        "type": "source",
+        "dx": 0,
+        "dy": -60
+      }
+    ],
+    "contacts": [],
+    "framesCount": 2
+  },
+  "sourceL1": {
+    "id": "sourceL1",
+    "name": "Power Phase L1",
+    "description": "Power Phase L1",
+    "category": "sources",
+    "type": "source",
+    "tagType": "sources",
+    "width": 60,
+    "height": 120,
+    "svgPath": "/symbols/sourceL1.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "L1",
+        "direction": 0,
+        "type": "source",
+        "dx": 0,
+        "dy": -60
+      }
+    ],
+    "contacts": [],
+    "framesCount": 2
+  },
+  "sourceL1L2L3": {
+    "id": "sourceL1L2L3",
+    "name": "Power Phase L1L2L3",
+    "description": "Power Phase L1L2L3",
+    "category": "sources",
+    "type": "source",
+    "tagType": "sources",
+    "width": 180,
+    "height": 120,
+    "svgPath": "/symbols/sourceL1L2L3.svg",
+    "nodes": [
+      {
+        "id": 2,
+        "tag": "L1",
+        "direction": 0,
+        "type": "source",
+        "dx": 60,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "L2",
+        "direction": 0,
+        "type": "source",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 0,
+        "tag": "L3",
+        "direction": 0,
+        "type": "source",
+        "dx": -60,
+        "dy": -60
+      }
+    ],
+    "contacts": [],
+    "framesCount": 1
+  },
+  "sourceL1L2L3N": {
+    "id": "sourceL1L2L3N",
+    "name": "Power Phase L1L2L3N",
+    "description": "Power Phase L1L2L3N",
+    "category": "sources",
+    "type": "source",
+    "tagType": "sources",
+    "width": 240,
+    "height": 120,
+    "svgPath": "/symbols/sourceL1L2L3N.svg",
+    "nodes": [
+      {
+        "id": 3,
+        "tag": "N",
+        "direction": 0,
+        "type": "source",
+        "dx": 90,
+        "dy": -60
+      },
+      {
+        "id": 2,
+        "tag": "L1",
+        "direction": 0,
+        "type": "source",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "L2",
+        "direction": 0,
+        "type": "source",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 0,
+        "tag": "L3",
+        "direction": 0,
+        "type": "source",
+        "dx": -90,
+        "dy": -60
+      }
+    ],
+    "contacts": [],
+    "framesCount": 1
+  },
+  "sourceL2": {
+    "id": "sourceL2",
+    "name": "Power Phase L2",
+    "description": "Power Phase L2",
+    "category": "sources",
+    "type": "source",
+    "tagType": "sources",
+    "width": 60,
+    "height": 120,
+    "svgPath": "/symbols/sourceL2.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "L2",
+        "direction": 0,
+        "type": "source",
+        "dx": 0,
+        "dy": -60
+      }
+    ],
+    "contacts": [],
+    "framesCount": 2
+  },
+  "sourceL3": {
+    "id": "sourceL3",
+    "name": "Power Phase L3",
+    "description": "Power Phase L3",
+    "category": "sources",
+    "type": "source",
+    "tagType": "sources",
+    "width": 60,
+    "height": 120,
+    "svgPath": "/symbols/sourceL3.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "L3",
+        "direction": 0,
+        "type": "source",
+        "dx": 0,
+        "dy": -60
+      }
+    ],
+    "contacts": [],
+    "framesCount": 2
+  },
+  "sourceN": {
+    "id": "sourceN",
+    "name": "Power Phase N",
+    "description": "Power Phase N",
+    "category": "sources",
+    "type": "source",
+    "tagType": "sources",
+    "width": 60,
+    "height": 120,
+    "svgPath": "/symbols/sourceN.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "N",
+        "direction": 0,
+        "type": "source",
+        "dx": 0,
+        "dy": -60
+      }
+    ],
+    "contacts": [],
+    "framesCount": 2
+  },
+  "sourceNegative": {
+    "id": "sourceNegative",
+    "name": "Power Negative",
+    "description": "Power Negative",
+    "category": "sources",
+    "type": "source",
+    "tagType": "sources",
+    "width": 60,
+    "height": 120,
+    "svgPath": "/symbols/sourceNegative.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "-",
+        "direction": 0,
+        "type": "source",
+        "dx": 0,
+        "dy": -60
+      }
+    ],
+    "contacts": [],
+    "framesCount": 2
+  },
+  "sourcePE": {
+    "id": "sourcePE",
+    "name": "Protection Earth",
+    "description": "Protection Earth",
+    "category": "sources",
+    "type": "source",
+    "tagType": "sources",
+    "width": 60,
+    "height": 120,
+    "svgPath": "/symbols/sourcePE.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "PE",
+        "direction": 0,
+        "type": "source",
+        "dx": 0,
+        "dy": -60
+      }
+    ],
+    "contacts": [],
+    "framesCount": 2
+  },
+  "sourcePlus": {
+    "id": "sourcePlus",
+    "name": "Power Positive",
+    "description": "Power Positive",
+    "category": "sources",
+    "type": "source",
+    "tagType": "sources",
+    "width": 60,
+    "height": 120,
+    "svgPath": "/symbols/sourcePlus.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "+",
+        "direction": 0,
+        "type": "source",
+        "dx": 0,
+        "dy": -60
+      }
+    ],
+    "contacts": [],
+    "framesCount": 2
+  },
+  "switch3p": {
+    "id": "switch3p",
+    "name": "Switch 3 Positions I-II-III",
+    "description": "Switch 3 Positions I-II-III",
+    "category": "switches",
+    "type": "switch",
+    "tagType": "switches",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/switch3p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": -60,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "3",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      },
+      {
+        "id": 3,
+        "tag": "4",
+        "direction": 2,
+        "type": "contact",
+        "dx": 60,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "nc",
+        "enableFrames": "1,0,0"
+      },
+      {
+        "id": 1,
+        "nodeId1": 0,
+        "nodeId2": 2,
+        "type": "no",
+        "enableFrames": "0,1,0"
+      },
+      {
+        "id": 2,
+        "nodeId1": 0,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "0,0,1"
+      }
+    ],
+    "framesCount": 3
+  },
+  "switch3p0": {
+    "id": "switch3p0",
+    "name": "Switch 3 Positions I-0-II",
+    "description": "Switch 3 Positions I-0-II",
+    "category": "switches",
+    "type": "switch",
+    "tagType": "switches",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/switch3p0.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": -60,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "3",
+        "direction": 2,
+        "type": "contact",
+        "dx": 60,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "nc",
+        "enableFrames": "1,0,0"
+      },
+      {
+        "id": 1,
+        "nodeId1": 0,
+        "nodeId2": 2,
+        "type": "no",
+        "enableFrames": "0,0,0"
+      },
+      {
+        "id": 2,
+        "nodeId1": 0,
+        "nodeId2": 2,
+        "type": "no",
+        "enableFrames": "0,0,1"
+      }
+    ],
+    "framesCount": 3
+  },
+  "switchCON": {
+    "id": "switchCON",
+    "name": "Switch CON",
+    "description": "Switch CON",
+    "category": "switches",
+    "type": "switch",
+    "tagType": "switches",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/switchCON.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "11",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "12",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "14",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "nc",
+        "enableFrames": "1,0"
+      },
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 2,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "switchCrossover": {
+    "id": "switchCrossover",
+    "name": "Switch Crossover",
+    "description": "Switch Crossover",
+    "category": "switches",
+    "type": "switch",
+    "tagType": "switches",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/switchCrossover.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "3",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "4",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 3,
+        "type": "nc",
+        "enableFrames": "1,0"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 1,
+        "type": "nc",
+        "enableFrames": "1,0"
+      },
+      {
+        "id": 2,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 3,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "switchNC": {
+    "id": "switchNC",
+    "name": "Switch NC",
+    "description": "Switch NC",
+    "category": "switches",
+    "type": "switch",
+    "tagType": "switches",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/switchNC.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "11",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "12",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "nc",
+        "enableFrames": "1,0"
+      }
+    ],
+    "framesCount": 2
+  },
+  "switchNO": {
+    "id": "switchNO",
+    "name": "Switch NO",
+    "description": "Switch NO",
+    "category": "switches",
+    "type": "switch",
+    "tagType": "switches",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/switchNO.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "13",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "14",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "switchNONC": {
+    "id": "switchNONC",
+    "name": "Switch NCNO",
+    "description": "Switch NCNO",
+    "category": "switches",
+    "type": "switch",
+    "tagType": "switches",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/switchNONC.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "11",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "12",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "13",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "14",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "nc",
+        "enableFrames": "1,0"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "text": {
+    "id": "text",
+    "name": "Text",
+    "description": "Text",
+    "category": "others",
+    "type": "text",
+    "tagType": "none",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/text.svg",
+    "nodes": [],
+    "contacts": [],
+    "framesCount": 1
+  },
+  "tmBreaker1p": {
+    "id": "tmBreaker1p",
+    "name": "Thermal-Magnetic Circuit Breaker 1P",
+    "description": "Thermal-Magnetic Circuit Breaker 1P",
+    "category": "protections",
+    "type": "switch",
+    "tagType": "breakers",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/tmBreaker1p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "tmBreaker2p": {
+    "id": "tmBreaker2p",
+    "name": "Thermal-Magnetic Circuit Breaker 2P",
+    "description": "Thermal-Magnetic Circuit Breaker 2P",
+    "category": "protections",
+    "type": "switch",
+    "tagType": "breakers",
+    "width": 120,
+    "height": 120,
+    "svgPath": "/symbols/tmBreaker2p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "3",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "4",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "tmBreaker3p": {
+    "id": "tmBreaker3p",
+    "name": "Thermal-Magnetic Circuit Breaker 3P",
+    "description": "Thermal-Magnetic Circuit Breaker 3P",
+    "category": "protections",
+    "type": "switch",
+    "tagType": "breakers",
+    "width": 180,
+    "height": 120,
+    "svgPath": "/symbols/tmBreaker3p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": -60,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": -60,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "3",
+        "direction": 0,
+        "type": "contact",
+        "dx": 0,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "4",
+        "direction": 2,
+        "type": "contact",
+        "dx": 0,
+        "dy": 60
+      },
+      {
+        "id": 4,
+        "tag": "5",
+        "direction": 0,
+        "type": "contact",
+        "dx": 60,
+        "dy": -60
+      },
+      {
+        "id": 5,
+        "tag": "6",
+        "direction": 2,
+        "type": "contact",
+        "dx": 60,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 2,
+        "nodeId1": 4,
+        "nodeId2": 5,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  },
+  "tmBreaker4p": {
+    "id": "tmBreaker4p",
+    "name": "Thermal-Magnetic Circuit Breaker 4P",
+    "description": "Thermal-Magnetic Circuit Breaker 4P",
+    "category": "protections",
+    "type": "switch",
+    "tagType": "breakers",
+    "width": 240,
+    "height": 120,
+    "svgPath": "/symbols/tmBreaker4p.svg",
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "1",
+        "direction": 0,
+        "type": "contact",
+        "dx": -90,
+        "dy": -60
+      },
+      {
+        "id": 1,
+        "tag": "2",
+        "direction": 2,
+        "type": "contact",
+        "dx": -90,
+        "dy": 60
+      },
+      {
+        "id": 2,
+        "tag": "3",
+        "direction": 0,
+        "type": "contact",
+        "dx": -30,
+        "dy": -60
+      },
+      {
+        "id": 3,
+        "tag": "4",
+        "direction": 2,
+        "type": "contact",
+        "dx": -30,
+        "dy": 60
+      },
+      {
+        "id": 4,
+        "tag": "5",
+        "direction": 0,
+        "type": "contact",
+        "dx": 30,
+        "dy": -60
+      },
+      {
+        "id": 5,
+        "tag": "6",
+        "direction": 2,
+        "type": "contact",
+        "dx": 30,
+        "dy": 60
+      },
+      {
+        "id": 6,
+        "tag": "7",
+        "direction": 0,
+        "type": "contact",
+        "dx": 90,
+        "dy": -60
+      },
+      {
+        "id": 7,
+        "tag": "8",
+        "direction": 2,
+        "type": "contact",
+        "dx": 90,
+        "dy": 60
+      }
+    ],
+    "contacts": [
+      {
+        "id": 0,
+        "nodeId1": 0,
+        "nodeId2": 1,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 1,
+        "nodeId1": 2,
+        "nodeId2": 3,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 2,
+        "nodeId1": 4,
+        "nodeId2": 5,
+        "type": "no",
+        "enableFrames": "0,1"
+      },
+      {
+        "id": 3,
+        "nodeId1": 6,
+        "nodeId2": 7,
+        "type": "no",
+        "enableFrames": "0,1"
+      }
+    ],
+    "framesCount": 2
+  }
+}

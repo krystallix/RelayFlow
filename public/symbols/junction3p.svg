@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg width="60" height="120" viewBox="0 0 60 120" version="1.1" id="svg1" sodipodi:docname="junction3p.svg" inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+   <sodipodi:namedview id="namedview1" pagecolor="#505050" bordercolor="#eeeeee" borderopacity="1" inkscape:showpageshadow="0" inkscape:pageopacity="0" inkscape:pagecheckerboard="0" inkscape:deskcolor="#3d3d3d" inkscape:zoom="4.9589244" inkscape:cx="23.896311" inkscape:cy="60.597818" inkscape:window-width="1352" inkscape:window-height="762" inkscape:window-x="88" inkscape:window-y="25" inkscape:window-maximized="0" inkscape:current-layer="svg1" showguides="false" />
+   <defs id="defs1" />
+   <metadata id="metadata1">
+      <info category="others" type="junction" duplicateTag="true" tagType="junctions" width="60" height="120" name="Connection 3P" description="Connection 3P" marginH="0" marginV="0" />
+      <nodes>
+         <node id="0" tag="" direction="0" type="junction" dx="-30.0" dy="-60.0" />
+         <node id="1" tag="" direction="2" type="junction" dx="-30.0" dy="60.0" />
+         <node id="2" tag="" direction="1" type="junction" dx="30.0" dy="0.0" />
+      </nodes>
+      <frames>
+         <frame id="0">
+            <pathFrame id="mainPath1" type="main" style="stroke" />
+            <pathFrame id="mainFill1" type="main" style="fill" />
+         </frame>
+      </frames>
+   </metadata>
+   <path id="mainPath1" style="fill:#ffffff;stroke:#ffffff;stroke-width:2" inkscape:label="mainPath1" d="M 2e-6,60 H 60 M 2e-6,-1e-6 V 8.8402929 120" sodipodi:nodetypes="ccccc" />
+   <path id="mainFill1" style="fill:#ffffff;stroke:#ffffff;stroke-width:2" d="m 8.0000019,60 a 8.0000006,7.9999998 0 0 1 -8,8 8.0000006,7.9999998 0 0 1 -7.9999998,-8 8.0000006,7.9999998 0 0 1 7.9999998,-8 8.0000006,7.9999998 0 0 1 8,8 z" inkscape:label="mainFill1" />
+</svg>

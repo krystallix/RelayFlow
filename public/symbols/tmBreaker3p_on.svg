@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg width="180" height="120" viewBox="0 0 180 120" version="1.1" id="svg1" sodipodi:docname="tmBreaker3p.svg" inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+   <sodipodi:namedview id="namedview1" pagecolor="#505050" bordercolor="#eeeeee" borderopacity="1" inkscape:showpageshadow="0" inkscape:pageopacity="0" inkscape:pagecheckerboard="0" inkscape:deskcolor="#3d3d3d" inkscape:zoom="1.8145567" inkscape:cx="89.278005" inkscape:cy="36.096971" inkscape:window-width="1352" inkscape:window-height="762" inkscape:window-x="88" inkscape:window-y="25" inkscape:window-maximized="0" inkscape:current-layer="svg1" showguides="true" />
+   <defs id="defs1" />
+   <metadata id="metadata1">
+      <info category="protections" duplicateTag="false" type="switch" width="180" height="120" tagType="breakers" name="Thermal-Magnetic Circuit Breaker 3P" description="Thermal-Magnetic Circuit Breaker 3P" marginH="0" marginV="0" />
+      <nodes id="0">
+         <node id="0" tag="1" direction="0" type="contact" dx="-60.0" dy="-60.0" />
+         <node id="1" tag="2" direction="2" type="contact" dx="-60.0" dy="60.0" />
+         <node id="2" tag="3" direction="0" type="contact" dx="0.0" dy="-60.0" />
+         <node id="3" tag="4" direction="2" type="contact" dx="0.0" dy="60.0" />
+         <node id="4" tag="5" direction="0" type="contact" dx="60.0" dy="-60.0" />
+         <node id="5" tag="6" direction="2" type="contact" dx="60.0" dy="60.0" />
+      </nodes>
+      <frames id="0">
+         <frame id="0">
+            <pathFrame id="mainPath1" type="main" style="stroke" />
+         </frame>
+         <frame id="1">
+            <pathFrame id="mainPath2" type="main" style="stroke" />
+         </frame>
+      </frames>
+      <contacts>
+         <contact id="0" nodeId1="0" nodeId2="1" type="no" enableFrames="0,1" />
+         <contact id="1" nodeId1="2" nodeId2="3" type="no" enableFrames="0,1" />
+         <contact id="2" nodeId1="4" nodeId2="5" type="no" enableFrames="0,1" />
+      </contacts>
+   </metadata>
+   <path id="mainPath2" style="display:inline;stroke:#ffffff;fill:none;stroke-width:2;stroke-dasharray:none" inkscape:label="mainPath2" d="m 148.86604,67.614004 -9.08806,0.317361 m 8.13132,-15.248677 -7.11697,0.450034 -0.54665,-7.111921 -7.11698,0.450031 0.54327,7.112156 -7.11698,0.450035 m 13.06241,10.35902 -11.96678,4.048901 12.22007,3.204278 z M 147,35.999991 149.99999,83.99999 M 89.027031,67.614007 79.938967,67.931368 m 8.131324,-15.248677 -7.116974,0.450034 -0.54665,-7.111921 -7.11698,0.450031 0.543271,7.112156 -7.116977,0.450035 m 13.062407,10.35902 -11.966785,4.048901 12.220074,3.204278 z m -50.912353,3.221961 -9.088064,0.317361 m 8.131324,-15.248677 -7.116974,0.450034 -0.54665,-7.111921 -7.11698,0.450031 0.543271,7.112156 -7.1169761,0.450035 M 19.617392,64.392046 7.6506079,68.440947 19.870681,71.645225 Z m 5.432853,-33.3418 9.8995,9.899496 m 0,-9.899496 -9.8995,9.899496 m 60.160996,-9.899496 9.8995,9.899496 m 0,-9.899496 -9.8995,9.899496 M 147,35.999991 l 3,48 V 119.99999 M 150,-9.75e-6 V 35.999991 m -62.839009,3e-6 3,48 V 120 m 0,-120.0000065 V 35.999994 m -63.160996,0 3,48 V 120 m 0,-120.0000065 V 0 35.999994 M 103,60 h 5 m -13,0 h 5 m -13,0 h 5 m 51,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -24.999995,0 h 5 m -13,0 h 5 m -13,0 h 5 M 59,60 h 5.000001 M 51,60 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m 113.05025,-29.86971 9.8995,9.899495 m 0,-9.899495 -9.8995,9.899495" />
+   <path id="mainPath1" style="display:none;fill:none;stroke:#ffffff;stroke-width:2;stroke-dasharray:none" inkscape:label="mainPath1" d="m 144.53608,66.876798 -8.74133,2.506536 m 4.2008,-16.762871 -6.79669,2.158418 -2.25094,-6.768421 -6.7967,2.158417 2.24771,6.769468 -6.7967,2.158416 m 15.18048,6.891231 -10.63181,6.823659 12.63227,0.152794 z M 135,35.999991 l 15,48 m -65.302929,-17.1232 -8.74133,2.506536 m 4.2008,-16.762871 -6.79669,2.158418 -2.250942,-6.768421 -6.796697,2.158417 2.247711,6.769468 -6.796698,2.158416 m 15.180477,6.891231 -10.631807,6.823659 12.632267,0.152794 z m -50.407625,0.888822 -8.74133,2.506536 m 4.2008,-16.762871 -6.79669,2.158418 -2.250942,-6.768421 -6.7966969,2.158417 2.247711,6.769468 -6.79669804,2.158416 M 14.782708,65.988001 4.1509011,72.81166 16.783168,72.964454 Z m 10.267537,-25.038259 9.8995,-9.899496 m 0,9.899496 -9.8995,-9.899496 m 60.160996,9.899496 9.8995,-9.899496 m 0,9.899496 -9.8995,-9.899496 m 59.839009,8.979539 9.8995,-9.899495 m 0,9.899495 -9.8995,-9.899495 M 90.160991,-6.5e-6 V 35.999994 M 135,35.999991 150,83.999997 V 120 M 150,-9.75e-6 V 35.99999 m -74.839009,-6e-6 15,48.000006 V 120 m -75.160996,-84.000016 15,48.000006 V 120 m 0,-120.0000165 V 35.999983 M 98.000001,60 H 103 m -12.999999,0 h 5 m -13,0 h 5 M 138,60 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 M 98.000003,60 H 103 m -24.999995,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5" />
+</svg>

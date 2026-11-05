@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg width="120" height="120" viewBox="0 0 120 120" version="1.1" id="svg1" sodipodi:docname="contactCONDelayOff.svg" inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+   <sodipodi:namedview id="namedview1" pagecolor="#505050" bordercolor="#eeeeee" borderopacity="1" inkscape:showpageshadow="0" inkscape:pageopacity="0" inkscape:pagecheckerboard="0" inkscape:deskcolor="#3d3d3d" inkscape:zoom="4.3341865" inkscape:cx="45.683314" inkscape:cy="69.563228" inkscape:window-width="1352" inkscape:window-height="762" inkscape:window-x="88" inkscape:window-y="25" inkscape:window-maximized="0" inkscape:current-layer="svg1" showguides="true" />
+   <defs id="defs1" />
+   <metadata id="metadata1">
+      <info isPaid="true" tagIndex="2" category="auxiliaries" duplicateTag="false" type="relayContact" tagType="contactors" timerType="delayOff" width="120" height="120"  name="Off-Delay Contact CON for Contactors" description="Off-Delay Contact CON for Contactors" marginH="0" marginV="0" />
+      <nodes>
+         <node id="0" tag="55" direction="0" type="contact" dx="0.0" dy="-60.0" />
+         <node id="1" tag="56" direction="2" type="contact" dx="-30.0" dy="60.0" />
+         <node id="2" tag="58" direction="2" type="contact" dx="30.0" dy="60.0" />
+      </nodes>
+      <contacts>
+         <contact id="0" nodeId1="0" nodeId2="1" type="nc" enableFrames="1,0" />
+         <contact id="0" nodeId1="0" nodeId2="2" type="no" enableFrames="0,1" />
+      </contacts>
+      <frames>
+         <frame id="0">
+            <pathFrame id="mainPath1" type="main" style="stroke" />
+         </frame>
+         <frame id="1">
+            <pathFrame id="mainPath2" type="main" style="stroke" />
+         </frame>
+      </frames>
+   </metadata>
+   <path id="mainPath1" style="display:inline;fill:none;stroke:#ffffff;stroke-width:2" d="m 30.00038,62.5 m 0,-5 M 20.000005,70 c 5.522849,0 10.000001,-4.47716 10,-10 0,-5.52285 -4.477153,-10 -10,-10 M 48.958333,62.5 H 29.684961 m 0,-5 H 51.041667 M 72,78 h 18 v 42 M 48,78 H 30 v 42 M 40,84 60,36 V 0" inkscape:label="mainPath1" />
+   <path id="mainPath2" style="display:none;fill:none;stroke:#800000;stroke-width:2" d="m 48.000755,62.5 m 0,-5 M 38.00038,70 c 5.522849,0 10.000001,-4.47716 10,-10 0,-5.52285 -4.477153,-10 -10,-10 M 71.041667,62.5 H 47.685336 m 0,-5 H 69.041667 M 72,78 h 18 v 42 M 48,78 H 30 v 42 M 80,84 60,36 V 0" inkscape:label="mainPath2" />
+</svg>

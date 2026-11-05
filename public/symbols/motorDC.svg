@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="120"
+   height="180"
+   viewBox="0 0 120 180"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="motorDC.svg"
+   inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#3d3d3d"
+     inkscape:zoom="1.6828826"
+     inkscape:cx="27.036942"
+     inkscape:cy="94.183635"
+     inkscape:window-width="1352"
+     inkscape:window-height="762"
+     inkscape:window-x="88"
+     inkscape:window-y="25"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg1"
+     showguides="false" />
+  <defs
+     id="defs1">
+    <inkscape:path-effect
+       effect="join_type"
+       id="path-effect4"
+       is_visible="true"
+       lpeversion="1"
+       linecap_type="butt"
+       line_width="2"
+       linejoin_type="extrp_arc"
+       miter_limit="100"
+       attempt_force_join="true" />
+    <inkscape:path-effect
+       effect="fillet_chamfer"
+       id="path-effect3"
+       is_visible="true"
+       lpeversion="1"
+       nodesatellites_param="F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1 @ F,0,0,1,0,0,0,1"
+       radius="0"
+       unit="px"
+       method="auto"
+       mode="F"
+       chamfer_steps="1"
+       flexible="false"
+       use_knot_distance="true"
+       apply_no_radius="true"
+       apply_with_radius="true"
+       only_selected="false"
+       hide_knots="false" />
+    <inkscape:path-effect
+       effect="bounding_box"
+       linkedpath=""
+       id="path-effect2"
+       is_visible="true"
+       lpeversion="1.3"
+       visualbounds="false" />
+    <inkscape:path-effect
+       effect="bounding_box"
+       linkedpath=""
+       id="path-effect1"
+       is_visible="true"
+       lpeversion="1.3"
+       visualbounds="false" />
+  </defs>
+  <metadata
+     id="metadata1">
+    <info
+       category="motors"
+       type="motorDc"
+       tagType="loads"
+       width="120"
+       height="180"
+       name="DC Motor"
+       description="DC Motor"
+       marginH="0"
+       marginV="0" />
+    <nodes>
+      <node
+         id="0"
+         tag="X1"
+         direction="0"
+         type="load"
+         dx="0.0"
+         dy="-90.0" />
+      <node
+         id="1"
+         tag="X2"
+         direction="2"
+         type="load"
+         dx="0.0"
+         dy="90.0" />
+    </nodes>
+    <frames>
+      <frame
+         id="0">
+        <pathFrame
+           id="mainPath1"
+           type="main"
+           style="stroke" />
+        <pathFrame
+           id="textPath1"
+           type="main"
+           style="fill"
+           fixedRotation="true"
+           isCentered="false" />
+        <pathFrame
+           id="pathFill2"
+           type="main"
+           style="fill" />
+      </frame>
+      <frame
+         id="1">
+        <pathFrame
+           id="fillPath1"
+           type="simulation"
+           style="fill"
+           indexColor="0" />
+        <pathFrame
+           id="textPath1"
+           type="main"
+           style="fill"
+           fixedRotation="true"
+           isCentered="false" />
+        <pathFrame
+           id="mainPath1"
+           type="main"
+           style="stroke" />
+        <pathFrame
+           id="pathFill2"
+           type="main"
+           style="fill" />
+        <pathFrame
+           id="pathFill3"
+           type="simulation"
+           style="fill"
+           indexColor="2"
+           fixedRotation="true"
+           isCentered="true" />
+        <pathFrame
+           id="strokePath1"
+           strokeWidth="7"
+           type="simulation"
+           style="fill"
+           indexColor="2"
+           fixedRotation="true"
+           isCentered="true" />
+      </frame>
+      <frame
+         id="2">
+        <pathFrame
+           id="fillPath1"
+           type="simulation"
+           style="fill"
+           indexColor="0" />
+        <pathFrame
+           id="textPath1"
+           type="main"
+           style="fill"
+           fixedRotation="true"
+           isCentered="false" />
+        <pathFrame
+           id="mainPath1"
+           type="main"
+           style="stroke" />
+        <pathFrame
+           id="pathFill2"
+           type="main"
+           style="fill" />
+        <pathFrame
+           id="pathFill4"
+           type="simulation"
+           style="fill"
+           indexColor="2"
+           fixedRotation="true"
+           isCentered="true" />
+        <pathFrame
+           id="strokePath1"
+           strokeWidth="7"
+           type="simulation"
+           style="fill"
+           indexColor="2"
+           fixedRotation="true"
+           isCentered="true" />
+      </frame>
+    </frames>
+  </metadata>
+  <path
+     id="fillPath1"
+     style="fill:#d4aa00;stroke-width:2"
+     d="M 105,89.999996 A 45.000004,45.000002 0 0 1 60,135 45.000004,45.000002 0 0 1 14.999999,89.999996 45.000004,45.000002 0 0 1 60,44.999999 45.000004,45.000002 0 0 1 105,89.999996 Z"
+     inkscape:label="fillPath1" />
+  <path
+     id="textPath1"
+     style="fill:#ffffff"
+     d="m 48.951168,99.020506 v 3.000004 h 22.125 v -3.000004 z m -0.02734,6.361334 v 3 h 5 v -3 z m 8.589844,0 v 3 h 5 v -3 z m 8.5625,0 v 3 h 5 v -3 z M 48.951168,94.524416 V 71.618161 h 6.921875 l 4.15625,15.625 4.109375,-15.625 h 6.9375 V 94.524416 H 66.779293 V 76.493161 l -4.546875,18.031255 h -4.453125 l -4.53125,-18.031255 v 18.031255 z"
+     inkscape:label="textPath1" />
+  <path
+     id="pathFill2"
+     style="fill:#ffffff;stroke:#ffffff;stroke-width:2;stroke-dasharray:none"
+     d="m 45,155 h 30 v -22.57359 c -10,3.43145 -20,3.43145 -30,0 z M 45,24.847664 h 30 v 22.573585 c -10,-3.43145 -20,-3.43145 -30,0 z"
+     inkscape:label="pathFill2" />
+  <path
+     id="mainPath1"
+     style="fill:none;stroke:#ffffff;stroke-width:2;stroke-dasharray:none"
+     d="M 60,24.847664 V 0 m 0,155 v 25 M 105,90.000001 A 45.000004,45.000004 0 0 1 60,135 45.000004,45.000004 0 0 1 15,90.000001 45.000004,45.000004 0 0 1 60,45 45.000004,45.000004 0 0 1 105,90.000001 Z"
+     inkscape:label="mainPath1" />
+  <path
+     style="fill:#ff0000"
+     d="M 60,41.5 C 33.255677,41.499997 11.5,63.255647 11.5,90 h 7 c 0,-22.961278 18.538763,-41.500003 41.5,-41.5 22.961235,-10e-7 41.5,18.538723 41.5,41.5 h 7 C 108.5,63.255648 86.744322,41.499999 60,41.5 Z"
+     id="strokePath1" />
+  <path
+     d="m 19.864309,76.097841 13.19776,-0.0214 -16.01701,27.846779 -16.1071298,-27.794719 11.8595598,-0.0191"
+     style="fill:#ff0000;stroke-width:0.452307"
+     id="pathFill3"
+     inkscape:label="pathFill3" />
+  <path
+     d="m 105.86431,76.098011 13.19776,-0.0214 -16.01701,27.846779 -16.10713,-27.794719 11.85956,-0.0191"
+     style="fill:#ff0000;stroke-width:0.452307"
+     id="pathFill4"
+     inkscape:label="pathFill4" />
+</svg>

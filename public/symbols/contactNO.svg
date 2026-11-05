@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg width="120" height="120" viewBox="0 0 120 120" version="1.1" id="svg1" sodipodi:docname="contactNO.svg" inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+   <sodipodi:namedview id="namedview1" pagecolor="#505050" bordercolor="#eeeeee" borderopacity="1" inkscape:showpageshadow="0" inkscape:pageopacity="0" inkscape:pagecheckerboard="0" inkscape:deskcolor="#3d3d3d" inkscape:zoom="4.3405678" inkscape:cx="47.228844" inkscape:cy="60.706343" inkscape:window-width="1352" inkscape:window-height="762" inkscape:window-x="88" inkscape:window-y="25" inkscape:window-maximized="0" inkscape:current-layer="svg1" showguides="false" />
+   <defs id="defs1" />
+   <metadata id="metadata1">
+      <info category="auxiliaries" duplicateTag="true" type="relayContact" width="120" height="120" tagType="contacts" name="Contact NO" description="Contact NO" marginH="0" marginV="0" />
+      <nodes id="0">
+         <node id="0" tag="13" direction="0" type="contact" dx="0.0" dy="-60.0" />
+         <node id="1" tag="14" direction="2" type="contact" dx="0.0" dy="60.0" />
+      </nodes>
+      <nodes id="1">
+         <node id="0" tag="17" direction="0" type="contact" dx="0.0" dy="-60.0" />
+         <node id="1" tag="18" direction="2" type="contact" dx="0.0" dy="60.0" />
+      </nodes>
+      <nodes id="2">
+         <node id="0" tag="17" direction="0" type="contact" dx="0.0" dy="-60.0" />
+         <node id="1" tag="18" direction="2" type="contact" dx="0.0" dy="60.0" />
+      </nodes>
+      <nodes id="3">
+         <node id="0" tag="17" direction="0" type="contact" dx="0.0" dy="-60.0" />
+         <node id="1" tag="18" direction="2" type="contact" dx="0.0" dy="60.0" />
+      </nodes>
+
+      <nodes id="4">
+         <node id="0" tag="97" direction="0" type="contact" dx="0.0" dy="-60.0" />
+         <node id="1" tag="98" direction="2" type="contact" dx="0.0" dy="60.0" />
+      </nodes>
+
+      <contacts>
+         <contact id="0" nodeId1="0" nodeId2="1" type="no" enableFrames="0,1" />
+      </contacts>
+      <frames id="0">
+         <frame id="0">
+            <pathFrame id="mainPath1" type="main" style="stroke" />
+         </frame>
+         <frame id="1">
+            <pathFrame id="mainPath2" type="main" style="stroke" />
+         </frame>
+      </frames>
+      <frames id="1">
+         <frame id="0">
+            <pathFrame id="mainPath1_2" type="main" style="stroke" />
+         </frame>
+         <frame id="1">
+            <pathFrame id="mainPath2_2" type="main" style="stroke" />
+         </frame>
+      </frames>
+      <frames id="2">
+         <frame id="0">
+            <pathFrame id="mainPath1_3" type="main" style="stroke" />
+         </frame>
+         <frame id="1">
+            <pathFrame id="mainPath2_3" type="main" style="stroke" />
+         </frame>
+      </frames>
+      <frames id="3">
+         <frame id="0">
+            <pathFrame id="mainPath1_4" type="main" style="stroke" />
+         </frame>
+         <frame id="1">
+            <pathFrame id="mainPath2_4" type="main" style="stroke" />
+         </frame>
+      </frames>
+
+      <frames id="4">
+         <frame id="0">
+            <pathFrame id="mainPath1_5" type="main" style="stroke" />
+         </frame>
+         <frame id="1">
+            <pathFrame id="mainPath2_5" type="main" style="stroke" />
+         </frame>
+      </frames>
+      
+   </metadata>
+   <path id="mainPath1" style="fill:none;stroke:#ffffff;stroke-width:2;stroke-dasharray:none" d="m 45,36 15,48 v 36 M 60,0 v 36" inkscape:label="mainPath1" sodipodi:nodetypes="ccccc" />
+   <path id="mainPath2" style="display:none;fill:none;stroke:#800000;stroke-width:2" d="m 58,34 1.999996,50 v 36 M 60.000001,-2.4079028e-7 60,36" inkscape:label="mainPath2" sodipodi:nodetypes="ccccc" />
+   <path id="mainPath2_2" style="display:none;fill:none;stroke:#800000;stroke-width:2" inkscape:label="mainPath2_2" d="M 58,33.999999 60,84 v 36 M 60,-1.2039514e-7 V 35.999998 M 58.75,62.5 H 26.250366 m 31.821115,-5 H 26.250366 m 10,12.499996 c -5.522848,0 -10.000001,-4.477152 -10,-9.999997 0,-5.522844 4.477153,-9.999994 10,-9.999994" sodipodi:nodetypes="ccccccccccsc" />
+   <path id="mainPath1_2" style="fill:none;stroke:#ffffff;stroke-width:2" d="M 52.5,62.5 H 20.000366 m 31.821115,-5 H 20.000366 M 44.999992,36 60,84 v 36 M 60,-1.2039514e-7 V 36 M 30.000366,69.999995 c -5.522848,0 -10.000001,-4.477152 -10,-9.999997 0,-5.522844 4.477153,-9.999994 10,-9.999994" inkscape:label="mainPath1_2" sodipodi:nodetypes="ccccccccccsc" />
+   <path id="mainPath1_3" style="display:inline;fill:none;stroke:#ffffff;stroke-width:2" inkscape:label="mainPath1_3" d="m 52.499996,62.50001 h -22.49962 m 21.82111,-5 h -21.82111 m 14.99962,-21.5 15,48 v 36 m 0,-120 v 36 m -29.99962,26.5 m 0,-5 m -10,12.499995 c 5.522849,0 10.000001,-4.477152 10,-9.999997 0,-5.522844 -4.477153,-9.999994 -10,-9.999994" />
+   <path id="mainPath2_3" style="display:none;fill:none;stroke:#800000;stroke-width:2" inkscape:label="mainPath2_3" d="m 57.999996,34.00001 2,49.99999 v 36 m 0,-119.99999 v 36 m -1.25,26.49999 -22.49962,3e-6 M 58.071486,57.5 l -21.82111,3e-6 m 0,5 m 0,-5 m -10,12.500001 c 5.522849,0 10,-4.477154 10,-10.000004 0,-5.522844 -4.477153,-9.999994 -10,-9.999994" />
+   <path id="mainPath1_4" style="display:inline;fill:none;stroke:#ffffff;stroke-width:2" d="m 9.897635,69.99999 c 5.522849,0 10.000001,-4.47715 10,-10 0,-5.52284 -4.477153,-9.99999 -10,-9.99999 M 52.397269,62.5 H 19.897635 m 31.821115,-5 H 19.897635 M 44.897261,36 59.897269,84 v 36 m 0,-120.000005 V 36 M 29.897635,70 c -5.522848,0 -10.000001,-4.47716 -10,-10.00001 0,-5.52284 4.477153,-9.99999 10,-9.99999" inkscape:label="mainPath1_4" />
+   <path id="mainPath2_4" style="display:none;fill:none;stroke:#800000;stroke-width:2" d="m 26.147635,62.49999 m 0,-5 m -10,12.5 c 5.522849,0 10.000001,-4.47715 10,-10 0,-5.52284 -4.477153,-9.99999 -10,-9.99999 m 41.749634,-16 2,50 v 36 m 0,-120.000003 V 36 m -1.25,26.5 H 26.147635 m 31.821115,-5 H 26.147635 m 10,12.49999 c -5.522848,0 -10.000001,-4.47715 -10,-9.99999 0,-5.52285 4.477153,-10 10,-10" inkscape:label="mainPath2_4" />
+   <path id="mainPath1_5" style="display:inline;fill:none;stroke:#ffffff;stroke-width:2" inkscape:label="mainPath1_5" d="m 44.897261,36 15.000001,48 v 36 m 0,-120 v 36 m -26.000001,24.000004 1.88e-4,10.000004 M 51.897262,60 H 24.897448 l 1.88e-4,10.000004" />
+   <path id="mainPath2_5" style="display:none;fill:none;stroke:#800000;stroke-width:2" d="m 40.897666,60.000002 1.9e-4,10.000002 M 58.897669,59.999998 H 31.897855 l 1.88e-4,10.000006 M 57.897269,34 l 2,50 v 36 m 0,-120.0000023 V 36" inkscape:label="mainPath2_5" />
+</svg>

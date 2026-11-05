@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg width="180" height="120" viewBox="0 0 180 120" version="1.1" id="svg1" sodipodi:docname="phaseFailure.svg" inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+   <sodipodi:namedview id="namedview1" pagecolor="#505050" bordercolor="#eeeeee" borderopacity="1" inkscape:showpageshadow="0" inkscape:pageopacity="0" inkscape:pagecheckerboard="0" inkscape:deskcolor="#3d3d3d" inkscape:zoom="1.5723" inkscape:cx="90.63156" inkscape:cy="67.099155" inkscape:window-width="1440" inkscape:window-height="762" inkscape:window-x="0" inkscape:window-y="25" inkscape:window-maximized="0" inkscape:current-layer="svg1" showguides="false" borderlayer="false" />
+   <defs id="defs1" />
+   <metadata id="metadata1">
+      <info category="protections" type="coil" timerType="phase" tagType="devices" width="180" height="120" name="Phase Failure Relay" description="Phase Failure Relay" marginH="0" marginV="0" />
+      <nodes>
+         <node id="0" tag="L1" direction="0" type="load" dx="-60.0" dy="-60.0" />
+         <node id="1" tag="L2" direction="0" type="load" dx="0" dy="-60.0" />
+         <node id="2" tag="L3" direction="0" type="load" dx="60.0" dy="-60.0" />
+      </nodes>
+      <frames>
+         <frame id="0">
+            <pathFrame id="mainPath1" type="main" style="stroke" />
+         </frame>
+         <frame id="1">
+            <pathFrame id="fillPath1" type="simulation" style="fill" indexColor="0" />
+            <pathFrame id="mainPath1" type="main" style="stroke" />
+         </frame>
+         <frame id="2">
+            <pathFrame id="fillPath1" type="simulation" style="fill" indexColor="2" />
+            <pathFrame id="mainPath1" type="main" style="stroke" />
+         </frame>
+      </frames>
+   </metadata>
+   <path id="fillPath1" style="fill:#ffcc00;stroke-width:2" inkscape:label="fillPath1" d="M 0,30 H 180 V 90 H 0 Z" />
+   <path id="mainPath1" style="fill:none;stroke:#ffffff;stroke-width:2" d="m 112.5,82.5 h -45 L 90,37.5 Z M 29.999999,30 V 0 M 90,30 V 0 m 60,30 V 0 M 0,30 H 180 V 90 H 0 Z" />
+</svg>

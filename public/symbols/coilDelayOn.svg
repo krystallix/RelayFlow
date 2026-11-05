@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg width="120" height="120" viewBox="0 0 120 120" version="1.1" id="svg1" sodipodi:docname="coilDelayOn.svg" inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+   <sodipodi:namedview id="namedview1" pagecolor="#505050" bordercolor="#eeeeee" borderopacity="1" inkscape:showpageshadow="0" inkscape:pageopacity="0" inkscape:pagecheckerboard="0" inkscape:deskcolor="#3d3d3d" inkscape:zoom="3.5873734" inkscape:cx="61.047451" inkscape:cy="54.496697" inkscape:window-width="1352" inkscape:window-height="762" inkscape:window-x="88" inkscape:window-y="25" inkscape:window-maximized="0" inkscape:current-layer="svg1" showguides="false" />
+   <defs id="defs1" />
+   <metadata id="metadata1">
+      <info indexAuxFrame = "1" isPaid = "true" category = "coils" tagType = "timerCoils" timerType = "delayOn"  type="coil" width="120" height="120"  name="On-Delay Relay Coil" description="On-Delay Relay Coil" marginH="0" marginV="0" />
+      <nodes>
+         <node id="0" tag="A1" direction="0" type="load" dx="0.0" dy="-60.0" />
+         <node id="1" tag="A2" direction="2" type="load" dx="0.0" dy="60.0" />
+      </nodes>
+      <frames>
+         <frame id="0">
+            <pathFrame id="mainPath1" type="main" style="stroke" />
+         </frame>
+         <frame id="1">
+            <pathFrame id="mainFill1" type="simulation" style="fill" />
+            <pathFrame id="mainPath1" type="main" style="stroke" />
+         </frame>
+      </frames>
+   </metadata>
+   <path d="m 35.999999,47.999992 h 48.000004 v 24 H 35.999999 Z m 24,0 m 0,24" style="fill:#aa0000;stroke:none;stroke-width:2;stroke-dasharray:none" id="mainFill1" inkscape:label="mainFill1" />
+   <path id="mainPath1" style="fill:none;stroke:#ffffff;stroke-width:2" d="m 50.999999,47.999992 -15,24 m 15,0 v -24 m -15,24 h 15 l -15,-24 m 0,0 h 48 v 24 h -48 z m 24,0 V -2e-6 m 0,71.999994 V 120" inkscape:label="mainPath1" />
+</svg>

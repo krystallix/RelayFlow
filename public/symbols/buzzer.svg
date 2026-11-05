@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg width="60" height="120" viewBox="0 0 60 120" version="1.1" id="svg1" sodipodi:docname="buzzer.svg" inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+   <sodipodi:namedview id="namedview1" pagecolor="#505050" bordercolor="#eeeeee" borderopacity="1" inkscape:showpageshadow="0" inkscape:pageopacity="0" inkscape:pagecheckerboard="0" inkscape:deskcolor="#3d3d3d" inkscape:zoom="2.4347082" inkscape:cx="57.296393" inkscape:cy="61.403661" inkscape:window-width="1352" inkscape:window-height="762" inkscape:window-x="88" inkscape:window-y="25" inkscape:window-maximized="0" inkscape:current-layer="svg1" showguides="false" />
+   <defs id="defs1" />
+   <metadata id="metadata1">
+      <info category="loads" type="load" tagType="loads" width="60" height="120" name="Buzzer" description="Buzzer" marginH="0" marginV="28" />
+      <nodes>
+         <node id="0" tag="X1" direction="0" type="load" dx="0.0" dy="-60.0" />
+         <node id="1" tag="X2" direction="2" type="load" dx="0.0" dy="60.0" />
+      </nodes>
+      <frames>
+         <frame id="0">
+            <pathFrame id="mainPath1" type="main" style="stroke" />
+         </frame>
+         <frame id="1">
+            <pathFrame id="mainFill1" type="simulation" style="fill" color="1" />
+            <pathFrame id="mainPath1" type="main" style="stroke" />
+         </frame>
+         <frame id="2">
+            <pathFrame id="mainFill1" type="simulation" style="fill" color="1" />
+            <pathFrame id="mainPath1" type="main" style="stroke" />
+         </frame>
+         <frame id="3">
+            <pathFrame id="mainFill1" type="simulation" style="fill" color="1" />
+            <pathFrame id="mainPath1" type="main" style="stroke" />
+         </frame>
+         <frame id="4">
+            <pathFrame id="mainFill1" type="simulation" style="fill" color="2" />
+            <pathFrame id="mainPath1" type="main" style="stroke" />
+         </frame>
+         <frame id="5">
+            <pathFrame id="mainFill1" type="simulation" style="fill" color="2" />
+            <pathFrame id="mainPath1" type="main" style="stroke" />
+         </frame>
+         <frame id="6">
+            <pathFrame id="mainFill1" type="simulation" style="fill" color="2" />
+            <pathFrame id="mainPath1" type="main" style="stroke" />
+         </frame>
+      </frames>
+   </metadata>
+   <path d="M 61.99999,72.000001 M 61.99999,48 m 0,33.600001 C 50.03359,81.600001 38,71.9664 38,60 38,48.033601 50.03359,38.4 61.99999,38.4 Z" style="fill:#ffff00;stroke:none;stroke-width:2;stroke-dasharray:none" id="mainFill1" inkscape:label="mainFill1" />
+   <path id="mainPath1" style="fill:none;stroke:#ffffff;stroke-width:2;stroke-dasharray:none" inkscape:label="mainPath1" d="M 42,71.999999 H 30 V 120 M 30,-3e-7 v 23.9999993 24 H 42 M 62,81.6 C 50.0336,81.6 38,71.9664 38,60 38,48.0336 50.0336,38.4 62,38.4 Z" />
+</svg>

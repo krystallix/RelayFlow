@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg width="120" height="120" viewBox="0 0 120 120" version="1.1" id="svg1" sodipodi:docname="rccbBreaker2p .svg" inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+   <sodipodi:namedview id="namedview1" pagecolor="#505050" bordercolor="#eeeeee" borderopacity="1" inkscape:showpageshadow="0" inkscape:pageopacity="0" inkscape:pagecheckerboard="0" inkscape:deskcolor="#3d3d3d" inkscape:zoom="3.8880728" inkscape:cx="-4.2437477" inkscape:cy="45.395241" inkscape:window-width="1352" inkscape:window-height="762" inkscape:window-x="88" inkscape:window-y="25" inkscape:window-maximized="0" inkscape:current-layer="svg1" showguides="true" />
+   <defs id="defs1" />
+   <metadata id="metadata1">
+      <info category="protections" duplicateTag="false" type="switch" width="120" height="120" tagType="breakers" name="RCCB Circuit Breaker 2P" description="RCCB Circuit Breaker 2P" marginH="0" marginV="0" />
+      <nodes id="0">
+         <node id="0" tag="1" direction="0" type="contact" dx="-30.0" dy="-60.0" />
+         <node id="1" tag="2" direction="2" type="contact" dx="-30.0" dy="60.0" />
+         <node id="2" tag="3" direction="0" type="contact" dx="30.0" dy="-60.0" />
+         <node id="3" tag="4" direction="2" type="contact" dx="30.0" dy="60.0" />
+      </nodes>
+      <frames id="0">
+         <frame id="0">
+            <pathFrame id="mainPath1" type="main" style="stroke" />
+         </frame>
+         <frame id="1">
+            <pathFrame id="mainPath2" type="main" style="stroke" />
+         </frame>
+      </frames>
+      <contacts>
+         <contact id="0" nodeId1="0" nodeId2="1" type="no" enableFrames="0,1" />
+         <contact id="1" nodeId1="2" nodeId2="3" type="no" enableFrames="0,1" />
+      </contacts>
+   </metadata>
+   <path id="mainPath1" style="display:inline;fill:none;stroke:#ffffff;stroke-width:2" d="m 57.551895,67.256423 -8.90711,2.375264 m 7.82563,-5.846104 1.91647,6.999998 M 82.660995,60 l -8.74133,2.506536 m -1.01204,-3.395342 -10.63181,6.823659 12.63227,0.152794 z m -75.516726,8.145229 -8.90711,2.375264 m 7.82563,-5.846104 1.91647,6.999998 M 22.499999,60 l -8.74133,2.506536 m -1.01204,-3.395342 -10.63181,6.823659 12.63227,0.152794 z m 12.303616,-18.161452 9.8995,-9.899496 m 0,9.899496 -9.8995,-9.899496 m 60.160996,9.899496 9.8995,-9.899496 m 0,9.899496 -9.8995,-9.899496 m -10.05025,4.949738 15,48.000006 V 120 m 0,-120.0000165 V 35.999983 m -75.160996,10e-7 15,48.000006 V 120 m 0,-120.0000165 V 35.999983 M 78.000005,60 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5" inkscape:label="mainPath1" />
+   <path d="m -81.51949,36.629103 -8.90711,2.375264 m 7.82563,-5.846104 1.91647,6.999998 m 24.27411,-10.785581 -8.74133,2.506536 m -1.01204,-3.395342 -10.63181,6.823659 12.63227,0.152794 z" style="display:none;fill:none;stroke:#00ff00;stroke-width:2" id="path8" />
+   <path d="m -53.124699,19.198453 -9.21469,0.260672 m 8.9614,-3.887261 0.25329,7.253179 m 25.98896,-4.453529 -9.08806,0.317361 m -0.16058,-3.539323 -11.96678,4.048902 12.22007,3.204278 z m 7.74865,3.221962 h 1.49999" style="display:none;fill:none;stroke:#00ffff;stroke-width:2" id="path9" />
+   <path id="mainPath2" style="display:none;fill:none;stroke:#800000;stroke-width:2" d="m 62.76104,60.826939 -9.21469,0.260672 m 8.9614,-3.887261 0.25329,7.253179 M 88.75,60 79.66194,60.317361 M 79.50136,56.778038 67.53458,60.82694 79.75465,64.031218 Z M 87.25001,60 H 88.75 m -86.2389699,0.826939 -9.21469,0.260672 m 8.9614,-3.887261 0.25329,7.253179 M 28.49999,60 19.41193,60.317361 M 19.25135,56.778038 7.28457,60.82694 19.50464,64.031218 Z M 27,60 h 1.49999 m -3.449745,-28.949754 9.8995,9.899496 m 0,-9.899496 -9.8995,9.899496 m 60.160996,-9.899496 9.8995,9.899496 m 0,-9.899496 -9.8995,9.899496 m 1.94975,-4.949748 3,48 V 120 m 0,-120.0000065 V 35.999994 m -63.160996,0 3,48 V 120 m 0,-120.0000065 V 35.999994 M 83.000005,60 h 5 m -13,0 h 5 m -13,0 h 5 M 59,60 h 5.000001 M 51,60 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5" inkscape:label="mainPath2" />
+</svg>

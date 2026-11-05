@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg width="240" height="240" viewBox="0 0 240 240" version="1.1" id="svg1" sodipodi:docname="breaker.svg" inkscape:version="1.4 (e7c3feb1, 2024-10-09)" xml:space="preserve"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+   <sodipodi:namedview id="namedview1" pagecolor="#505050" bordercolor="#eeeeee" borderopacity="1" inkscape:showpageshadow="0" inkscape:pageopacity="0" inkscape:pagecheckerboard="0" inkscape:deskcolor="#3d3d3d" inkscape:zoom="2.6698481" inkscape:cx="132.21726" inkscape:cy="98.694752" inkscape:window-width="1440" inkscape:window-height="762" inkscape:window-x="0" inkscape:window-y="25" inkscape:window-maximized="0" inkscape:current-layer="svg1" showguides="true" borderlayer="false" />
+   <defs id="defs1" />
+   <metadata id="metadata1">
+      <info category = "protections" type="switch" tagType = "breakers" width="240" height="240"  tagSize="20" isTappedOnSimulation="false" name="coil" description="Coil" />
+      <nodes>
+         <node id="0" tag="1" direction="0" type="motor" dx="-60.0" dy="-120.0" />
+         <node id="1" tag="3" direction="0" type="motor" dx="0" dy="-120.0" />
+         <node id="2" tag="5" direction="0" type="motor" dx="60.0" dy="-120.0" />
+         <node id="3" tag="2" direction="2" type="motor" dx="-60.0" dy="120.0" />
+         <node id="4" tag="4" direction="2" type="motor" dx="0" dy="120.0" />
+         <node id="5" tag="6" direction="2" type="motor" dx="60.0" dy="120.0" />
+      </nodes>
+      <frames>
+         <frame id="0">
+            <pathFrame id="mainPath" type="main" style="stroke" />
+            <pathFrame id="mainPath2" type="main" style="stroke" strokeWidth="1.0" />
+         </frame>
+      </frames>
+   </metadata>
+   <path id="mainPath" style="fill:none;stroke:#ffffff;stroke-width:2;stroke-dasharray:none" class="F G" d="m 181.48354,157.50994 12.0003,7.50018 -12.0003,7.50019 m -15.00037,0 h 6.00015 m -3.00008,-15.00037 h 6.00016 m -3.00008,0 -3.00008,15.00037 m -48.0012,-15.00037 12.0003,7.50018 -12.0003,7.50019 m -15.00037,0 h 6.00015 m -3.00008,-15.00037 h 6.00016 m -3.00008,0 -3.00008,15.00037 m -48.001198,-15.00037 12.000297,7.50018 -12.000297,7.50019 m -15.000369,0 h 6.000142 m -3.000071,-15.00037 h 6.000155 m -3.000084,0 -3.000071,15.00037 M 29.979762,150.00974 H 209.98426 v 30.00075 H 29.979762 Z M 59.980512,120 v 7.50019 h 15.000369 v 15.00037 H 59.980512 v 7.50018 M 119.98201,120 v 7.50019 h 15.00037 v 15.00037 h -15.00037 v 7.50018 M 179.98351,120 v 7.50019 h 15.00037 v 15.00037 h -15.00037 v 7.50018 M 29.979762,120 H 209.98426 v 30.00074 H 29.979762 Z M 44.992137,59.998502 59.992506,104.99962 v 22.50057 m 44.995124,-67.501688 15.00038,45.001118 v 22.50057 m 44.99512,-67.501688 15.00038,45.001118 v 22.50057 M 179.99609,240 V 180.01049 M 120.00058,240 V 180.01049 M 59.977508,240 V 180.01049 M 179.99551,59.998502 V -4.3916405e-8 M -30.015742,77.998952 v 18.00045 m 24.0036,-9.000225 H 29.988763 M 11.997312,68.998726 V 104.99962 M -6.012142,68.998726 H 29.988763 V 104.99962 H -6.012142 Z M 120,59.998502 V -4.3916405e-8 M 59.977508,59.998502 V -4.3916405e-8" sodipodi:nodetypes="ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc" inkscape:label="mainPath" />
+   <path id="mainPath2" style="display:none;fill:none;stroke:#ffffff;stroke-width:1;stroke-dasharray:2, 3;stroke-dashoffset:0" class="F G J" d="m 11.997312,104.99962 v 60.00451 M 173.98336,86.999177 H 29.979762 m 0.01798,78.004953 H 11.9973 M 29.99774,135.00037 H 11.997312 M -6.0151466,86.999177 H -30.015742" inkscape:label="mainPath2" />
+</svg>

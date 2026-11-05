@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg width="120" height="120" viewBox="0 0 120 120" version="1.1" id="svg1" sodipodi:docname="switchNO.svg" inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+   <sodipodi:namedview id="namedview1" pagecolor="#505050" bordercolor="#eeeeee" borderopacity="1" inkscape:showpageshadow="0" inkscape:pageopacity="0" inkscape:pagecheckerboard="0" inkscape:deskcolor="#3d3d3d" inkscape:zoom="11.090657" inkscape:cx="26.238302" inkscape:cy="60.456294" inkscape:window-width="1352" inkscape:window-height="762" inkscape:window-x="88" inkscape:window-y="25" inkscape:window-maximized="0" inkscape:current-layer="svg1" showguides="false" />
+   <defs id="defs1" />
+   <metadata id="metadata1">
+      <info category="switches" type="switch" tagType="switches" duplicateTag="false" width="120" height="120" name="Switch NO" description="Switch NO" marginH="0" marginV="0" />
+      <nodes>
+         <node id="0" tag="13" direction="0" type="contact" dx="0.0" dy="-60.0" />
+         <node id="1" tag="14" direction="2" type="contact" dx="0.0" dy="60.0" />
+      </nodes>
+      <contacts>
+         <contact id="0" nodeId1="0" nodeId2="1" type="no" enableFrames="0,1" />
+      </contacts>
+      <frames>
+         <frame id="0">
+            <pathFrame id="mainPath1" type="main" style="stroke" />
+         </frame>
+         <frame id="1">
+            <pathFrame id="mainPath2" type="main" style="stroke" />
+         </frame>
+      </frames>
+   </metadata>
+   <path id="mainPath1" style="fill:none;stroke:#ffffff;stroke-width:2" d="M 30,49.979161 H 20.000375 V 70.020835 H 10.00075 M 52.00019,59.999998 h 0.499809 m -8.499812,0 h 5.000003 m -13.000003,0 h 5 m -13,0 h 5 m -12.999999,0 h 5 M 45,36 60,84 v 36 M 60,0 v 36" inkscape:label="mainPath1" sodipodi:nodetypes="ccccccccccccccccccc" />
+   <path id="mainPath2" style="display:none;fill:none;stroke:#800000;stroke-width:2" d="m 36.249998,49.979162 h -9.999625 v 20.041674 l -9.999625,-10e-7 M 58.250188,59.999999 60,60 m -9.749815,-10e-7 h 5.000003 m -13.000003,0 h 5 m -13,0 h 5 m -12.999999,0 h 5 M 58,34 59.999996,84 v 36 M 60.000001,-2.4079028e-7 60,36" inkscape:label="mainPath2" sodipodi:nodetypes="ccccccccccccccccccc" />
+</svg>

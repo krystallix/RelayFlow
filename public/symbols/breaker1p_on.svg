@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg width="120" height="120" viewBox="0 0 120 120" version="1.1" id="svg1" sodipodi:docname="breaker1p.svg" inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+   <sodipodi:namedview id="namedview1" pagecolor="#505050" bordercolor="#eeeeee" borderopacity="1" inkscape:showpageshadow="0" inkscape:pageopacity="0" inkscape:pagecheckerboard="0" inkscape:deskcolor="#3d3d3d" inkscape:zoom="6.1321023" inkscape:cx="58.055131" inkscape:cy="52.265925" inkscape:window-width="1352" inkscape:window-height="762" inkscape:window-x="88" inkscape:window-y="25" inkscape:window-maximized="0" inkscape:current-layer="svg1" showguides="false" />
+   <defs id="defs1" />
+   <metadata id="metadata1">
+      <info category="protections" type="switch" tagType="breakers" width="120" height="120" name="Circuit Breaker 1P" description="Circuit Breaker 1P" marginH="0" marginV="0" />
+      <nodes>
+         <node id="0" tag="1" direction="0" type="contact" dx="0.0" dy="-60.0" />
+         <node id="1" tag="2" direction="2" type="contact" dx="0.0" dy="60.0" />
+      </nodes>
+      <contacts>
+         <contact id="0" nodeId1="0" nodeId2="1" type="no" enableFrames="0,1" />
+      </contacts>
+      <frames>
+         <frame id="0">
+            <pathFrame id="mainPath1" type="main" style="stroke" />
+         </frame>
+         <frame id="1">
+            <pathFrame id="mainPath2" type="main" style="stroke" />
+         </frame>
+      </frames>
+   </metadata>
+   <path id="mainPath2" style="display:inline;stroke:#ffffff;fill:none;stroke-width:2;stroke-dasharray:none" d="m 55.05025,31.050252 9.8995,9.899495 m 0,-9.899495 -9.8995,9.899495 M 57.000001,36 59.999996,84 v 36 M 60.000001,-2.4079028e-7 60,36" inkscape:label="mainPath2" sodipodi:nodetypes="ccccccccc" />
+   <path id="mainPath1" style="display:none;fill:none;stroke:#ffffff;stroke-width:2" d="m 55.05025,40.949747 9.8995,-9.899495 m 0,9.899495 -9.8995,-9.899495 M 45,36 60,84 v 36 M 60,0 v 36" inkscape:label="mainPath1" />
+</svg>

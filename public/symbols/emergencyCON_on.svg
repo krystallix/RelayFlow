@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="120"
+   height="120"
+   viewBox="0 0 120 120"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="emergencyCON.svg"
+   inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#3d3d3d"
+     inkscape:zoom="4.7180032"
+     inkscape:cx="33.276789"
+     inkscape:cy="64.751969"
+     inkscape:window-width="1352"
+     inkscape:window-height="762"
+     inkscape:window-x="88"
+     inkscape:window-y="25"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg1"
+     showguides="true" />
+  <defs
+     id="defs1" />
+  <metadata
+     id="metadata1">
+    <info
+       category="switches"
+       type="switch"
+       tagType="switches"
+       duplicateTag="false"
+       width="120"
+       height="120"
+       name="Switch CON"
+       description="Switch CON"
+       marginH="0"
+       marginV="0" />
+    <nodes>
+      <node
+         id="0"
+         tag="11"
+         direction="0"
+         type="contact"
+         dx="0.0"
+         dy="-60.0" />
+      <node
+         id="1"
+         tag="12"
+         direction="2"
+         type="contact"
+         dx="-30.0"
+         dy="60.0" />
+      <node
+         id="2"
+         tag="14"
+         direction="2"
+         type="contact"
+         dx="30.0"
+         dy="60.0" />
+    </nodes>
+    <contacts>
+      <contact
+         id="0"
+         nodeId1="0"
+         nodeId2="1"
+         type="nc"
+         enableFrames="1,0" />
+      <contact
+         id="0"
+         nodeId1="0"
+         nodeId2="2"
+         type="no"
+         enableFrames="0,1" />
+    </contacts>
+    <frames>
+      <frame
+         id="0">
+        <pathFrame
+           id="mainPath1"
+           type="main"
+           style="stroke" />
+      </frame>
+      <frame
+         id="1">
+        <pathFrame
+           id="mainPath2"
+           type="main"
+           style="stroke" />
+      </frame>
+    </frames>
+  </metadata>
+  <path
+     id="mainPath2"
+     style="display:inline;stroke:#ffffff;fill:none;stroke-width:2"
+     d="m 38.000755,50 v 20 a 10,10 0 0 1 -10,-10 10,10 0 0 1 10,-10 z M 72,78 h 18 v 42 M 48,78 H 30 v 42 M 80,84 60,36 V 0 m 10.000193,60 h 0.499809 m -8.499811,0 h 5.000002 m -13.000002,0 h 5 m -13,0 h 5 m -13,0 h 5"
+     inkscape:label="mainPath2" />
+  <path
+     id="mainPath1"
+     style="display:none;fill:none;stroke:#ffffff;stroke-width:2"
+     inkscape:label="mainPath1"
+     d="m 72,78 h 18 v 42 M 48,78 H 30 v 42 M 40,84 60,36 V 0 M 44.000379,60 h 5.000003 m -13.000003,0 h 5 m -13,0 h 5 M 20.00038,60 h 5 M 20.000943,50 v 20 a 10,10 0 0 1 -10,-10 10,10 0 0 1 10,-10 z" />
+</svg>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg width="180" height="120" viewBox="0 0 180 120" version="1.1" id="svg1" sodipodi:docname="contactor3p.svg" inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+   <sodipodi:namedview id="namedview1" pagecolor="#505050" bordercolor="#eeeeee" borderopacity="1" inkscape:showpageshadow="0" inkscape:pageopacity="0" inkscape:pagecheckerboard="0" inkscape:deskcolor="#3d3d3d" inkscape:zoom="2.6083502" inkscape:cx="74.184823" inkscape:cy="82.619273" inkscape:window-width="1352" inkscape:window-height="762" inkscape:window-x="88" inkscape:window-y="25" inkscape:window-maximized="0" inkscape:current-layer="svg1" showguides="true" />
+   <defs id="defs1" />
+   <metadata id="metadata1">
+      <info tagIndex="2" category="contactors" duplicateTag="false" type="relayContact" width="180" height="120" tagType="contactors" name="Contactor 3P" description="Contactor 3P" marginH="0" marginV="0" />
+      <nodes id="0">
+         <node id="0" tag="1" direction="0" type="contact" dx="-60.0" dy="-60.0" />
+         <node id="1" tag="2" direction="2" type="contact" dx="-60.0" dy="60.0" />
+         <node id="2" tag="3" direction="0" type="contact" dx="0.0" dy="-60.0" />
+         <node id="3" tag="4" direction="2" type="contact" dx="0.0" dy="60.0" />
+         <node id="4" tag="5" direction="0" type="contact" dx="60.0" dy="-60.0" />
+         <node id="5" tag="6" direction="2" type="contact" dx="60.0" dy="60.0" />
+      </nodes>
+      <frames id="0">
+         <frame id="0">
+            <pathFrame id="mainPath1" type="main" style="stroke" />
+         </frame>
+         <frame id="1">
+            <pathFrame id="mainPath2" type="main" style="stroke" />
+         </frame>
+      </frames>
+      <contacts>
+         <contact id="0" nodeId1="0" nodeId2="1" type="no" enableFrames="0,1" />
+         <contact id="1" nodeId1="2" nodeId2="3" type="no" enableFrames="0,1" />
+         <contact id="2" nodeId1="4" nodeId2="5" type="no" enableFrames="0,1" />
+      </contacts>
+   </metadata>
+   <path id="mainPath1" style="display:none;fill:none;stroke:#ffffff;stroke-width:2" d="M 98.000001,60 H 103 m -12.999999,0 h 5 m -13,0 h 5 M 138,60 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 M 98.000003,60 H 103 m 47,-29 c -2.76142,0 -5,2.238576 -5,5 0,2.761424 2.23858,5 5,5 z m -15,5 15,48 v 36 M 150,0 V 36 M 78.000005,60 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 M 90.000011,31 c -2.761424,0 -5,2.238576 -5,5 0,2.761424 2.238576,5 5,5 z m -15,5 15,48 v 36 m 0,-120 V 36 M 30,31 c -2.761424,0 -5,2.238576 -5,5 0,2.761424 2.238576,5 5,5 z m -15,5 15,48 v 36 M 30,0 v 36" inkscape:label="mainPath1" />
+   <path id="mainPath2" style="display:inline;stroke:#ffffff;fill:none;stroke-width:2" d="m 103,60 h 5 m -13,0 h 5 m -13,0 h 5 m 51,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m 42,-29 c -2.76142,0 -5,2.238576 -5,5 0,2.761424 2.23858,5 5,5 z m -6,3 6,50 v 36 M 150,0 V 36 M 83.000005,60 h 5 m -13,0 h 5 m -13,0 h 5 M 59,60 h 5.000001 M 51,60 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 M 90.000011,31 c -2.761424,0 -5,2.238576 -5,5 0,2.761424 2.238576,5 5,5 z m -6,3 5.999994,50 v 36 m 6e-6,-120 V 36 M 30,31 c -2.761424,0 -5,2.238576 -5,5 0,2.761424 2.238576,5 5,5 z m -6,3 5.999995,50 v 36 M 30,0 v 36" inkscape:label="mainPath2" />
+</svg>

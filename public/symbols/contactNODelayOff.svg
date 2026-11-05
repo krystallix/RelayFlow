@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg width="120" height="120" viewBox="0 0 120 120" version="1.1" id="svg1" sodipodi:docname="contactP1DelayOff.svg" inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+   <sodipodi:namedview id="namedview1" pagecolor="#505050" bordercolor="#eeeeee" borderopacity="1" inkscape:showpageshadow="0" inkscape:pageopacity="0" inkscape:pagecheckerboard="0" inkscape:deskcolor="#3d3d3d" inkscape:zoom="4.4254072" inkscape:cx="25.760341" inkscape:cy="56.153025" inkscape:window-width="1352" inkscape:window-height="762" inkscape:window-x="88" inkscape:window-y="25" inkscape:window-maximized="0" inkscape:current-layer="svg1" showguides="false" />
+   <defs id="defs1"/>
+   <metadata id="metadata1">
+      <info isPaid = "true" tagIndex="2" duplicateTag = "false" category = "auxiliaries" timerType = "delayOff" type="relayContact" width="120" height="120" tagType = "contactors"  name="Off-Delay Contact NO for Contactors" description="Off-Delay Contact NO for Contactors" marginH="0" marginV="0" />
+      <nodes>
+         <node id="0" tag="67" direction="0" type="contact" dx="0.0" dy="-60.0" />
+         <node id="1" tag="68" direction="2" type="contact" dx="0.0" dy="60.0" />
+      </nodes>
+      <contacts>
+         <contact id="0" nodeId1="0" nodeId2="1" type="no" enableFrames="0,1" />
+      </contacts>
+      <frames>
+         <frame id="0">
+            <pathFrame id="mainPath1" type="main" style="stroke" />
+         </frame>
+         <frame id="1">
+            <pathFrame id="mainPath2" type="main" style="stroke" />
+         </frame>
+      </frames>
+   </metadata>
+   <path id="mainPath1" style="display:inline;fill:none;stroke:#ffffff;stroke-width:2" inkscape:label="mainPath1" d="M 52.5,62.5 H 30.000375 m 21.821111,-5 H 30.000375 M 45,36 60,84 v 36 M 60,0 V 36 M 30.000375,62.5 m 0,-5 m -10,12.499995 c 5.522849,0 10.000001,-4.477152 10,-9.999997 0,-5.522844 -4.477153,-9.999994 -10,-9.999994" />
+   <path id="mainPath2" style="display:none;fill:none;stroke:#800000;stroke-width:2" inkscape:label="mainPath2" d="m 58,34 2,49.99999 v 36 M 60,0 v 36 m -1.25,26.49999 -22.499625,3e-6 m 21.821115,-5.000003 -21.821115,3e-6 m 0,5 m 0,-5 m -10,12.500001 c 5.522849,0 10.000001,-4.477154 10,-10.000004 0,-5.522844 -4.477153,-9.999994 -10,-9.999994" />
+</svg>

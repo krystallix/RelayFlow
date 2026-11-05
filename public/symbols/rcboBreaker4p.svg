@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg width="300" height="240" viewBox="0 0 300 240" version="1.1" id="svg1" sodipodi:docname="rcboBreaker4p.svg" inkscape:version="1.4 (e7c3feb1, 2024-10-09)" xml:space="preserve"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+   <sodipodi:namedview id="namedview1" pagecolor="#505050" bordercolor="#eeeeee" borderopacity="1" inkscape:showpageshadow="0" inkscape:pageopacity="0" inkscape:pagecheckerboard="0" inkscape:deskcolor="#3d3d3d" inkscape:zoom="0.86050165" inkscape:cx="180.12749" inkscape:cy="56.362472" inkscape:window-width="1440" inkscape:window-height="762" inkscape:window-x="0" inkscape:window-y="25" inkscape:window-maximized="0" inkscape:current-layer="svg1" showguides="true" borderlayer="false" />
+   <defs id="defs1" />
+   <metadata id="metadata1">
+      <info category="protections" type="switch" tagType="breakers" width="300" height="240" name="RCBO Circuit Breaker 4P" description="RCBO Circuit Breaker 4P" />
+      <nodes>
+         <node id="0" tag="1" direction="0" type="contact" dx="-90.0" dy="-120.0" />
+         <node id="1" tag="2" direction="2" type="contact" dx="-90.0" dy="120.0" />
+         <node id="2" tag="3" direction="0" type="contact" dx="-30.0" dy="-120.0" />
+         <node id="3" tag="4" direction="2" type="contact" dx="-30.0" dy="120.0" />
+         <node id="4" tag="5" direction="0" type="contact" dx="30.0" dy="-120.0" />
+         <node id="5" tag="6" direction="2" type="contact" dx="30.0" dy="120.0" />
+         <node id="6" tag="7" direction="0" type="contact" dx="90.0" dy="-120.0" />
+         <node id="7" tag="8" direction="2" type="contact" dx="90.0" dy="120.0" />
+      </nodes>
+      <frames id="0">
+         <frame id="0">
+            <pathFrame id="mainPath1" type="main" style="stroke" />
+         </frame>
+         <frame id="1">
+            <pathFrame id="mainPath2" type="main" style="stroke" />
+         </frame>
+      </frames>
+      <contacts>
+         <contact id="0" nodeId1="0" nodeId2="1" type="no" enableFrames="0,1" />
+         <contact id="1" nodeId1="2" nodeId2="3" type="no" enableFrames="0,1" />
+         <contact id="2" nodeId1="4" nodeId2="5" type="no" enableFrames="0,1" />
+         <contact id="3" nodeId1="6" nodeId2="7" type="no" enableFrames="0,1" />
+      </contacts>
+   </metadata>
+
+
+
+
+
+
+
+   <path id="mainPath2" style="display:none;fill:none;stroke:#800000;stroke-width:2" d="m 270.00676,150.00498 c 1e-5,16.5713 -53.73187,30.005 -120.0135,30.005 -66.28163,0 -120.0135,-13.4337 -120.01349,-30.005 2e-5,-16.5713 53.73188,-30.00499 120.01349,-30.00499 66.28162,0 120.01349,13.43369 120.0135,30.00499 z m -33.54229,-117.54052 7.07106,7.071068 m 0,-7.071068 -7.07106,7.071068 M 234,33.999997 240,84.000013 V 240 M 240,-4e-6 V 35.999994 M 56.44198,32.46446 l 7.07106,7.071068 m 0,-7.071068 -7.07106,7.071068 m 60,-7.071068 7.07106,7.071068 m 0,-7.071068 -7.07106,7.071068 m 59.99999,-7.071068 7.07106,7.071068 m 0,-7.071068 -7.07106,7.071068 M -26.00225,50.999777 V 69.000224 M -1.99865,60 H 34.00226 M 16.001805,41.999547 V 78.000441 M -1.99865,41.999547 l 36.00091,2e-6 V 78.000446 H -1.99865 Z M -9.35223,59.999995 -1.99865,60 m -15.35358,-5e-6 h 5 m -13.65002,5e-6 5.65002,-5e-6 m 70.97718,0 h 13.120008 m -21.120008,0 h 5 M 16.0108,123.00045 v -5 m 0,13 v -5 m 0,-42.999994 v -5.00001 m 0,13.00001 v -5 m 0,13 v -5 m 0,12.999994 v -5 m 0,13 v -5 m 0,29 v -5 m 0,15.00536 v -7.00536 M 139.5,59.999989 h 5 m -13,0 h 5 m -13,0 h 5 m 48,0 h 5 m -10,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m 29.4775,-25.999992 6,50.000016 V 240 m 0,-240.000004 V 35.999994 M 116.5,59.999989 h 8 m -12.40248,0 h 4.99999 m -12.99999,0 h 5 m -13.000002,0 h 5.000002 m -13.000002,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m 44.879992,-25.999992 6,50.000016 V 240 m 0,-240.000004 V 35.999994 M 53.9775,33.999997 59.97751,84.000013 V 240 m 0,-240.000004 V 35.999994 M 192,59.999989 h 5 m -13,0 h 5 m 43,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 M 25.00001,149.44839 h 5 m -13,0 h 5 m 3,0 h 5 m -13.98921,-0.99917 0.98921,0.99917 M 34.00226,60 h 5" sodipodi:nodetypes="sssssccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc" inkscape:label="mainPath2" />
+   <path id="mainPath1" style="fill:none;stroke:#ffffff;stroke-width:2" d="m 270.00676,150.00499 c 1e-5,16.5713 -53.73187,30.005 -120.0135,30.005 -66.28163,0 -120.0135,-13.4337 -120.01349,-30.005 C 29.97979,133.43369 83.71165,120 149.99326,120 c 66.28162,0 120.01349,13.43369 120.0135,30.00499 z m -33.54229,-117.540527 7.07106,7.071068 m 0,-7.071068 -7.07106,7.071068 M 225,35.999998 240,84.000017 V 240.00001 M 240,0 v 35.999999 m -183.55802,-3.535534 7.07106,7.071068 m 0,-7.071068 -7.07106,7.071068 m 60,-7.071068 7.07106,7.071068 m 0,-7.071068 -7.07106,7.071068 m 59.99999,-7.071068 7.07106,7.071068 m 0,-7.071068 -7.07106,7.071068 M -30.00225,50.99978 v 18.00045 m 24.0036,-9.000225 h 36.0009 M 12.0108,41.999554 V 78.000447 M -5.99865,41.999554 h 36.0009 v 36.000893 h -36.0009 z m -7.35359,18.000447 h 5 m -13,0 h 5 m -13,0 h 5 m 70.97719,0 h 5 m -13,0 h 5 m -13,0 h 5 M 11.99731,123.99963 v -5 m 0,13 v -5 m 0,-43.000002 v -5.00001 m 0,13.00001 v -5 m 0,13 v -5 m 0,13.000002 v -5 m 0,13 v -5 m 0,29 v -5 m 0,15.00536 v -7.00536 M 127.9775,59.999994 h 5 m -13,0 h 5 m -13,0 h 5 m 51,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m 32,-23.999996 15,48.000019 V 240.00001 M 179.9775,0 v 35.999999 m -72,23.999996 h 5 m -12.99999,0 h 4.99999 m -12.99999,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m 48,-23.999996 15,48.000018 V 240.00001 M 119.97751,0 v 35.999999 m -75,0 15,48.000018 V 240.00001 M 59.97751,0 V 35.999999 M 183.4775,59.999994 h 5 m -13,0 h 5 m 43,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 M 25.00001,149.4484 h 5 m -13,0 h 5 m 3,0 h 5 m -18.0027,0 h 5.0027" sodipodi:nodetypes="sssssccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc" inkscape:label="mainPath1" />
+</svg>

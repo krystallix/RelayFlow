@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg width="180" height="120" viewBox="0 0 180 120" version="1.1" id="svg1" sodipodi:docname="fuse3p.svg" inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+   <sodipodi:namedview id="namedview1" pagecolor="#505050" bordercolor="#eeeeee" borderopacity="1" inkscape:showpageshadow="0" inkscape:pageopacity="0" inkscape:pagecheckerboard="0" inkscape:deskcolor="#3d3d3d" inkscape:zoom="3.1642789" inkscape:cx="88.171747" inkscape:cy="49.774373" inkscape:window-width="1352" inkscape:window-height="762" inkscape:window-x="88" inkscape:window-y="25" inkscape:window-maximized="0" inkscape:current-layer="svg1" showguides="true" />
+   <defs id="defs1" />
+   <metadata id="metadata1">
+      <info category="protections" hasAux = "false" duplicateTag="false" type="switch" width="180" height="120" tagType="fuses" name="Fuse 3P" description="Fuse 3P" marginH="0" marginV="0" />
+      <nodes id="0">
+         <node id="0" tag="1" direction="0" type="contact" dx="-60.0" dy="-60.0" />
+         <node id="1" tag="2" direction="2" type="contact" dx="-60.0" dy="60.0" />
+         <node id="2" tag="3" direction="0" type="contact" dx="0.0" dy="-60.0" />
+         <node id="3" tag="4" direction="2" type="contact" dx="0.0" dy="60.0" />
+         <node id="4" tag="5" direction="0" type="contact" dx="60.0" dy="-60.0" />
+         <node id="5" tag="6" direction="2" type="contact" dx="60.0" dy="60.0" />
+      </nodes>
+      <frames id="0">
+         <frame id="0">
+            <pathFrame id="mainPath1" type="main" style="stroke" />
+         </frame>
+         <frame id="1">
+            <pathFrame id="mainPath2" type="main" style="stroke" />
+         </frame>
+      </frames>
+      <contacts>
+         <contact id="0" nodeId1="0" nodeId2="1" type="no" enableFrames="1,0" />
+         <contact id="1" nodeId1="2" nodeId2="3" type="no" enableFrames="1,0" />
+         <contact id="2" nodeId1="4" nodeId2="5" type="no" enableFrames="1,0" />
+      </contacts>
+   </metadata>
+   <path id="mainPath1" style="display:none;fill:none;stroke:#ffffff;stroke-width:2" inkscape:label="mainPath1" d="m 22.499995,45.000001 h 15 V 75 h -15 z M 29.999995,0 V 120 M 82.660991,45.000001 h 15 V 75 h -15 z M 90.160991,0 V 120 M 142.5,45.000001 h 15 V 75 h -15 z M 150,0 v 120" />
+   <path id="mainPath2" style="display:inline;stroke:#ffffff;fill:none;stroke-width:2" inkscape:label="mainPath2" d="M 29.999995,120 V 68.566693 m -7.5,-23.566692 h 15 V 75 h -15 z M 29.999995,0 V 52.679974 M 90.160991,120 V 68.566693 m -7.5,-23.566692 h 15 V 75 h -15 z M 90.160991,0 V 52.679974 M 150,120 V 68.566693 m -7.5,-23.566692 h 15 V 75 h -15 z M 150,0 v 52.679974" />
+</svg>

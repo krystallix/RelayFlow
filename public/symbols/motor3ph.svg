@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg width="180" height="180" viewBox="0 0 180 180" version="1.1" id="svg1" sodipodi:docname="motor3ph.svg" inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+   <sodipodi:namedview id="namedview1" pagecolor="#505050" bordercolor="#eeeeee" borderopacity="1" inkscape:showpageshadow="0" inkscape:pageopacity="0" inkscape:pagecheckerboard="0" inkscape:deskcolor="#3d3d3d" inkscape:zoom="2.1203132" inkscape:cx="91.731731" inkscape:cy="49.7568" inkscape:window-width="1440" inkscape:window-height="762" inkscape:window-x="0" inkscape:window-y="25" inkscape:window-maximized="0" inkscape:current-layer="svg1" showguides="false" borderlayer="false" />
+   <defs id="defs1" />
+   <metadata id="metadata1">
+      <info category="motors" type="motor3ph" motorType="threePhaseMotor" iconY = "5" iconX = "0" tagType="motors" width="180" height="180" name="Three-Phase Motor" description="Three-Phase Motor" marginH="0" marginV="0" />
+      <nodes>
+         <node id="0" tag="U" direction="0" type="load" dx="-60.0" dy="-90.0" />
+         <node id="1" tag="V" direction="0" type="load" dx="0" dy="-90.0" />
+         <node id="2" tag="W" direction="0" type="load" dx="60.0" dy="-90.0" />
+      </nodes>
+      <frames>
+         <frame id="0">
+            <pathFrame id="mainPath1" type="main" style="stroke" />
+            <pathFrame id="textPath1" type="main" style="fill" fixedRotation="true" isCentered="false" />
+         </frame>
+         <frame id="1">
+            <pathFrame id="fillPath1" type="simulation" style="fill" indexColor="0" />
+            <pathFrame id="textPath1" type="main" style="fill" fixedRotation="true" isCentered="false" />
+            <pathFrame id="mainPath1" type="main" style="stroke" />
+            <pathFrame id="pathFill2" type="main" style="fill" />
+            <pathFrame id="pathFill3" type="simulation" style="fill" indexColor="2" fixedRotation="true" isCentered="true" />
+            <pathFrame id="strokePath1" strokeWidth="10" type="simulation" style="fill" indexColor="2" fixedRotation="true" isCentered="true" />
+         </frame>
+         <frame id="2">
+            <pathFrame id="fillPath1" type="simulation" style="fill" indexColor="0" />
+            <pathFrame id="textPath1" type="main" style="fill" fixedRotation="true" isCentered="false" />
+            <pathFrame id="mainPath1" type="main" style="stroke" />
+            <pathFrame id="pathFill2" type="main" style="fill" />
+            <pathFrame id="pathFill4" type="simulation" style="fill" indexColor="2" fixedRotation="true" isCentered="true" />
+            <pathFrame id="strokePath1" strokeWidth="10" type="simulation" style="fill" indexColor="2" fixedRotation="true" isCentered="true" />
+         </frame>
+      </frames>
+   </metadata>
+   <path id="fillPath1" style="fill:#d4aa00;stroke-width:2" d="M 160,90 A 70.000004,70.000004 0 0 1 90,160 70.000004,70.000004 0 0 1 20,90 70.000004,70.000004 0 0 1 90,20 70.000004,70.000004 0 0 1 160,90 Z" inkscape:label="fillPath1" />
+   <path id="textPath1" style="fill:#ffffff" d="m 103.3231,80.303132 c -1.07384,0.20232 -2.16377,0.65557 -3.19727,1.36133 -2.066998,1.41152 -4.093579,3.72937 -6.363279,7.251946 l 3.36133,2.16602 c 2.10529,-3.26743 3.906839,-5.192686 5.257809,-6.115226 1.35096,-0.92255 2.06903,-0.94064 2.85937,-0.69532 1.58069,0.49065 3.83399,3.415546 6.02149,6.810546 2.1875,3.395 4.3092,7.25994 8.19726,8.4668 1.94404,0.603422 4.23378,0.19862 6.30079,-1.21289 2.067,-1.41152 4.09357,-3.73133 6.36328,-7.25391 l -3.36133,-2.16602 c -2.1053,3.26743 -3.90685,5.19269 -5.25781,6.11524 -1.35097,0.92255 -2.06903,0.94259 -2.85938,0.69726 -1.58069,-0.49064 -3.83398,-3.41749 -6.02148,-6.8125 -2.1875,-3.394996 -4.30921,-7.257976 -8.19727,-8.464836 -0.97201,-0.30171 -2.02968,-0.35075 -3.10351,-0.14844 z M 47.87612,101.30469 V 78.398442 h 6.921869 l 4.15625,15.624996 4.109381,-15.624996 h 6.937503 v 22.906248 h -4.29688 V 83.273442 L 61.15737,101.30469 H 56.70424 L 52.17299,83.273442 v 18.031248 z m 25.593753,-6.078132 4.25,-0.51562 q 0.20312,1.625 1.09375,2.48437 0.89062,0.85938 2.15625,0.85938 1.35937,0 2.28125,-1.03125 0.9375,-1.03125 0.9375,-2.78125 0,-1.65625 -0.89063,-2.625 -0.89062,-0.96875 -2.17187,-0.96875 -0.84375,0 -2.01563,0.32812 l 0.48438,-3.57812 q 1.78125,0.0469 2.71875,-0.76563 0.9375,-0.828116 0.9375,-2.187496 0,-1.15625 -0.6875,-1.84375 -0.6875,-0.6875 -1.82813,-0.6875 -1.125,0 -1.92187,0.78125 -0.79688,0.78125 -0.96875,2.28125 l -4.04688,-0.6875 q 0.42188,-2.07812 1.26563,-3.3125 0.85937,-1.25 2.375,-1.95312 1.53125,-0.71875 3.42187,-0.71875 3.23438,0 5.1875,2.0625 1.60938,1.6875 1.60938,3.8125 0,3.015616 -3.29688,4.812496 1.96875,0.42187 3.14063,1.89062 1.1875,1.46875 1.1875,3.54688 0,3.01562 -2.20313,5.14062 -2.20312,2.125002 -5.48437,2.125002 -3.10938,0 -5.15625,-1.781252 -2.04688,-1.79687 -2.375,-4.6875 z" inkscape:label="textPath1" />
+   <path id="mainPath1" style="fill:none;stroke:#ececec;stroke-width:2.00001" d="M 90,0 V 20 M 29.999999,0 V 53.944492 M 150,0 v 53.94449 m 10,35.872256 c 0,38.659934 -31.34007,70.000004 -70,70.000004 -38.659933,0 -70,-31.34007 -70,-70.000004 2e-6,-38.659932 31.340068,-69.999998 70,-70 38.65993,2e-6 70,31.340068 70,70 z" inkscape:label="mainPath" sodipodi:nodetypes="ccccccsssss" />
+   <path d="m 19.13569,76.09802 -13.19776,-0.0214 16.01701,27.84676 16.107131,-27.7947 -11.85956,-0.0191" style="fill:#ff0000;stroke-width:0.452307" id="pathFill4" inkscape:label="pathFill4" />
+   <path d="m 155.13569,76.09802 -13.19776,-0.0214 16.01701,27.84676 16.10713,-27.7947 -11.85956,-0.0191" style="fill:#ff0000;stroke-width:0.452307" id="pathFill3" inkscape:label="pathFill3" />
+   <path style="fill:#ff0000" d="M 90,16.5 C 49.448528,16.499995 16.5,49.448524 16.5,90 h 7 c 0,-36.768395 29.73161,-66.500004 66.5,-66.5 36.76839,-4e-6 66.5,29.731605 66.5,66.5 h 7 C 163.5,49.448524 130.55147,16.499995 90,16.5 Z" id="strokePath1" />
+</svg>

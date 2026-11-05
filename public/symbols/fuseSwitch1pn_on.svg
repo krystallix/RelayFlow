@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg width="120" height="120" viewBox="0 0 120 120" version="1.1" id="svg1" sodipodi:docname="fuse1pn.svg" inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+   <sodipodi:namedview id="namedview1" pagecolor="#505050" bordercolor="#eeeeee" borderopacity="1" inkscape:showpageshadow="0" inkscape:pageopacity="0" inkscape:pagecheckerboard="0" inkscape:deskcolor="#3d3d3d" inkscape:zoom="2.897407" inkscape:cx="47.973929" inkscape:cy="51.252723" inkscape:window-width="1352" inkscape:window-height="762" inkscape:window-x="88" inkscape:window-y="25" inkscape:window-maximized="0" inkscape:current-layer="svg1" showguides="true" />
+   <defs id="defs1" />
+   <metadata id="metadata1">
+      <info category="protections" duplicateTag="false" type="switch" width="120" height="120" tagType="fuses" name="Fuse Switch 1P+N" description="Fuse Switch 1P+N" marginH="0" marginV="0" />
+      <nodes id="0">
+         <node id="0" tag="1" direction="0" type="contact" dx="-30.0" dy="-60.0" />
+         <node id="1" tag="2" direction="2" type="contact" dx="-30.0" dy="60.0" />
+         <node id="2" tag="3" direction="0" type="contact" dx="30.0" dy="-60.0" />
+         <node id="3" tag="4" direction="2" type="contact" dx="30.0" dy="60.0" />
+      </nodes>
+      <frames id="0">
+         <frame id="0">
+            <pathFrame id="mainPath1" type="main" style="stroke" />
+         </frame>
+         <frame id="1">
+            <pathFrame id="mainPath2" type="main" style="stroke" />
+         </frame>
+      </frames>
+      <contacts>
+         <contact id="0" nodeId1="0" nodeId2="1" type="no" enableFrames="0,1" />
+         <contact id="1" nodeId1="2" nodeId2="3" type="no" enableFrames="0,1" />
+      </contacts>
+   </metadata>
+   <path id="mainPath2" style="display:inline;stroke:#ffffff;fill:none;stroke-width:2" inkscape:label="mainPath2" d="m 97.160991,35.999994 h -14 m 4,0 3,48 V 120 m 0,-120.0000065 V 35.999994 m -70.098126,9.506383 14.96975,-0.952254 1.90451,29.939486 -14.96975,0.952254 z m 16.93713,-9.506383 h -14 m 4,0 3,48 V 120 m 0,-120.0000065 V 35.999994 M 83.000005,60 h 5 m -13,0 h 5 m -13,0 h 5 M 59,60 h 5.000001 M 51,60 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5" sodipodi:nodetypes="ccccccccccccccccccccccccccccccccccc" />
+   <path id="mainPath1" style="display:none;fill:none;stroke:#ffffff;stroke-width:2;stroke-dasharray:none" inkscape:label="mainPath1" d="m 97.160991,35.999984 h -14 m -8,0 15,48.000006 V 120 m 0,-120.0000165 V 35.999983 m -53.160996,10e-7 h -14 m -12.23,12.01 14.28,-4.59 9.18,28.560002 -14.28,4.59 z m 4.23,-12.01 15,48.000006 V 120 m 0,-120.0000165 V 35.999983 M 78.000005,60 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5" sodipodi:nodetypes="ccccccccccccccccccccccccccccccccccc" />
+</svg>

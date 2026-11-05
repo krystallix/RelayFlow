@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg width="120" height="120" viewBox="0 0 120 120" version="1.1" id="svg1" sodipodi:docname="powerSupply.svg" inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+   <sodipodi:namedview id="namedview1" pagecolor="#505050" bordercolor="#eeeeee" borderopacity="1" inkscape:showpageshadow="0" inkscape:pageopacity="0" inkscape:pagecheckerboard="0" inkscape:deskcolor="#3d3d3d" inkscape:zoom="2.4416233" inkscape:cx="29.898142" inkscape:cy="93.994845" inkscape:window-width="1352" inkscape:window-height="762" inkscape:window-x="88" inkscape:window-y="25" inkscape:window-maximized="0" inkscape:current-layer="svg1" showguides="true" />
+   <defs id="defs1" />
+   <metadata id="metadata1">
+      <info category = "sources" type="powerSupply2" tagType = "powerSupply" width="120" height="120" name="Power Supply" description="Power Supply" marginH="0" marginV="0" />
+      <nodes>
+         <node id="0" tag="L" direction="0" type="load" dx="-30.0" dy="-60.0" />
+         <node id="1" tag="+" direction="2" type="none" dx="-30.0" dy="60.0" />
+         <node id="2" tag="N" direction="0" type="load" dx="30.0" dy="-60.0" />
+         <node id="3" tag="-" direction="2" type="none" dx="30.0" dy="60.0" />
+      </nodes>
+
+      <frames>
+         <frame id="0">
+            <pathFrame id="mainPath1" type="main" style="stroke" />
+         </frame>
+      </frames>
+   </metadata>
+   <path id="mainPath1" style="fill:none;stroke:#ffffff;stroke-width:2" d="m 64.442064,78.979121 h 20 m -20,-6.36121 h 20 M 35.557936,46.020879 c 0,-2.761428 2.238572,-5 5,-5 2.761428,0 5,2.238572 5,5 0,2.761429 2.238572,5 5,5 v 0 c 2.761424,0 5,-2.238571 5,-5 M 95,25 25,95 M 25,25 H 95 V 95 H 25 Z m 5,0 V 0 m 0,95 v 25 M 90,95 v 25 M 90,0 v 25" inkscape:label="pathMain1" />
+</svg>

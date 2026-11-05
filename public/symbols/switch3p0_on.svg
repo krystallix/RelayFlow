@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg width="120" height="120" viewBox="0 0 120 120" version="1.1" id="svg1" sodipodi:docname="switch3p0.svg" inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+   <sodipodi:namedview id="namedview1" pagecolor="#505050" bordercolor="#eeeeee" borderopacity="1" inkscape:showpageshadow="0" inkscape:pageopacity="0" inkscape:pagecheckerboard="0" inkscape:deskcolor="#3d3d3d" inkscape:zoom="3.1974448" inkscape:cx="62.080822" inkscape:cy="57.702325" inkscape:window-width="1352" inkscape:window-height="762" inkscape:window-x="88" inkscape:window-y="25" inkscape:window-maximized="0" inkscape:current-layer="svg1" showguides="true" />
+   <defs id="defs1" />
+   <metadata id="metadata1">
+      <info category="switches" type="switch" positions="I,0,II" tagType="switches" duplicateTag="false" width="120" height="120" name="Switch 3 Positions I-0-II" description="Switch 3 Positions I-0-II" marginH="0" marginV="0" />
+      <nodes>
+         <node id="0" tag="1" direction="0" type="contact" dx="0.0" dy="-60.0" />
+         <node id="1" tag="2" direction="2" type="contact" dx="-60.0" dy="60.0" />
+         <node id="2" tag="3" direction="2" type="contact" dx="60.0" dy="60.0" />
+      </nodes>
+      <contacts>
+         <contact id="0" nodeId1="0" nodeId2="1" type="nc" enableFrames="1,0,0" />
+         <contact id="1" nodeId1="0" nodeId2="2" type="no" enableFrames="0,0,0" />
+         <contact id="2" nodeId1="0" nodeId2="2" type="no" enableFrames="0,0,1" />
+      </contacts>
+      <frames>
+         <frame id="0">
+            <pathFrame id="mainPath1" type="main" style="stroke" />
+         </frame>
+         <frame id="1">
+            <pathFrame id="mainPath2" type="main" style="stroke" />
+         </frame>
+         <frame id="2">
+            <pathFrame id="mainPath3" type="main" style="stroke" />
+         </frame>
+      </frames>
+   </metadata>
+   <path id="mainPath1" style="display:none;fill:none;stroke:#ffffff;stroke-width:2" d="m 0,50.000004 h -9.99962 v 20.041679 h -9.99963 M 30.00019,60.020843 33.5,59.849758 m -11.49981,0.171085 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 M 7,83.699517 60,36 V 0 m 42,77.999996 h 18 V 120 M 18,77.999996 H 0 V 120 M 69,77.999996 H 51" inkscape:label="mainPath1" />
+   <path id="mainPath2" style="display:inline;stroke:#ffffff;fill:none;stroke-width:2" d="M 24,50.000004 H 14.00038 V 70.041683 H 4.00075 M 54.00019,60.020843 57.5,59.849758 m -11.49981,0.171085 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 M 55,83.699517 60,36 V 0 m 42,77.999996 h 18 V 120 M 18,77.999996 H 0 V 120 M 69,77.999996 H 51" inkscape:label="mainPath2" />
+   <path id="mainPath3" style="display:none;fill:none;stroke:#ffff00;stroke-width:2" d="M 52,50.000004 H 42.00038 V 70.041683 H 32.00075 M 82.00019,60.020843 85.5,59.849758 m -11.49981,0.171085 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 M 113,83.699517 60,36 V 0 m 42,77.999996 h 18 V 120 M 18,77.999996 H 0 V 120 M 69,77.999996 H 51" inkscape:label="mainPath3" />
+</svg>

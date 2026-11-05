@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg width="240" height="120" viewBox="0 0 240 120" version="1.1" id="svg1" sodipodi:docname="contactorNC4p.svg" inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+   <sodipodi:namedview id="namedview1" pagecolor="#505050" bordercolor="#eeeeee" borderopacity="1" inkscape:showpageshadow="0" inkscape:pageopacity="0" inkscape:pagecheckerboard="0" inkscape:deskcolor="#3d3d3d" inkscape:zoom="2.3346117" inkscape:cx="100.65914" inkscape:cy="49.901231" inkscape:window-width="1352" inkscape:window-height="762" inkscape:window-x="88" inkscape:window-y="25" inkscape:window-maximized="0" inkscape:current-layer="svg1" showguides="true" />
+   <defs id="defs1" />
+   <metadata id="metadata1">
+      <info tagIndex="2" category="contactors" duplicateTag="false" type="relayContact" width="240" height="120" tagType="contactors" name="Contactor NC 4P" description="Contactor NC 4P" marginH="0" marginV="0" />
+      <nodes id="0">
+         <node id="0" tag="1" direction="0" type="contact" dx="-90.0" dy="-60.0" />
+         <node id="1" tag="2" direction="2" type="contact" dx="-90.0" dy="60.0" />
+         <node id="2" tag="3" direction="0" type="contact" dx="-30.0" dy="-60.0" />
+         <node id="3" tag="4" direction="2" type="contact" dx="-30.0" dy="60.0" />
+         <node id="4" tag="5" direction="0" type="contact" dx="30.0" dy="-60.0" />
+         <node id="5" tag="6" direction="2" type="contact" dx="30.0" dy="60.0" />
+         <node id="6" tag="7" direction="0" type="contact" dx="90.0" dy="-60.0" />
+         <node id="7" tag="8" direction="2" type="contact" dx="90.0" dy="60.0" />
+      </nodes>
+      <frames id="0">
+         <frame id="0">
+            <pathFrame id="mainPath1" type="main" style="stroke" />
+         </frame>
+         <frame id="1">
+            <pathFrame id="mainPath2" type="main" style="stroke" />
+         </frame>
+      </frames>
+      <contacts>
+         <contact id="0" nodeId1="0" nodeId2="1" type="no" enableFrames="1,0" />
+         <contact id="1" nodeId1="2" nodeId2="3" type="no" enableFrames="1,0" />
+         <contact id="2" nodeId1="4" nodeId2="5" type="no" enableFrames="1,0" />
+         <contact id="3" nodeId1="6" nodeId2="7" type="no" enableFrames="1,0" />
+      </contacts>
+   </metadata>
+   <path id="mainPath1" style="fill:none;stroke:#ffffff;stroke-width:2" inkscape:label="mainPath1" d="m 210,31 c 2.76142,0 5,2.238576 5,5 0,2.761424 -2.23858,5 -5,5 z m 0,5 m 18,6 H 210 V 0 m 15,36 -15,48 v 36.00001 M 150,31 c 2.76142,0 5,2.238576 5,5 0,2.761424 -2.23858,5 -5,5 z m 0,5 m 18,6 H 150 V 0 m 15,36 -15,48 v 36.00001 M 90.000011,31 c 2.76142,0 5,2.238576 5,5 0,2.761424 -2.23858,5 -5,5 z m 0,5 m 17.999999,6 H 90.000011 V 0 M 105.00001,36 90.000011,84 v 36.00001 M 172.95493,60 h 5 m -13,0 h 5 m -13,0 h 5 m 51,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 M 112.62,60 h 5 m -13,0 h 5 m -13,0 h 5 m 51,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -25,0 h 5 m -13,0 h 5 M 76.62001,60 H 81.62 m -12.99999,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13.000005,0 h 5.000005 m -13.000005,0 h 5 M 29.999995,31.000002 c 2.76142,0 5,2.238576 5,5 0,2.761424 -2.23858,5 -5,5 z m 0,5 m 18,6 h -18 v -42 m 15,36 -15,48 v 36.000008" />
+   <path id="mainPath2" style="display:none;fill:none;stroke:#800000;stroke-width:2" d="m 180.92617,60 h 5 m -13,0 h 5 m -13,0 h 5 m 51,0 H 225 m -12.07383,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -65.33493,0 h 5 m -13,0 h 5 m -13,0 h 5 m 51,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -25,0 h 5 m -13.000004,0 h 5 m -12.99999,0 h 4.99999 m -12.99999,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13.000005,0 h 5.000005 m -13.000005,0 h 5 M 228,42 H 210 V 0 M 237.00001,40 210,83.999996 V 120 m 0,-89 c 2.76142,0 5,2.238576 5,5 0,2.761424 -2.23858,5 -5,5 z m 0,5 m -42,6 H 150 V 0 M 177.00001,40 150,83.999996 V 120 m 0,-89 c 2.76142,0 5,2.238576 5,5 0,2.761424 -2.23858,5 -5,5 z m 0,5 m -41.99999,6 H 90.000011 V 0 M 117.00002,40 90.000011,83.999996 V 120 m 0,-89 c 2.76142,0 5,2.238576 5,5 0,2.761424 -2.23858,5 -5,5 z m 0,5 m -42.000016,6.000002 h -18 v -42 m 27.00001,40 -27.00001,43.999996 V 120 m 0,-88.999998 c 2.76142,0 5,2.238576 5,5 0,2.761424 -2.23858,5 -5,5 z m 0,5" inkscape:label="mainPath2" />
+</svg>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg width="120" height="240" viewBox="0 0 120 240" version="1.1" id="svg1" sodipodi:docname="motorBreaker1p.svg" inkscape:version="1.4 (e7c3feb1, 2024-10-09)" xml:space="preserve"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+   <sodipodi:namedview id="namedview1" pagecolor="#505050" bordercolor="#eeeeee" borderopacity="1" inkscape:showpageshadow="0" inkscape:pageopacity="0" inkscape:pagecheckerboard="0" inkscape:deskcolor="#3d3d3d" inkscape:zoom="3.096341" inkscape:cx="6.1362751" inkscape:cy="58.617575" inkscape:window-width="1440" inkscape:window-height="762" inkscape:window-x="0" inkscape:window-y="25" inkscape:window-maximized="0" inkscape:current-layer="svg1" showguides="true" borderlayer="false" />
+   <defs id="defs1" />
+   <metadata id="metadata1">
+      <info category="protections" type="switch" tagType="breakers" width="120" height="240" name="Motor-Breaker 1P" description="Motor-Breaker 1P" />
+      <nodes>
+         <node id="0" tag="1" direction="0" type="contact" dx="0.0" dy="-120.0" />
+         <node id="1" tag="2" direction="2" type="contact" dx="0.0" dy="120.0" />
+      </nodes>
+      <frames id="0">
+         <frame id="0">
+            <pathFrame id="mainPath1" type="main" style="stroke" />
+         </frame>
+         <frame id="1">
+            <pathFrame id="mainPath2" type="main" style="stroke" />
+         </frame>
+      </frames>
+      <contacts>
+         <contact id="0" nodeId1="0" nodeId2="1" type="no" enableFrames="0,1" />
+      </contacts>
+   </metadata>
+
+
+
+
+   <path id="mainPath2" style="display:none;fill:none;stroke:#800000;stroke-width:2;stroke-dasharray:none" d="m 56.441978,32.464465 7.07106,7.071068 m 0,-7.071068 -7.07106,7.071068 M -26.002252,50.99978 V 69.00023 M -5.998653,60.000005 H 30.002252 M 16.010801,41.999554 V 78.000448 M -1.998653,41.999554 H 34.002252 V 78.000448 H -1.998653 Z m -7.353583,18.000447 h 5 m -13,0 h 5 m -13,0 h 5 m 70.977184,0 h 5 m -13,0 h 2.5 2.5 m -17.622696,4e-6 9.622696,-4e-6 M 23.479762,165.01012 h 5 m -13,0 h 5 m 3,0 h 5 m -5,-30.00974 h 5 m -13,0 h 5 m 3,0 h 5 m -12.48245,-11.00075 v -5 m 0,13 v -5 m 0,-43.000009 v -5 m 0,13 v -5 m 0,13 v -5 m 0,13.000009 v -5 m 0,13 v -5 m 0,53 v -5 m 0,-19 v -5 m 0,13 v -5 m 0,13 v -5 m 0,13 v -5 M 53.9775,34 59.977508,84.000007 v 36.000003 m 0,-120.000009 v 35.999998 m 1.503034,121.509951 12.000298,7.50018 -12.000298,7.50019 m -15.000369,0 h 6.000142 m -3.000071,-15.00037 h 6.000155 m -3.000084,0 -3.000071,15.00037 m -19.500482,-22.50957 60.002254,0.004 V 180.01 l -60.002254,1e-5 z m 30.00075,-30.00074 v 7.50019 H 74.98088 v 15.00037 H 59.980512 v 7.50018 m -30.00075,-30.00074 h 60.002254 l 0.0023,30.00523 -60.004506,-0.004 z m 29.997746,120 V 180.0105" sodipodi:nodetypes="cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc" inkscape:label="mainPath2" />
+   <path id="mainPath1" style="display:inline;fill:none;stroke:#f9f9f9;stroke-width:2;stroke-dasharray:none" d="m 56.441978,32.464464 7.07106,7.071068 m 0,-7.071068 -7.07106,7.071068 m -86.44423,11.464247 v 18.00045 M -5.9986525,60.000004 H 30.002252 M 12.010801,41.999553 V 78.000447 M -5.9986525,41.999553 H 30.002252 V 78.000447 H -5.9986525 Z M -13.352236,60 h 4.9999996 m -12.9999996,0 h 5 m -13,0 h 5 m 70.977184,0 h 5 m -13,0 h 5 m -13,0 h 5 M 19.479762,165.01011 h 5 m -13,0 h 5 m 11,0 h 2.5 m -10.5,0 h 5 m -5,-30.00974 h 5 m -13,0 h 5 m 11,0 h 2.5 m -10.5,0 h 5 m -12.48245,-11.00075 v -5 m 0,13 v -5 m 0,-43 v -5 m 0,13 v -5 m 0,13 v -5 m 0,13 v -5 m 0,13 v -5 m 0,53 v -5 m 0,-19 v -5 m 0,13 v -5 m 0,13 v -5 m 0,13 v -5 m 32.980196,-122.999622 15,48.000008 V 120 m 0,-120 v 35.999998 m 1.503034,121.509942 12.000297,7.50018 -12.000297,7.50019 m -15.000369,0 h 6.000142 m -3.000071,-15.00037 h 6.000155 m -3.000084,0 -3.000071,15.00037 m -19.500482,-22.50057 60.004554,-0.005 -0.0023,30.00476 -60.002254,4.9e-4 z M 59.980512,120 v 7.50019 h 15.000369 v 15.00037 H 59.980512 v 7.50018 M 29.979762,120 l 60.002254,1e-5 0.0023,30.00523 -60.004554,-0.004 z m 29.997746,120 v -59.98951" inkscape:label="mainPath1" sodipodi:nodetypes="ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc" />
+</svg>

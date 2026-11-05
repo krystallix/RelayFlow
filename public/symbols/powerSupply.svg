@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg width="210" height="180" viewBox="0 0 210 180" version="1.1" id="svg1" sodipodi:docname="powerSupply.svg" inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+   <sodipodi:namedview id="namedview1" pagecolor="#505050" bordercolor="#eeeeee" borderopacity="1" inkscape:showpageshadow="0" inkscape:pageopacity="0" inkscape:pagecheckerboard="0" inkscape:deskcolor="#3d3d3d" inkscape:zoom="1.2948483" inkscape:cx="114.2991" inkscape:cy="120.86358" inkscape:window-width="1352" inkscape:window-height="762" inkscape:window-x="88" inkscape:window-y="25" inkscape:window-maximized="0" inkscape:current-layer="svg1" showguides="true" />
+   <defs id="defs1" />
+   <metadata id="metadata1">
+      <info category="sources" type="powerSupply" tagType="powerSupply" width="210" height="180" name="Power Supply" description="Power Supply" marginH="0" marginV="0" />
+      <nodes>
+         <node id="0" tag="LV" direction="0" type="load" dx="-90.0" dy="-90.0" />
+         <node id="1" tag="+" direction="2" type="none" dx="-90.0" dy="90.0" />
+         <node id="2" tag="C" direction="0" type="load" dx="-30.0" dy="-90.0" />
+         <node id="3" tag="+" direction="2" type="none" dx="-30.0" dy="90.0" />
+         <node id="4" tag="HV" direction="0" type="load" dx="30.0" dy="-90.0" />
+         <node id="5" tag="-" direction="2" type="none" dx="30.0" dy="90.0" />
+         <node id="6" tag="PE" direction="0" type="none" dx="90.0" dy="-90.0" />
+         <node id="7" tag="-" direction="2" type="none" dx="90.0" dy="90.0" />
+      </nodes>
+      <frames>
+         <frame id="0">
+            <pathFrame id="mainPath1" type="main" style="stroke" />
+         </frame>
+      </frames>
+   </metadata>
+   <path id="mainPath1" style="fill:none;stroke:#ffffff;stroke-width:1.99998" d="m 29.999998,70.093738 c 0,-5.573286 4.518023,-10.091313 10.091308,-10.091313 5.573285,0 10.09132,4.518027 10.09132,10.091313 0,5.573296 4.518023,10.09132 10.091308,10.09132 v 0 c 5.573285,0 10.09132,-4.518024 10.09132,-10.09132 m 69.269466,49.903842 h 20.18263 20.18264 m -40.36527,-12.83859 h 40.36527 M 135,0 V 30.000004 M 75,0 V 30.000004 M 15,0 V 30.000004 M 195,0 V 30.000004 M 135,150 v 30 M 75,150 v 30 M 15,150 v 30 m 180,-30 v 30 M 210,30.000005 -1.0085614e-5,150 m 0,-119.999995 H 210 V 150 H -1.0085614e-5 Z" inkscape:label="mainPath1" />
+</svg>

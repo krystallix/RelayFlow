@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg width="60" height="120" viewBox="0 0 60 120" version="1.1" id="svg1" sodipodi:docname="sourceL1.svg" inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+   <sodipodi:namedview id="namedview1" pagecolor="#505050" bordercolor="#eeeeee" borderopacity="1" inkscape:showpageshadow="0" inkscape:pageopacity="0" inkscape:pagecheckerboard="0" inkscape:deskcolor="#3d3d3d" inkscape:zoom="4.5660605" inkscape:cx="20.14866" inkscape:cy="92.311524" inkscape:window-width="1440" inkscape:window-height="762" inkscape:window-x="0" inkscape:window-y="25" inkscape:window-maximized="0" inkscape:current-layer="svg1" showguides="true" />
+   <defs id="defs1" />
+   <metadata id="metadata1">
+      <info category = "sources" type="source" tagType = "sources" duplicateTag = "true"  iconY = "15" iconX = "0"  width="60" height="120"  isTappedOnSimulation="false" marginV="-8" name="Power Phase L1" description="Power Phase L1" />
+      <nodes>
+         <node id="0" tag="L1" direction="0" type="source" value="l1" dx="0.0" dy="-60.0" />
+      </nodes>
+      <frames>
+         <frame id="0">
+            <pathFrame id="mainPath" type="main" style="stroke" />
+            <pathFrame id="textPath1" type="main" style="fill" fixedRotation="true" isCentered="false" />
+         </frame>
+         <frame id="1">
+            <pathFrame id="pathFill0" type="static" style="fill" color="#ffffff00" />
+            <pathFrame id="pathMain0" type="main" style="stroke" />
+         </frame>
+      </frames>
+   </metadata>
+   <path id="mainPath" style="display:inline;fill:none;stroke:#ffffff;stroke-width:2;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke" d="M 30,79.5 V 0 m 20,99.5 c 0,11.04569 -8.954305,20 -20,20 -11.045695,0 -20,-8.95431 -20,-20 0,-11.045695 8.954305,-20 20,-20 11.045695,0 20,8.954305 20,20 z" sodipodi:nodetypes="ccsssss" />
+   <path style="font-weight:bold;font-size:24px;line-height:0px;font-family:Arial;-inkscape-font-specification:'Arial Bold';text-align:center;text-anchor:middle;fill:#ffffff;stroke-width:2.7" d="M 18.867186,108.125 V 91.08593 h 3.46875 v 14.14454 h 8.625 v 2.89453 z m 22.265625,0 H 37.839842 V 95.71484 q -1.804687,1.6875 -4.253906,2.4961 v -2.98828 q 1.289063,-0.42188 2.800781,-1.59376 1.511719,-1.18359 2.074219,-2.7539 h 2.671875 z" id="textPath1" aria-label="L1" inkscape:label="textPath1" />
+</svg>

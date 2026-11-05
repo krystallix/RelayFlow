@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg width="120" height="120" viewBox="0 0 120 120" version="1.1" id="svg1" sodipodi:docname="contactNONCDelayOff.svg" inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+   <sodipodi:namedview id="namedview1" pagecolor="#505050" bordercolor="#eeeeee" borderopacity="1" inkscape:showpageshadow="0" inkscape:pageopacity="0" inkscape:pagecheckerboard="0" inkscape:deskcolor="#3d3d3d" inkscape:zoom="3.9971463" inkscape:cx="31.772667" inkscape:cy="76.429527" inkscape:window-width="1352" inkscape:window-height="762" inkscape:window-x="88" inkscape:window-y="25" inkscape:window-maximized="0" inkscape:current-layer="svg1" showguides="true" />
+   <defs id="defs1" />
+   <metadata id="metadata1">
+      <info isPaid="true" tagIndex="2" category="auxiliaries" duplicateTag="false" type="relayContact" tagType="contactors" timerType="delayOff" width="120" height="120" name="Off-Delay Contact NCNO for Contactors" description="Off-Delay Contact NCNO for Contactors" marginH="0" marginV="0" />
+      <nodes>
+         <node id="0" tag="55" direction="0" type="contact" dx="-30.0" dy="-60.0" />
+         <node id="1" tag="56" direction="2" type="contact" dx="-30.0" dy="60.0" />
+         <node id="2" tag="67" direction="0" type="contact" dx="30.0" dy="-60.0" />
+         <node id="3" tag="68" direction="2" type="contact" dx="30.0" dy="60.0" />
+      </nodes>
+      <contacts>
+         <contact id="0" nodeId1="0" nodeId2="1" type="nc" enableFrames="1,0" />
+         <contact id="1" nodeId1="2" nodeId2="3" type="no" enableFrames="0,1" />
+      </contacts>
+      <frames>
+         <frame id="0">
+            <pathFrame id="mainPath1" type="main" style="stroke" />
+         </frame>
+         <frame id="1">
+            <pathFrame id="mainPath2" type="main" style="stroke" />
+         </frame>
+      </frames>
+   </metadata>
+   <path id="mainPath1" style="display:inline;fill:none;stroke:#ffffff;stroke-width:2" d="m 3.748e-4,62.5 m 0,-5 M -10,69.999995 C -4.4771512,69.999995 8e-7,65.522843 -2e-7,59.999998 -2e-7,54.477154 -4.4771532,50.000004 -10,50.000004 M 36.71875,62.5 H -0.31504427 m 4.4e-7,-5 H 38.28125 M 48,42 H 30 V 0 M 45,36 30,84 v 36 M 75,36 90,84 v 36 M 90,0 V 36 M 77.5,60 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5" inkscape:label="mainPath1" />
+   <path id="mainPath2" style="display:none;fill:none;stroke:#800000;stroke-width:2" d="m -2,69.999995 c 5.522849,0 10.000001,-4.477152 10,-9.999997 C 8,54.477154 3.522847,50.000004 -2,50.000004 M 84,60 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -5.806817,2.5 H 7.6029944 m 0,-5 H 46.28125 M 48,42 H 30 V 6.0197569e-8 M 57.000002,40 30,84 v 36 m 58,-86 2,50 v 36 M 90,-1.8059271e-7 V 36" inkscape:label="mainPath2" />
+</svg>

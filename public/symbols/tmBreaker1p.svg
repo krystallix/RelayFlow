@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg width="120" height="120" viewBox="0 0 120 120" version="1.1" id="svg1" sodipodi:docname="tmBreaker1p.svg" inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+   <sodipodi:namedview id="namedview1" pagecolor="#505050" bordercolor="#eeeeee" borderopacity="1" inkscape:showpageshadow="0" inkscape:pageopacity="0" inkscape:pagecheckerboard="0" inkscape:deskcolor="#3d3d3d" inkscape:zoom="2.8147858" inkscape:cx="22.737076" inkscape:cy="34.638514" inkscape:window-width="1352" inkscape:window-height="762" inkscape:window-x="88" inkscape:window-y="25" inkscape:window-maximized="0" inkscape:current-layer="svg1" showguides="false" />
+   <defs id="defs1" />
+   <metadata id="metadata1">
+      <info category="protections" type="switch" tagType="breakers" width="120" height="120" name="Thermal-Magnetic Circuit Breaker 1P" description="Thermal-Magnetic Circuit Breaker 1P" marginH="0" marginV="0" />
+      <nodes>
+         <node id="0" tag="1" direction="0" type="contact" dx="0.0" dy="-60.0" />
+         <node id="1" tag="2" direction="2" type="contact" dx="0.0" dy="60.0" />
+      </nodes>
+      <contacts>
+         <contact id="0" nodeId1="0" nodeId2="1" type="no" enableFrames="0,1" />
+      </contacts>
+      <frames>
+         <frame id="0">
+            <pathFrame id="mainPath1" type="main" style="stroke" />
+         </frame>
+         <frame id="1">
+            <pathFrame id="mainPath2" type="main" style="stroke" />
+         </frame>
+      </frames>
+   </metadata>
+   <g transform="rotate(30.000012,-84.728304,65.964903)" id="g27" style="fill:none;stroke:#ffffff" />
+   <g transform="rotate(-103,35.632637,23.825128)" id="g28" style="fill:none;stroke:#ffffff" />
+   <path id="mainPath1" style="fill:none;stroke:#ffffff;stroke-width:2;stroke-dasharray:none" d="m 54.536078,66.876807 -8.741329,2.506536 m 4.2008,-16.762871 -6.796697,2.158418 -2.250938,-6.768421 -6.796698,2.158417 2.247711,6.769468 -6.796698,2.158416 m 15.180472,6.891231 -10.631802,6.823659 12.632268,0.152794 z m 10.267549,-25.038254 9.8995,-9.899495 m 0,9.899495 -9.8995,-9.899495 M 45,36 60,84 v 36 M 60,0 v 36" inkscape:label="mainPath1" />
+   <path id="mainPath2" style="display:none;fill:none;stroke:#800000;stroke-width:2;stroke-dasharray:none" d="m 58.866044,67.614013 -9.088062,0.317361 m 8.131324,-15.248677 -7.116973,0.450034 -0.546646,-7.111921 -7.116977,0.450031 0.543264,7.112156 -7.116974,0.450035 m 13.062405,10.35902 -11.966783,4.048901 12.22007,3.204278 z m 5.432845,-33.3418 9.8995,9.899495 m 0,-9.899495 -9.8995,9.899495 M 57.000001,36 59.999996,84 v 36 M 60.000001,-2.4079028e-7 60,36" inkscape:label="mainPath2" />
+</svg>

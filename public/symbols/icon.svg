@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="220"
+   height="220"
+   viewBox="0 0 220 220"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="icon.svg"
+   inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
+   xml:space="preserve"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+   id="namedview1"
+   pagecolor="#505050"
+   bordercolor="#eeeeee"
+   borderopacity="1"
+   inkscape:showpageshadow="0"
+   inkscape:pageopacity="0"
+   inkscape:pagecheckerboard="0"
+   inkscape:deskcolor="#3d3d3d"
+   inkscape:zoom="1.2872902"
+   inkscape:cx="189.54545"
+   inkscape:cy="159.63767"
+   inkscape:window-width="1352"
+   inkscape:window-height="762"
+   inkscape:window-x="88"
+   inkscape:window-y="25"
+   inkscape:window-maximized="0"
+   inkscape:current-layer="svg1"
+   showguides="false" />
+  <defs
+   id="defs1" />
+  <metadata
+   id="metadata1">
+    <info
+   type="delayOn"
+   width="120"
+   height="120"
+   tagType="2"
+   tagIndex="1"
+   name="coil"
+   description="Coil"
+   marginH="0"
+   marginV="-20" />
+    <nodes>
+      <node
+   id="0"
+   tag="A1"
+   direction="0"
+   type="load"
+   dx="0.0"
+   dy="-60.0" />
+      <node
+   id="1"
+   tag="A2"
+   direction="2"
+   type="load"
+   dx="0.0"
+   dy="60.0" />
+    </nodes>
+    <frames>
+      <frame
+   id="0">
+        <pathFrame
+   id="mainPath1"
+   type="main"
+   style="stroke" />
+      </frame>
+      <frame
+   id="1">
+        <pathFrame
+   id="mainFill1"
+   type="simulation"
+   style="fill" />
+        <pathFrame
+   id="mainPath1"
+   type="main"
+   style="stroke" />
+      </frame>
+    </frames>
+  </metadata>
+  <rect
+   style="fill:#048c5a;fill-opacity:1;stroke:none;stroke-width:3;stroke-dasharray:none"
+   id="rect1"
+   width="220"
+   height="220"
+   x="0"
+   y="0" />
+  <g
+   id="g7"
+   transform="matrix(4.3609903,0,0,4.3609903,-5.5108584,-5.4973393)"
+   style="fill:#ffffff;stroke:#ffffff;stroke-width:0.11465286;stroke-dasharray:none">
+    <path
+   id="pahtttttttttt"
+   style="fill:#ffffff;stroke:#ffffff;stroke-width:0.11465286;stroke-dasharray:none"
+   d="M 21.8281,2.3601 V 10.11 h -9.002 V 8.8269 H 8.8573 v 3.9687 h 1.2542 v 8.9529 H 2.4102 v 0.6605 8.5994 h 7.7013 v 9.0393 H 8.8573 v 3.9687 h 3.9688 V 42.616 h 9.002 v 7.9923 H 31.088 V 42.616 h 8.9902 v 1.4004 h 3.9687 v -3.9687 h -1.3358 v -9.0393 h 7.8533 v -9.2599 h -7.8533 v -8.9529 h 1.3358 V 8.8269 H 40.0782 V 10.11 H 31.088 V 2.3601 Z m 1.3224,1.3224 h 6.6151 v 14.2869 h -6.6151 z m -12.9687,6.4668 h 1.3219 v 1.3218 h -1.3219 z m 31.2203,0 h 1.3224 v 1.3218 h -1.3224 z m -28.576,1.2851 h 9.002 v 7.859 h 9.2599 v -7.859 h 8.9902 v 1.3612 h 1.3105 v 8.9529 H 33.631 v 9.2599 h 7.7577 v 9.0393 h -1.3105 v 1.2459 H 31.088 v -7.6192 h -9.2599 v 7.6192 h -9.002 v -1.2459 h -1.3927 v -9.0393 h 7.9101 v -9.2599 h -7.9101 v -8.9529 h 1.3927 z M 4.5336,23.0709 h 2.1058 l -1.0656,1.9116 z m 4.207,0 h 9.279 v 6.6151 h -9.279 z m 30.0586,0 H 49.2404 V 29.686 H 38.7992 Z m -35.0666,1.2956 1.079,1.9828 -1.079,1.9353 z m 3.685,0.0248 v 3.9785 L 6.3221,26.357 Z M 5.5599,27.7234 6.628,29.686 H 4.4659 Z m 17.5906,7.2755 h 6.6151 v 14.287 h -6.6151 z m -12.9687,6.3707 h 1.3219 v 1.3244 h -1.3219 z m 31.2203,0 h 1.3224 v 1.3244 h -1.3224 z"
+   sodipodi:nodetypes="ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc" />
+  </g>
+</svg>

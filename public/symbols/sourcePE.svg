@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg width="60" height="120" viewBox="0 0 60 120" version="1.1" id="svg1" sodipodi:docname="sourcePE.svg" inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+   <sodipodi:namedview id="namedview1" pagecolor="#505050" bordercolor="#eeeeee" borderopacity="1" inkscape:showpageshadow="0" inkscape:pageopacity="0" inkscape:pagecheckerboard="0" inkscape:deskcolor="#3d3d3d" inkscape:zoom="2.9436398" inkscape:cx="-2.5478661" inkscape:cy="85.098727" inkscape:window-width="1440" inkscape:window-height="762" inkscape:window-x="0" inkscape:window-y="25" inkscape:window-maximized="0" inkscape:current-layer="svg1" showguides="true" />
+   <defs id="defs1" />
+   <metadata id="metadata1">
+            <info category = "sources" type="source" tagType = "sources" duplicateTag = "true"  iconY = "15" iconX = "0"  width="60" height="120"  isTappedOnSimulation="false" marginV="-8" name="Protection Earth" description="Protection Earth" />
+      <nodes>
+         <node id="0" tag="PE" direction="0" type="source" value = "pe" dx="0.0" dy="-60.0" />
+      </nodes>
+      <frames>
+         <frame id="0">
+            <pathFrame id="mainPath" type="main" style="stroke" />
+            <pathFrame id="textPath1" type="main" style="fill" fixedRotation="true" isCentered="false" />
+         </frame>
+         <frame id="1">
+            <pathFrame id="pathFill0" type="static" style="fill" color="#ffffff00" />
+            <pathFrame id="pathMain0" type="main" style="stroke" />
+         </frame>
+      </frames>
+   </metadata>
+   <path id="mainPath" style="display:inline;fill:none;stroke:#ffffff;stroke-width:2;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke" d="M 30,79.5 V 0 m 20,99.5 c 0,11.04569 -8.954305,20 -20,20 -11.045695,0 -20,-8.95431 -20,-20 0,-11.045695 8.954305,-20 20,-20 11.045695,0 20,8.954305 20,20 z" sodipodi:nodetypes="ccsssss" />
+   <path id="textPath1" style="font-weight:bold;font-size:24px;line-height:0px;font-family:Arial;-inkscape-font-specification:'Arial Bold';text-align:center;text-anchor:middle;fill:#ffffff;stroke-width:2.7" d="M 15.462891,108.58984 V 91.410156 h 5.566406 q 3.164062,0 4.125,0.257813 1.476562,0.386718 2.472656,1.6875 0.996094,1.289062 0.996094,3.339843 0,1.582032 -0.574219,2.660157 -0.574219,1.078121 -1.464844,1.699221 -0.878906,0.60937 -1.792968,0.80859 -1.242188,0.2461 -3.597657,0.2461 h -2.261718 v 6.48046 z m 3.46875,-14.273434 v 4.875 h 1.898437 q 2.050781,0 2.742188,-0.269531 0.691406,-0.269531 1.078125,-0.84375 0.398437,-0.574219 0.398437,-1.335938 0,-0.9375 -0.550781,-1.546875 -0.550781,-0.609375 -1.394531,-0.761718 -0.621094,-0.117188 -2.496094,-0.117188 z M 31.470703,108.58984 V 91.410156 h 12.738281 v 2.90625 H 34.939453 V 98.125 h 8.625 v 2.89453 h -8.625 v 4.67578 h 9.597656 v 2.89453 z" aria-label="PE " />
+</svg>

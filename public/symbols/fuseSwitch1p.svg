@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg width="120" height="120" viewBox="0 0 120 120" version="1.1" id="svg1" sodipodi:docname="fuse1p.svg" inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+   <sodipodi:namedview id="namedview1" pagecolor="#505050" bordercolor="#eeeeee" borderopacity="1" inkscape:showpageshadow="0" inkscape:pageopacity="0" inkscape:pagecheckerboard="0" inkscape:deskcolor="#3d3d3d" inkscape:zoom="3.25068" inkscape:cx="38.453493" inkscape:cy="54.911588" inkscape:window-width="1352" inkscape:window-height="762" inkscape:window-x="88" inkscape:window-y="25" inkscape:window-maximized="0" inkscape:current-layer="svg1" showguides="false" />
+   <defs id="defs1" />
+   <metadata id="metadata1">
+      <info category="protections" type="switch" tagType="fuses" width="120" height="120" name="Fuse Switch 1P" description="Fuse Switch 1P" marginH="0" marginV="0" />
+      <nodes>
+         <node id="0" tag="1" direction="0" type="contact" dx="0.0" dy="-60.0" />
+         <node id="1" tag="2" direction="2" type="contact" dx="0.0" dy="60.0" />
+      </nodes>
+            <contacts>
+         <contact id="0" nodeId1="0" nodeId2="1" type="no" enableFrames="0,1" />
+      </contacts>
+      <frames>
+         <frame id="0">
+            <pathFrame id="mainPath1" type="main" style="stroke" />
+         </frame>
+         <frame id="1">
+            <pathFrame id="mainPath2" type="main" style="stroke" />
+         </frame>
+      </frames>
+   </metadata>
+   <path id="mainPath2" style="display:none;fill:none;stroke:#800000;stroke-width:2" d="M 50.062874,45.506383 65.032617,44.554129 66.937126,74.493615 51.967383,75.44587 Z M 67,36 H 53 m 4.000001,0 2.999995,48 v 36 M 60.000001,-2.4079028e-7 60,36" inkscape:label="mainPath2" sodipodi:nodetypes="cccccccccccc" />
+   <path id="mainPath1" style="fill:none;stroke:#ffffff;stroke-width:2;stroke-dasharray:none" d="M 67,36 H 53 M 40.77,48.01 55.05,43.42 64.23,71.98 49.95,76.57 Z M 45,36 60,84 v 36 M 60,0 v 36" inkscape:label="mainPath1" sodipodi:nodetypes="cccccccccccc" />
+</svg>
