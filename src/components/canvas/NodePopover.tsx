@@ -88,6 +88,7 @@ export const NodePopover: React.FC<NodePopoverProps> = ({
   return (
     <div
       onMouseDown={(e) => e.stopPropagation()}
+      onTouchStart={(e) => e.stopPropagation()}
       onClick={(e) => e.stopPropagation()}
       className={`relative flex flex-col gap-1.5 p-1.5 rounded-2xl shadow-2xl backdrop-blur-md border select-none transition-all duration-150 animate-in fade-in zoom-in-95 ${
         isDark

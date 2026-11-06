@@ -76,7 +76,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
       if (e.key === "Escape") onClose();
     };
 
-    const handleClickOutside = (e: MouseEvent) => {
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         onClose();
       }
@@ -84,16 +84,20 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
 
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("mousedown", handleClickOutside);
+    window.addEventListener("touchstart", handleClickOutside);
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("touchstart", handleClickOutside);
     };
   }, [onClose]);
 
   // Adjust coordinates if menu would bleed offscreen
-  const adjustedX = Math.min(x, typeof window !== "undefined" ? window.innerWidth - 220 : x);
-  const adjustedY = Math.min(y, typeof window !== "undefined" ? window.innerHeight - 280 : y);
+  const screenW = typeof window !== "undefined" ? window.innerWidth : 400;
+  const screenH = typeof window !== "undefined" ? window.innerHeight : 800;
+  const adjustedX = Math.max(10, Math.min(x, screenW - 220));
+  const adjustedY = Math.max(10, Math.min(y, screenH - 280));
 
   return (
     <div

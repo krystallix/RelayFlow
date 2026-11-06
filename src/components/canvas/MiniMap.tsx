@@ -196,7 +196,7 @@ export const MiniMap: React.FC<MiniMapProps> = ({
 
   return (
     <div
-      className={`fixed bottom-14 right-4 z-30 flex flex-col rounded-xl border shadow-xl backdrop-blur-md transition-all overflow-hidden ${
+      className={`fixed bottom-16 right-3 md:bottom-14 md:right-4 z-30 flex flex-col rounded-xl border shadow-xl backdrop-blur-md transition-all overflow-hidden ${
         isDark
           ? "bg-[#10141e]/90 border-white/10 text-zinc-300"
           : "bg-white/95 border-slate-200 text-slate-700 shadow-slate-300/50"

@@ -24,11 +24,15 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
 interface NodePaletteProps {
   zoomScale?: number;
   panOffset?: { x: number; y: number };
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
 export const NodePalette: React.FC<NodePaletteProps> = ({
   zoomScale = 1,
   panOffset = { x: 0, y: 0 },
+  isOpen = true,
+  onClose,
 }) => {
   const [search, setSearch] = useState("");
   const [collapsedCategories, setCollapsedCategories] = useState<Record<string, boolean>>({});
@@ -66,33 +70,66 @@ export const NodePalette: React.FC<NodePaletteProps> = ({
       x: Math.round(centerX / 30) * 30,
       y: Math.round(centerY / 30) * 30,
     });
+    // On mobile screens, auto-close the palette after adding
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      onClose?.();
+    }
   };
 
   return (
-    <aside
-      className={`w-64 border-r flex flex-col z-20 select-none h-[calc(100vh-3.5rem)] transition-colors duration-150 ${
-        isDark
-          ? "border-white/10 bg-[#0c0e14]/90 backdrop-blur-md text-white"
-          : "border-slate-200 bg-white/95 backdrop-blur-md text-slate-800 shadow-sm"
-      }`}
-    >
-      {/* Search Header */}
-      <div className={`p-3 border-b ${isDark ? "border-white/10" : "border-slate-200"}`}>
-        <div className="relative">
-          <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400" />
-          <input
-            type="text"
-            placeholder="Search symbols..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className={`w-full pl-8 pr-3 py-1.5 rounded-xl text-xs placeholder-zinc-500 focus:outline-none focus:border-amber-500/50 border transition-colors ${
-              isDark
-                ? "bg-[#151922] border-white/10 text-zinc-200"
-                : "bg-slate-100 border-slate-200 text-slate-900"
+    <>
+      {/* Mobile Backdrop Overlay */}
+      {isOpen && (
+        <div
+          onClick={onClose}
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden animate-in fade-in duration-200"
+        />
+      )}
+
+      <aside
+        className={`fixed md:relative top-0 bottom-0 left-0 z-50 md:z-20 w-[85vw] max-w-[320px] md:w-64 border-r flex flex-col select-none h-full md:h-[calc(100vh-3.5rem)] transition-all duration-300 ease-out shadow-2xl md:shadow-none ${
+          isDark
+            ? "border-white/10 bg-[#0c0e14]/98 md:bg-[#0c0e14]/90 backdrop-blur-xl text-white"
+            : "border-slate-200 bg-white/98 md:bg-white/95 backdrop-blur-xl text-slate-800"
+        } ${
+          isOpen
+            ? "translate-x-0 opacity-100"
+            : "-translate-x-full md:translate-x-0 md:hidden opacity-0 md:opacity-100 pointer-events-none md:pointer-events-auto"
+        }`}
+      >
+        {/* Mobile Header Bar */}
+        <div className={`p-3 border-b flex items-center justify-between md:hidden ${isDark ? "border-white/10" : "border-slate-200"}`}>
+          <div className="flex items-center gap-2">
+            <Layers className="w-4 h-4 text-amber-400" />
+            <span className="font-bold text-sm tracking-tight">Component Palette</span>
+          </div>
+          <button
+            onClick={onClose}
+            className={`p-1.5 rounded-xl border transition-colors ${
+              isDark ? "bg-white/5 border-white/10 text-zinc-400 hover:text-white" : "bg-slate-100 border-slate-200 text-slate-600 hover:text-slate-900"
             }`}
-          />
+          >
+            ✕
+          </button>
         </div>
-      </div>
+
+        {/* Search Header */}
+        <div className={`p-3 border-b ${isDark ? "border-white/10" : "border-slate-200"}`}>
+          <div className="relative">
+            <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400" />
+            <input
+              type="text"
+              placeholder="Search symbols..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className={`w-full pl-8 pr-3 py-2 rounded-xl text-xs placeholder-zinc-500 focus:outline-none focus:border-amber-500/50 border transition-colors ${
+                isDark
+                  ? "bg-[#151922] border-white/10 text-zinc-200"
+                  : "bg-slate-100 border-slate-200 text-slate-900"
+              }`}
+            />
+          </div>
+        </div>
 
       {/* Component Groups List */}
       <div className="flex-1 overflow-y-auto p-2 space-y-2">
@@ -237,5 +274,6 @@ export const NodePalette: React.FC<NodePaletteProps> = ({
         })}
       </div>
     </aside>
+  </>
   );
 };

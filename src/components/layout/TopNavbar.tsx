@@ -24,6 +24,12 @@ import {
   ChevronDown,
   Trash2,
   Copy,
+  Menu,
+  X,
+  Plus,
+  SlidersHorizontal,
+  Maximize2,
+  Layers,
 } from "lucide-react";
 import { useCircuitStore } from "@/store/useCircuitStore";
 import { FileAdapter } from "@/engine/serializer/FileAdapter";
@@ -33,6 +39,8 @@ interface TopNavbarProps {
   onZoomOut: () => void;
   onResetZoom: () => void;
   zoomScale: number;
+  isPaletteOpen?: boolean;
+  onTogglePalette?: () => void;
 }
 
 export const TopNavbar: React.FC<TopNavbarProps> = ({
@@ -40,10 +48,13 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
   onZoomOut,
   onResetZoom,
   zoomScale,
+  isPaletteOpen,
+  onTogglePalette,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [showHelpModal, setShowHelpModal] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const menuBarRef = useRef<HTMLDivElement>(null);
 
   const {
@@ -235,8 +246,8 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
         className="hidden"
       />
 
-      {/* Left: Branding, Nav Menu Popovers, Project Name */}
-      <div className="flex items-center gap-3">
+      {/* Left: Branding, Nav Menu Popovers, Project Name (Desktop) */}
+      <div className="hidden md:flex items-center gap-3">
         {/* Branding Logo */}
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-200 font-bold shadow-sm">
@@ -604,8 +615,8 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
         </div>
       </div>
 
-      {/* Center: Simulation Controls */}
-      <div className="flex items-center gap-2">
+      {/* Center: Simulation Controls (Desktop) */}
+      <div className="hidden md:flex items-center gap-2">
         <div
           className={`flex items-center p-1 rounded-xl border shadow-inner transition-colors ${
             isDark ? "bg-[#151922] border-white/10" : "bg-slate-100 border-slate-200"
@@ -700,7 +711,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
       </div>
 
       {/* Right: Theme Switcher, Zoom, and Quick Export */}
-      <div className="flex items-center gap-2">
+      <div className="hidden md:flex items-center gap-2">
         {/* Light / Dark Mode Toggle Button */}
         <button
           onClick={toggleTheme}
@@ -757,6 +768,324 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
           <span className="hidden sm:inline">Export</span>
         </button>
       </div>
+
+      {/* MOBILE COMPACT HEADER (Visible only on screens < md) */}
+      <div className="flex md:hidden items-center justify-between w-full">
+        {/* Left: Brand + Project Title */}
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-200 font-bold shrink-0">
+            <Zap className="w-4 h-4 fill-current text-zinc-300" />
+          </div>
+          <div className="min-w-0 flex items-center gap-1.5">
+            <input
+              type="text"
+              value={projectTitle}
+              onChange={(e) => setProjectTitle(e.target.value)}
+              className="bg-transparent border-none focus:outline-none w-24 text-xs font-bold truncate"
+            />
+            <span className="bg-amber-500/20 text-amber-400 font-mono text-[9px] px-1 py-0.2 rounded uppercase font-semibold shrink-0">
+              .{fileFormat}
+            </span>
+          </div>
+        </div>
+
+        {/* Right: Quick Action Buttons on Mobile */}
+        <div className="flex items-center gap-1.5">
+          {/* Mobile Simulate Toggle Button */}
+          {isSimulating ? (
+            <button
+              onClick={stopSimulation}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-500 text-white text-xs font-bold shadow-md shadow-red-500/20 animate-pulse"
+              title="Stop Simulation"
+            >
+              <Square className="w-3.5 h-3.5 fill-current" />
+              <span>Stop</span>
+            </button>
+          ) : (
+            <button
+              onClick={startSimulation}
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-500 text-black text-xs font-bold shadow-md shadow-emerald-500/20"
+              title="Run Simulation"
+            >
+              <Play className="w-3.5 h-3.5 fill-current" />
+              <span>Run</span>
+            </button>
+          )}
+
+          {/* Mobile Add Component Palette Button */}
+          <button
+            onClick={onTogglePalette}
+            className={`p-1.5 rounded-lg border transition-colors ${
+              isPaletteOpen
+                ? "bg-amber-500 text-black border-amber-500"
+                : isDark
+                ? "bg-[#151922] border-white/10 text-zinc-300"
+                : "bg-slate-100 border-slate-200 text-slate-700"
+            }`}
+            title="Toggle Components Palette"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
+
+          {/* Mobile Menu Hamburger Button */}
+          <button
+            onClick={() => setMobileMenuOpen(true)}
+            className={`p-1.5 rounded-lg border transition-colors ${
+              isDark
+                ? "bg-[#151922] border-white/10 text-zinc-300"
+                : "bg-slate-100 border-slate-200 text-slate-700"
+            }`}
+            title="Open Menu"
+          >
+            <Menu className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* MOBILE FULL DRAWER NAVIGATION PANEL */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-50 flex md:hidden animate-in fade-in duration-200">
+          {/* Backdrop */}
+          <div
+            onClick={() => setMobileMenuOpen(false)}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+          />
+
+          {/* Drawer Content */}
+          <div
+            className={`relative ml-auto w-[85vw] max-w-sm h-full flex flex-col p-4 shadow-2xl overflow-y-auto transition-transform z-10 ${
+              isDark ? "bg-[#0f121a] text-white border-l border-white/10" : "bg-white text-slate-900 border-l border-slate-200"
+            }`}
+          >
+            {/* Drawer Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-3">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-200 font-bold">
+                  <Zap className="w-3.5 h-3.5 fill-current text-zinc-300" />
+                </div>
+                <span className="font-bold text-sm tracking-tight">RelayFlow Menu</span>
+              </div>
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                className={`p-1.5 rounded-lg border ${
+                  isDark ? "border-white/10 hover:bg-white/5" : "border-slate-200 hover:bg-slate-100"
+                }`}
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Simulation Controls Section */}
+            <div className="mb-4">
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-2">Simulation</div>
+              <div className="grid grid-cols-3 gap-2">
+                {isSimulating ? (
+                  <button
+                    onClick={() => { stopSimulation(); setMobileMenuOpen(false); }}
+                    className="col-span-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-red-500/20 text-red-400 border border-red-500/40 font-bold text-xs"
+                  >
+                    <Square className="w-3.5 h-3.5 fill-current" />
+                    <span>Stop</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => { startSimulation(); setMobileMenuOpen(false); }}
+                    className="col-span-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-emerald-500 text-black font-bold text-xs"
+                  >
+                    <Play className="w-3.5 h-3.5 fill-current" />
+                    <span>Simulate</span>
+                  </button>
+                )}
+                <button
+                  onClick={stepSimulation}
+                  disabled={!isSimulating}
+                  className={`flex items-center justify-center gap-1 py-2.5 rounded-xl border text-xs font-semibold disabled:opacity-40 ${
+                    isDark ? "bg-white/5 border-white/10" : "bg-slate-100 border-slate-200"
+                  }`}
+                >
+                  <StepForward className="w-3.5 h-3.5" />
+                  <span>Step</span>
+                </button>
+                <button
+                  onClick={() => { stopSimulation(); setMobileMenuOpen(false); }}
+                  className={`flex items-center justify-center gap-1 py-2.5 rounded-xl border text-xs font-semibold ${
+                    isDark ? "bg-white/5 border-white/10" : "bg-slate-100 border-slate-200"
+                  }`}
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>Reset</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Quick Actions (Auto layout, Undo, Redo) */}
+            <div className="mb-4">
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-2">Circuit Actions</div>
+              <div className="space-y-1.5">
+                <button
+                  onClick={() => { autoLayout(); setMobileMenuOpen(false); }}
+                  disabled={nodes.length === 0}
+                  className="w-full flex items-center justify-between p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold disabled:opacity-40"
+                >
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4" />
+                    <span>Auto Layout Circuit</span>
+                  </div>
+                  <span className="text-[10px] opacity-70">Clean Ladder</span>
+                </button>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => undo()}
+                    disabled={undoStack.length === 0}
+                    className={`flex items-center justify-center gap-2 p-2 rounded-xl border text-xs disabled:opacity-40 ${
+                      isDark ? "bg-white/5 border-white/10" : "bg-slate-100 border-slate-200"
+                    }`}
+                  >
+                    <Undo2 className="w-3.5 h-3.5" />
+                    <span>Undo</span>
+                  </button>
+                  <button
+                    onClick={() => redo()}
+                    disabled={redoStack.length === 0}
+                    className={`flex items-center justify-center gap-2 p-2 rounded-xl border text-xs disabled:opacity-40 ${
+                      isDark ? "bg-white/5 border-white/10" : "bg-slate-100 border-slate-200"
+                    }`}
+                  >
+                    <Redo2 className="w-3.5 h-3.5" />
+                    <span>Redo</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* File Operations */}
+            <div className="mb-4">
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-2">File & Export</div>
+              <div className="space-y-1 text-xs">
+                <button
+                  onClick={handleNewCircuit}
+                  className={`w-full text-left p-2 rounded-xl flex items-center gap-2.5 ${
+                    isDark ? "hover:bg-white/10" : "hover:bg-slate-100"
+                  }`}
+                >
+                  <FilePlus className="w-4 h-4 text-zinc-400" />
+                  <span>New Blank Circuit</span>
+                </button>
+                <button
+                  onClick={() => { fileInputRef.current?.click(); setMobileMenuOpen(false); }}
+                  className={`w-full text-left p-2 rounded-xl flex items-center gap-2.5 ${
+                    isDark ? "hover:bg-white/10" : "hover:bg-slate-100"
+                  }`}
+                >
+                  <FolderOpen className="w-4 h-4 text-zinc-400" />
+                  <span>Open File (.rflow / .smrl)</span>
+                </button>
+                <button
+                  onClick={() => { loadDolExample(); setMobileMenuOpen(false); }}
+                  className={`w-full text-left p-2 rounded-xl flex items-center gap-2.5 ${
+                    isDark ? "hover:bg-white/10" : "hover:bg-slate-100"
+                  }`}
+                >
+                  <Sparkles className="w-4 h-4 text-amber-400" />
+                  <span>Load DOL Starter Example</span>
+                </button>
+                <button
+                  onClick={() => { handleExportRflow(); setMobileMenuOpen(false); }}
+                  className={`w-full text-left p-2 rounded-xl flex items-center justify-between ${
+                    isDark ? "hover:bg-white/10" : "hover:bg-slate-100"
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Download className="w-4 h-4 text-zinc-400" />
+                    <span>Save as .rflow</span>
+                  </div>
+                  <span className="text-[10px] font-mono bg-white/10 px-1.5 py-0.5 rounded">Native</span>
+                </button>
+                <button
+                  onClick={() => { handleExportSmrl(); setMobileMenuOpen(false); }}
+                  className={`w-full text-left p-2 rounded-xl flex items-center justify-between ${
+                    isDark ? "hover:bg-white/10" : "hover:bg-slate-100"
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Download className="w-4 h-4 text-zinc-400" />
+                    <span>Export to .smrl</span>
+                  </div>
+                  <span className="text-[10px] font-mono bg-white/10 px-1.5 py-0.5 rounded">Simurelay</span>
+                </button>
+                <button
+                  onClick={() => { handleExportBom(); setMobileMenuOpen(false); }}
+                  className={`w-full text-left p-2 rounded-xl flex items-center justify-between ${
+                    isDark ? "hover:bg-white/10" : "hover:bg-slate-100"
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <FileCode className="w-4 h-4 text-zinc-400" />
+                    <span>Export BOM (CSV)</span>
+                  </div>
+                  <span className="text-[10px] font-mono bg-white/10 px-1.5 py-0.5 rounded">Parts List</span>
+                </button>
+              </div>
+            </div>
+
+            {/* View & Appearance Settings */}
+            <div className="mb-4">
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-2">Display & Settings</div>
+              <div className="space-y-1.5 text-xs">
+                <button
+                  onClick={() => toggleTheme()}
+                  className={`w-full flex items-center justify-between p-2 rounded-xl border ${
+                    isDark ? "bg-white/5 border-white/10" : "bg-slate-100 border-slate-200"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-zinc-500" />}
+                    <span>Theme</span>
+                  </div>
+                  <span className="font-semibold">{isDark ? "Dark Mode" : "Light Mode"}</span>
+                </button>
+                <button
+                  onClick={() => toggleGrid()}
+                  className={`w-full flex items-center justify-between p-2 rounded-xl border ${
+                    isDark ? "bg-white/5 border-white/10" : "bg-slate-100 border-slate-200"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Grid className="w-4 h-4 text-zinc-400" />
+                    <span>Dotted CAD Grid</span>
+                  </div>
+                  {showGrid ? <Check className="w-4 h-4 text-emerald-400" /> : <span className="text-zinc-500">Off</span>}
+                </button>
+                <button
+                  onClick={() => setWireRoutingMode(wireRoutingMode === "orthogonal" ? "bezier" : "orthogonal")}
+                  className={`w-full flex items-center justify-between p-2 rounded-xl border ${
+                    isDark ? "bg-white/5 border-white/10" : "bg-slate-100 border-slate-200"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <SlidersHorizontal className="w-4 h-4 text-zinc-400" />
+                    <span>Routing Mode</span>
+                  </div>
+                  <span className="font-semibold">{wireRoutingMode === "orthogonal" ? "90° Ortho" : "Curved"}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Help / Shortcuts Button */}
+            <div className="mt-auto pt-3 border-t border-white/10">
+              <button
+                onClick={() => { setShowHelpModal(true); setMobileMenuOpen(false); }}
+                className={`w-full p-2.5 rounded-xl border flex items-center justify-center gap-2 text-xs font-semibold ${
+                  isDark ? "bg-white/5 border-white/10 text-zinc-300" : "bg-slate-100 border-slate-200 text-slate-700"
+                }`}
+              >
+                <HelpCircle className="w-4 h-4 text-amber-400" />
+                <span>Shortcuts & Help</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Keyboard Shortcuts Help Modal */}
       {showHelpModal && (

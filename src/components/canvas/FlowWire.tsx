@@ -251,9 +251,22 @@ export const FlowWire: React.FC<FlowWireProps> = ({
         d={routed.svgPath}
         fill="none"
         stroke="transparent"
-        strokeWidth={24}
+        strokeWidth={28}
         className="pointer-events-auto"
         onMouseDown={handleWireMouseDown}
+        onTouchStart={(e) => {
+          e.stopPropagation();
+          if (wireDraft) {
+            const touch = e.touches[0];
+            if (touch) {
+              const world = screenToWorld(touch.clientX, touch.clientY);
+              const { point } = getNearestPointOnSegments(world, routed.points);
+              connectWireToWire(wire.id, point);
+            }
+            return;
+          }
+          selectWire(wire.id, false);
+        }}
       />
 
       {/* 2. Middle Segment Line Drag Hit Target (draw.io style drag directly on line) */}

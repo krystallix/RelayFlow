@@ -71,11 +71,16 @@ export const VirtualProbeHUD: React.FC<VirtualProbeHUDProps> = ({
     badgeColor = "bg-emerald-500/10 text-emerald-400 border-emerald-500/30";
   }
 
+  const screenW = typeof window !== "undefined" ? window.innerWidth : 400;
+  const screenH = typeof window !== "undefined" ? window.innerHeight : 800;
+  const posX = Math.max(12, Math.min(reading.screenPos.x + 18, screenW - 250));
+  const posY = Math.max(12, Math.min(reading.screenPos.y - 45, screenH - 160));
+
   return (
     <div
       style={{
-        left: reading.screenPos.x + 18,
-        top: reading.screenPos.y - 45,
+        left: posX,
+        top: posY,
       }}
       className={`fixed z-50 pointer-events-none rounded-xl border p-2.5 shadow-2xl backdrop-blur-md transition-all duration-75 select-none ${
         isDark

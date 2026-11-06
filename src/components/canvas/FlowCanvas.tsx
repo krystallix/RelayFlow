@@ -20,6 +20,10 @@ import {
   Crosshair,
   Play,
   Square,
+  Plus,
+  Undo2,
+  Redo2,
+  Sparkles,
 } from "lucide-react";
 import { ManhattanRouter } from "@/engine/router/ManhattanRouter";
 import { WireMargins } from "@/engine/types";
@@ -33,6 +37,7 @@ interface FlowCanvasProps {
   panOffset: { x: number; y: number };
   setPanOffset: React.Dispatch<React.SetStateAction<{ x: number; y: number }>>;
   setZoomScale: React.Dispatch<React.SetStateAction<number>>;
+  onOpenPalette?: () => void;
 }
 
 interface DraggingNodeState {
@@ -48,6 +53,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   panOffset,
   setPanOffset,
   setZoomScale,
+  onOpenPalette,
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isPanning, setIsPanning] = useState(false);
@@ -85,11 +91,41 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   const [probeActive, setProbeActive] = useState(false);
   const [probeReading, setProbeReading] = useState<ProbeReading | null>(null);
 
-  // Mini-Map visibility
-  const [showMiniMap, setShowMiniMap] = useState(true);
+  // Mini-Map visibility (hidden by default on mobile for screen space)
+  const [showMiniMap, setShowMiniMap] = useState(false);
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.innerWidth >= 768) {
+      setShowMiniMap(true);
+    }
+  }, []);
 
   // Real-time Cursor Coordinates
   const [cursorCoords, setCursorCoords] = useState({ x: 0, y: 0 });
+
+  // Touch gesture state ref for silky-smooth mobile multi-touch
+  const touchStateRef = useRef<{
+    mode: "none" | "pan" | "pinch" | "nodeDrag";
+    lastTapTime: number;
+    startDistance: number;
+    startZoom: number;
+    startCentroidScreen: { x: number; y: number };
+    startCentroidWorld: { x: number; y: number };
+    startPan: { x: number; y: number };
+    startTouchPos: { x: number; y: number };
+    longPressTimer: any;
+    hasMoved: boolean;
+  }>({
+    mode: "none",
+    lastTapTime: 0,
+    startDistance: 0,
+    startZoom: 1,
+    startCentroidScreen: { x: 0, y: 0 },
+    startCentroidWorld: { x: 0, y: 0 },
+    startPan: { x: 0, y: 0 },
+    startTouchPos: { x: 0, y: 0 },
+    longPressTimer: null,
+    hasMoved: false,
+  });
 
   const {
     nodes,
@@ -126,6 +162,8 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     updateWireMargins,
     undo,
     redo,
+    undoStack,
+    redoStack,
     autoLayout,
     recentComponentIds,
     startWireDraft,
@@ -306,23 +344,25 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     }
   };
 
-  // Node Mouse Down (initiates drag or click)
-  const handleNodeMouseDown = (nodeId: string | number, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (e.button !== 0) return;
-
+  // Core Node Dragging (Unified for Mouse & Touch)
+  const startDraggingNode = (
+    nodeId: string | number,
+    clientX: number,
+    clientY: number,
+    shiftKey: boolean = false
+  ) => {
     if (isSimulating) {
       toggleComponentState(nodeId);
       return;
     }
 
-    const worldPos = screenToWorld(e.clientX, e.clientY);
+    const worldPos = screenToWorld(clientX, clientY);
 
     // Determine nodes to drag together
     let targetIds: (string | number)[] = [nodeId];
     if (selectedNodeIds.has(nodeId)) {
       targetIds = Array.from(selectedNodeIds);
-    } else if (!e.shiftKey) {
+    } else if (!shiftKey) {
       selectNode(nodeId, false);
       targetIds = [nodeId];
     }
@@ -340,8 +380,143 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       startWorldPos: worldPos,
       initialPositions,
       hasMoved: false,
-      shiftKey: e.shiftKey,
+      shiftKey,
     });
+  };
+
+  const moveDraggingNode = (worldPos: { x: number; y: number }) => {
+    if (!draggingNodeState) return;
+
+    let dx = worldPos.x - draggingNodeState.startWorldPos.x;
+    let dy = worldPos.y - draggingNodeState.startWorldPos.y;
+
+    if (Math.hypot(dx, dy) > 3) {
+      draggingNodeState.hasMoved = true;
+    }
+
+    if (draggingNodeState.hasMoved) {
+      const newGuidelines: SmartGuideline[] = [];
+      const SNAP_THRESHOLD = 8;
+      const primaryNode = nodes.find((n) => n.id === draggingNodeState.nodeId);
+
+      if (primaryNode) {
+        const initPos = draggingNodeState.initialPositions.get(primaryNode.id) || primaryNode.position;
+        let candidateX = initPos.x + dx;
+        let candidateY = initPos.y + dy;
+
+        // Check vertical alignment (same X)
+        for (const other of nodes) {
+          if (draggingNodeState.initialPositions.has(other.id)) continue;
+          if (Math.abs(candidateX - other.position.x) <= SNAP_THRESHOLD) {
+            dx = other.position.x - initPos.x;
+            candidateX = other.position.x;
+            newGuidelines.push({
+              type: "vertical",
+              coord: other.position.x,
+              start: Math.min(candidateY, other.position.y) - 60,
+              end: Math.max(candidateY, other.position.y) + 60,
+            });
+            break;
+          }
+        }
+
+        // Check horizontal alignment (same Y)
+        for (const other of nodes) {
+          if (draggingNodeState.initialPositions.has(other.id)) continue;
+          if (Math.abs(candidateY - other.position.y) <= SNAP_THRESHOLD) {
+            dy = other.position.y - initPos.y;
+            candidateY = other.position.y;
+            newGuidelines.push({
+              type: "horizontal",
+              coord: other.position.y,
+              start: Math.min(candidateX, other.position.x) - 60,
+              end: Math.max(candidateX, other.position.x) + 60,
+            });
+            break;
+          }
+        }
+      }
+
+      setSmartGuidelines(newGuidelines);
+
+      const updates = Array.from(draggingNodeState.initialPositions.entries()).map(([id, pos]) => ({
+        id,
+        position: {
+          x: pos.x + dx,
+          y: pos.y + dy,
+        },
+      }));
+      updateNodesPositions(updates, false); // live drag
+    }
+  };
+
+  const finishDraggingNode = () => {
+    setSmartGuidelines([]);
+    if (!draggingNodeState) return;
+
+    if (draggingNodeState.hasMoved) {
+      // Commit final snapped positions with undo history
+      const finalUpdates = Array.from(draggingNodeState.initialPositions.entries()).map(([id]) => {
+        const n = nodes.find((node) => node.id === id);
+        return {
+          id,
+          position: n?.position || { x: 0, y: 0 },
+        };
+      });
+      updateNodesPositions(finalUpdates, true);
+    } else {
+      // Simple Click without movement
+      if (isSimulating) {
+        toggleComponentState(draggingNodeState.nodeId);
+      } else {
+        selectNode(draggingNodeState.nodeId, draggingNodeState.shiftKey);
+      }
+    }
+    setDraggingNodeState(null);
+  };
+
+  // Node Mouse Down (initiates drag or click)
+  const handleNodeMouseDown = (nodeId: string | number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (e.button !== 0) return;
+    startDraggingNode(nodeId, e.clientX, e.clientY, e.shiftKey);
+  };
+
+  // Node Touch Start (mobile node touch & drag)
+  const handleNodeTouchStart = (nodeId: string | number, e: React.TouchEvent) => {
+    e.stopPropagation();
+    if (contextMenu) setContextMenu(null);
+
+    const touch = e.touches[0];
+    if (!touch) return;
+
+    if (touchStateRef.current.longPressTimer) {
+      clearTimeout(touchStateRef.current.longPressTimer);
+      touchStateRef.current.longPressTimer = null;
+    }
+
+    // Set long press timer for Node Context Menu on mobile (500ms)
+    const targetNode = nodes.find((n) => n.id === nodeId);
+    if (targetNode) {
+      const clientX = touch.clientX;
+      const clientY = touch.clientY;
+      const worldPos = screenToWorld(clientX, clientY);
+      touchStateRef.current.longPressTimer = setTimeout(() => {
+        if (!touchStateRef.current.hasMoved) {
+          setContextMenu({
+            x: clientX,
+            y: clientY,
+            target: { type: "node", node: targetNode, worldPos },
+          });
+        }
+      }, 500);
+    }
+
+    touchStateRef.current.mode = "nodeDrag";
+    touchStateRef.current.startTouchPos = { x: touch.clientX, y: touch.clientY };
+    touchStateRef.current.hasMoved = false;
+
+    startDraggingNode(nodeId, touch.clientX, touch.clientY, false);
   };
 
   // Canvas Mouse Move
@@ -375,68 +550,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
 
     // 1. Handle active node dragging (120 FPS live update) with Magnetic Alignment Smart Guides
     if (draggingNodeState) {
-      let dx = worldPos.x - draggingNodeState.startWorldPos.x;
-      let dy = worldPos.y - draggingNodeState.startWorldPos.y;
-
-      if (Math.hypot(dx, dy) > 3) {
-        draggingNodeState.hasMoved = true;
-      }
-
-      if (draggingNodeState.hasMoved) {
-        // Smart magnetic alignment snapping & guidelines
-        const newGuidelines: SmartGuideline[] = [];
-        const SNAP_THRESHOLD = 8;
-        const primaryNode = nodes.find((n) => n.id === draggingNodeState.nodeId);
-
-        if (primaryNode) {
-          const initPos = draggingNodeState.initialPositions.get(primaryNode.id) || primaryNode.position;
-          let candidateX = initPos.x + dx;
-          let candidateY = initPos.y + dy;
-
-          // Check vertical alignment (same X)
-          for (const other of nodes) {
-            if (draggingNodeState.initialPositions.has(other.id)) continue;
-            if (Math.abs(candidateX - other.position.x) <= SNAP_THRESHOLD) {
-              dx = other.position.x - initPos.x;
-              candidateX = other.position.x;
-              newGuidelines.push({
-                type: "vertical",
-                coord: other.position.x,
-                start: Math.min(candidateY, other.position.y) - 60,
-                end: Math.max(candidateY, other.position.y) + 60,
-              });
-              break;
-            }
-          }
-
-          // Check horizontal alignment (same Y)
-          for (const other of nodes) {
-            if (draggingNodeState.initialPositions.has(other.id)) continue;
-            if (Math.abs(candidateY - other.position.y) <= SNAP_THRESHOLD) {
-              dy = other.position.y - initPos.y;
-              candidateY = other.position.y;
-              newGuidelines.push({
-                type: "horizontal",
-                coord: other.position.y,
-                start: Math.min(candidateX, other.position.x) - 60,
-                end: Math.max(candidateX, other.position.x) + 60,
-              });
-              break;
-            }
-          }
-        }
-
-        setSmartGuidelines(newGuidelines);
-
-        const updates = Array.from(draggingNodeState.initialPositions.entries()).map(([id, pos]) => ({
-          id,
-          position: {
-            x: pos.x + dx,
-            y: pos.y + dy,
-          },
-        }));
-        updateNodesPositions(updates, false); // live drag
-      }
+      moveDraggingNode(worldPos);
       return;
     }
 
@@ -474,25 +588,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     }
 
     if (draggingNodeState) {
-      if (draggingNodeState.hasMoved) {
-        // Commit final snapped positions with undo history
-        const finalUpdates = Array.from(draggingNodeState.initialPositions.entries()).map(([id]) => {
-          const n = nodes.find((node) => node.id === id);
-          return {
-            id,
-            position: n?.position || { x: 0, y: 0 },
-          };
-        });
-        updateNodesPositions(finalUpdates, true);
-      } else {
-        // Simple Click without movement
-        if (isSimulating) {
-          toggleComponentState(draggingNodeState.nodeId);
-        } else {
-          selectNode(draggingNodeState.nodeId, draggingNodeState.shiftKey);
-        }
-      }
-      setDraggingNodeState(null);
+      finishDraggingNode();
     }
 
     // Process Marquee Selection
@@ -533,6 +629,180 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     }
 
     setIsPanning(false);
+  };
+
+  // Canvas Touch Start
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (contextMenu) setContextMenu(null);
+
+    if (touchStateRef.current.longPressTimer) {
+      clearTimeout(touchStateRef.current.longPressTimer);
+      touchStateRef.current.longPressTimer = null;
+    }
+
+    // 2-Finger Touch: Smooth Anchored Pinch Zoom & 2-finger Pan
+    if (e.touches.length === 2) {
+      const t1 = e.touches[0];
+      const t2 = e.touches[1];
+      const dist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+      const cx = (t1.clientX + t2.clientX) / 2;
+      const cy = (t1.clientY + t2.clientY) / 2;
+
+      const rect = containerRef.current?.getBoundingClientRect() || { left: 0, top: 0 };
+      const currentZoom = zoomScaleRef.current;
+      const currentPan = panOffsetRef.current;
+
+      const worldCentroid = {
+        x: (cx - rect.left - currentPan.x) / currentZoom,
+        y: (cy - rect.top - currentPan.y) / currentZoom,
+      };
+
+      touchStateRef.current = {
+        ...touchStateRef.current,
+        mode: "pinch",
+        startDistance: dist,
+        startZoom: currentZoom,
+        startCentroidScreen: { x: cx, y: cy },
+        startCentroidWorld: worldCentroid,
+        startPan: { ...currentPan },
+        hasMoved: false,
+      };
+      return;
+    }
+
+    // 1-Finger Touch on Canvas Background
+    if (e.touches.length === 1) {
+      const touch = e.touches[0];
+      const now = Date.now();
+      const isDoubleTap = now - touchStateRef.current.lastTapTime < 300;
+      touchStateRef.current.lastTapTime = now;
+
+      // Double tap on empty canvas zooms to fit entire schematic!
+      if (isDoubleTap && !draggingNodeState) {
+        handleZoomToFit();
+        return;
+      }
+
+      // If drafting wire and tapped empty canvas, cancel draft
+      if (wireDraft && !draggingNodeState) {
+        cancelWireDraft();
+        return;
+      }
+
+      const worldPos = screenToWorld(touch.clientX, touch.clientY);
+      mouseWorldPosRef.current = worldPos;
+
+      touchStateRef.current = {
+        ...touchStateRef.current,
+        mode: draggingNodeState ? "nodeDrag" : "pan",
+        startTouchPos: { x: touch.clientX, y: touch.clientY },
+        startPan: { ...panOffsetRef.current },
+        hasMoved: false,
+      };
+
+      // Long press (500ms) on empty canvas opens Context Menu
+      if (!draggingNodeState) {
+        const clientX = touch.clientX;
+        const clientY = touch.clientY;
+        touchStateRef.current.longPressTimer = setTimeout(() => {
+          if (!touchStateRef.current.hasMoved) {
+            setContextMenu({
+              x: clientX,
+              y: clientY,
+              target: { type: "canvas", worldPos },
+            });
+          }
+        }, 500);
+      }
+    }
+  };
+
+  // Canvas Touch Move
+  const handleTouchMove = (e: React.TouchEvent) => {
+    // 2-Finger Pinch Zoom
+    if (e.touches.length === 2 && touchStateRef.current.mode === "pinch") {
+      const t1 = e.touches[0];
+      const t2 = e.touches[1];
+      const dist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+      const cx = (t1.clientX + t2.clientX) / 2;
+      const cy = (t1.clientY + t2.clientY) / 2;
+
+      const rect = containerRef.current?.getBoundingClientRect() || { left: 0, top: 0 };
+      const ratio = dist / Math.max(1, touchStateRef.current.startDistance);
+      const newZoom = Math.min(Math.max(0.2, touchStateRef.current.startZoom * ratio), 3);
+
+      const world = touchStateRef.current.startCentroidWorld;
+      const newPan = {
+        x: cx - rect.left - world.x * newZoom,
+        y: cy - rect.top - world.y * newZoom,
+      };
+
+      zoomScaleRef.current = newZoom;
+      panOffsetRef.current = newPan;
+      setZoomScale(newZoom);
+      setPanOffset(newPan);
+      return;
+    }
+
+    // 1-Finger Drag
+    if (e.touches.length === 1) {
+      const touch = e.touches[0];
+      const dx = touch.clientX - touchStateRef.current.startTouchPos.x;
+      const dy = touch.clientY - touchStateRef.current.startTouchPos.y;
+
+      if (Math.hypot(dx, dy) > 8) {
+        touchStateRef.current.hasMoved = true;
+        if (touchStateRef.current.longPressTimer) {
+          clearTimeout(touchStateRef.current.longPressTimer);
+          touchStateRef.current.longPressTimer = null;
+        }
+      }
+
+      const worldPos = screenToWorld(touch.clientX, touch.clientY);
+      mouseWorldPosRef.current = worldPos;
+      setCursorCoords({
+        x: Math.round(worldPos.x),
+        y: Math.round(worldPos.y),
+      });
+
+      // Dragging a node with touch
+      if (draggingNodeState) {
+        moveDraggingNode(worldPos);
+        return;
+      }
+
+      // Updating wire draft with touch
+      if (wireDraft) {
+        updateWireDraft(worldPos);
+        return;
+      }
+
+      // Panning canvas with touch
+      if (touchStateRef.current.mode === "pan") {
+        const newPan = {
+          x: touchStateRef.current.startPan.x + dx,
+          y: touchStateRef.current.startPan.y + dy,
+        };
+        panOffsetRef.current = newPan;
+        setPanOffset(newPan);
+      }
+    }
+  };
+
+  // Canvas Touch End
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStateRef.current.longPressTimer) {
+      clearTimeout(touchStateRef.current.longPressTimer);
+      touchStateRef.current.longPressTimer = null;
+    }
+
+    if (draggingNodeState) {
+      finishDraggingNode();
+    }
+
+    touchStateRef.current.mode = "none";
+    touchStateRef.current.hasMoved = false;
+    setSmartGuidelines([]);
   };
 
   // Native Wheel & Trackpad Pinch Zoom Listener (Non-passive to prevent browser page-zoom)
@@ -826,6 +1096,10 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onTouchCancel={handleTouchEnd}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
       onContextMenu={(e) => {
@@ -873,6 +1147,20 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2.5 bg-white border border-zinc-200 text-black px-4 py-2.5 rounded-2xl shadow-2xl animate-bounce">
           <AlertTriangle className="w-5 h-5 text-red-600 shrink-0" />
           <span className="text-xs font-semibold text-black">{shortCircuitMessage || "Short circuit detected! Simulation halted."}</span>
+        </div>
+      )}
+
+      {/* Wire Drafting Active Indicator Pill (Super clear on mobile & desktop) */}
+      {wireDraft && (
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2.5 bg-amber-500 text-black px-4 py-2 rounded-2xl shadow-2xl text-xs font-semibold animate-in fade-in zoom-in-95">
+          <span className="w-2.5 h-2.5 rounded-full bg-black animate-ping" />
+          <span>Tap destination terminal to complete wire</span>
+          <button
+            onClick={() => cancelWireDraft()}
+            className="ml-1 bg-black/20 hover:bg-black/30 active:scale-95 text-black px-2 py-0.5 rounded-lg text-[10px] uppercase font-bold transition-all"
+          >
+            Cancel
+          </button>
         </div>
       )}
 
@@ -999,6 +1287,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
               isSelected={selectedNodeIds.has(node.id)}
               onPortMouseDown={(portId, portPos, e) => handlePortMouseDown(portId, portPos, node.id)}
               onNodeMouseDown={handleNodeMouseDown}
+              onNodeTouchStart={handleNodeTouchStart}
               onContextMenu={handleNodeContextMenu}
               onPortHover={handlePortHover}
               onPortLeave={handlePortLeave}
@@ -1049,8 +1338,8 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
         </div>
       )}
 
-      {/* Floating Bottom CAD Control Deck */}
-      <div className="absolute bottom-4 left-4 right-4 z-20 flex items-center justify-between pointer-events-none">
+      {/* DESKTOP Floating Bottom CAD Control Deck (Visible only on md+) */}
+      <div className="hidden md:flex absolute bottom-4 left-4 right-4 z-20 items-center justify-between pointer-events-none">
         {/* Left: Real-time Cursor World Coordinates & CAD Snap Indicator */}
         <div
           className={`flex items-center gap-3 backdrop-blur-md border rounded-2xl px-3.5 py-1.5 text-xs shadow-xl pointer-events-auto transition-colors ${
@@ -1188,6 +1477,107 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
               {shortCircuit ? "SHORT CIRCUIT" : isSimulating ? "SIMULATING" : "STANDBY"}
             </span>
           </div>
+        </div>
+      </div>
+
+      {/* MOBILE Floating Bottom CAD Control Dock (Compact & Thumb-Friendly) */}
+      <div className="flex md:hidden absolute bottom-3 left-3 right-3 z-30 items-center justify-between pointer-events-none pb-[env(safe-area-inset-bottom)]">
+        <div
+          className={`w-full flex items-center justify-between gap-1 p-1.5 rounded-2xl border backdrop-blur-xl shadow-2xl pointer-events-auto transition-colors ${
+            isDark
+              ? "bg-[#11141e]/95 border-white/10 text-zinc-300 shadow-black/80"
+              : "bg-white/95 border-slate-200 text-slate-700 shadow-slate-300"
+          }`}
+        >
+          {/* Add Component Palette Button */}
+          <button
+            onClick={onOpenPalette}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-amber-500 text-black text-xs font-bold shadow-md shadow-amber-500/20 active:scale-95 transition-transform"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Add</span>
+          </button>
+
+          {/* Undo */}
+          <button
+            onClick={() => undo()}
+            disabled={undoStack.length === 0}
+            className={`p-2 rounded-xl transition-all disabled:opacity-30 active:scale-95 ${
+              isDark ? "hover:bg-white/10 text-zinc-300" : "hover:bg-slate-100 text-slate-700"
+            }`}
+            title="Undo"
+          >
+            <Undo2 className="w-4 h-4" />
+          </button>
+
+          {/* Redo */}
+          <button
+            onClick={() => redo()}
+            disabled={redoStack.length === 0}
+            className={`p-2 rounded-xl transition-all disabled:opacity-30 active:scale-95 ${
+              isDark ? "hover:bg-white/10 text-zinc-300" : "hover:bg-slate-100 text-slate-700"
+            }`}
+            title="Redo"
+          >
+            <Redo2 className="w-4 h-4" />
+          </button>
+
+          {/* Auto Layout */}
+          <button
+            onClick={autoLayout}
+            disabled={nodes.length === 0}
+            className={`p-2 rounded-xl transition-all disabled:opacity-30 active:scale-95 ${
+              isDark ? "hover:bg-white/10 text-amber-400" : "hover:bg-slate-100 text-amber-600"
+            }`}
+            title="Auto Layout"
+          >
+            <Sparkles className="w-4 h-4" />
+          </button>
+
+          {/* Zoom to Fit */}
+          <button
+            onClick={handleZoomToFit}
+            className={`p-2 rounded-xl transition-all active:scale-95 ${
+              isDark ? "hover:bg-white/10 text-zinc-300" : "hover:bg-slate-100 text-slate-700"
+            }`}
+            title="Fit to Screen"
+          >
+            <Maximize2 className="w-4 h-4" />
+          </button>
+
+          {/* Voltage Probe HUD Toggle */}
+          <button
+            onClick={() => setProbeActive((prev) => !prev)}
+            className={`p-2 rounded-xl transition-all active:scale-95 ${
+              probeActive
+                ? isDark
+                  ? "bg-white/15 text-white border border-white/20"
+                  : "bg-slate-200 text-slate-900 border border-slate-300"
+                : isDark
+                ? "hover:bg-white/10 text-zinc-400"
+                : "hover:bg-slate-100 text-slate-600"
+            }`}
+            title="Voltage Probe HUD"
+          >
+            <Gauge className="w-4 h-4" />
+          </button>
+
+          {/* Mini-Map Toggle */}
+          <button
+            onClick={() => setShowMiniMap((prev) => !prev)}
+            className={`p-2 rounded-xl transition-all active:scale-95 ${
+              showMiniMap
+                ? isDark
+                  ? "bg-white/15 text-white border border-white/20"
+                  : "bg-slate-200 text-slate-900 border border-slate-300"
+                : isDark
+                ? "hover:bg-white/10 text-zinc-400"
+                : "hover:bg-slate-100 text-slate-600"
+            }`}
+            title="Toggle Mini-Map"
+          >
+            <MapIcon className="w-4 h-4" />
+          </button>
         </div>
       </div>
 
