@@ -14,6 +14,7 @@ import {
   CheckSquare,
   Play,
   Square,
+  Sparkles,
 } from "lucide-react";
 import { CircuitNode, CircuitWire } from "@/engine/types";
 
@@ -40,6 +41,7 @@ interface ContextMenuProps {
   onOpenSearch?: () => void;
   onZoomToFit?: () => void;
   onResetZoom?: () => void;
+  onAutoLayout?: () => void;
   onSelectAll?: () => void;
   onToggleProbe?: () => void;
 }
@@ -62,6 +64,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
   onOpenSearch,
   onZoomToFit,
   onResetZoom,
+  onAutoLayout,
   onSelectAll,
   onToggleProbe,
 }) => {
@@ -243,6 +246,22 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
       {/* 3. CANVAS CONTEXT MENU */}
       {target.type === "canvas" && (
         <div className="py-1">
+          <button
+            onClick={() => {
+              onAutoLayout?.();
+              onClose();
+            }}
+            className={`w-full px-2.5 py-1.5 rounded-lg flex items-center justify-between text-xs text-left font-medium transition-colors ${
+              isDark ? "hover:bg-white/10 text-amber-300" : "hover:bg-slate-100 text-amber-700"
+            }`}
+          >
+            <div className="flex items-center gap-2.5">
+              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <span>Auto Layout Circuit</span>
+            </div>
+            <span className="text-[10px] text-zinc-500 font-mono">Alt+L</span>
+          </button>
+
           <button
             onClick={() => {
               onOpenSearch?.();

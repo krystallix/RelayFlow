@@ -37,42 +37,42 @@
       </nodes>
       <frames id="0">
          <frame id="0">
-            <pathFrame id="mainPath1" type="main" style="stroke" />
+            <pathFrame id="mainPath1" type="main" style="display:inline;fill:none;stroke:#ffffff;stroke-width:2" />
          </frame>
          <frame id="1">
-            <pathFrame id="mainPath2" type="main" style="stroke" />
+            <pathFrame id="mainPath2" type="main" style="display:none;fill:none;stroke:#800000;stroke-width:2" />
          </frame>
       </frames>
       <frames id="1">
          <frame id="0">
-            <pathFrame id="mainPath1_2" type="main" style="stroke" />
+            <pathFrame id="mainPath1_2" type="main" style="display:none;fill:none;stroke:#800000;stroke-width:2" />
          </frame>
          <frame id="1">
-            <pathFrame id="mainPath2_2" type="main" style="stroke" />
+            <pathFrame id="mainPath2_2" type="main" style="display:none;fill:none;stroke:#800000;stroke-width:2" />
          </frame>
       </frames>
       <frames id="2">
          <frame id="0">
-            <pathFrame id="mainPath1_3" type="main" style="stroke" />
+            <pathFrame id="mainPath1_3" type="main" style="display:none;fill:none;stroke:#800000;stroke-width:2" />
          </frame>
          <frame id="1">
-            <pathFrame id="mainPath2_3" type="main" style="stroke" />
+            <pathFrame id="mainPath2_3" type="main" style="display:none;fill:none;stroke:#800000;stroke-width:2" />
          </frame>
       </frames>
       <frames id="3">
          <frame id="0">
-            <pathFrame id="mainPath1_4" type="main" style="stroke" />
+            <pathFrame id="mainPath1_4" type="main" style="display:none;fill:none;stroke:#800000;stroke-width:2" />
          </frame>
          <frame id="1">
-            <pathFrame id="mainPath2_4" type="main" style="stroke" />
+            <pathFrame id="mainPath2_4" type="main" style="display:none;fill:none;stroke:#800000;stroke-width:2" />
          </frame>
       </frames>
       <frames id="4">
          <frame id="0">
-            <pathFrame id="mainPath1_5" type="main" style="stroke" />
+            <pathFrame id="mainPath1_5" type="main" style="display:none;fill:none;stroke:#800000;stroke-width:2" />
          </frame>
          <frame id="1">
-            <pathFrame id="mainPath2_5" type="main" style="stroke" />
+            <pathFrame id="mainPath2_5" type="main" style="display:none;fill:none;stroke:#800000;stroke-width:2" />
          </frame>
       </frames>
       <contacts>
@@ -80,14 +80,14 @@
          <contact id="0" nodeId1="0" nodeId2="2" type="no" enableFrames="0,1" />
       </contacts>
    </metadata>
-   <path id="mainPath1" style="fill:none;stroke:#ffffff;stroke-width:2;stroke-dasharray:none" d="m 72,78 h 18 v 42 M 48,78 H 30 v 42 M 40,84 60,36 V 0" inkscape:label="mainPath1" />
-   <path id="mainPath2" style="display:none;fill:none;stroke:#800000;stroke-width:2;stroke-dasharray:none" d="m 72,78 h 18 v 42 M 48,78 H 30 v 42 M 80,84 60,36 V 0" inkscape:label="mainPath2" />
-   <path id="mainPath1_2" style="fill:none;stroke:#ffffff;stroke-width:2" d="M 48.95833,62.5 H 20 m 0,-5 H 51.04167 M 30.00038,70 c -5.52285,0 -10,-4.47716 -10,-10 0,-5.52285 4.47715,-10 10,-10 M 72,78 h 18 v 42 M 48,78 H 30 v 42 M 40,84 60,36 V 0" inkscape:label="mainPath1_2" sodipodi:nodetypes="cccccscccccccccc" />
+   <path id="mainPath1" style="display:inline;fill:none;stroke:#ffffff;stroke-width:2" d="m 72,78 h 18 v 42 M 48,78 H 30 v 42 M 40,84 60,36 V 0" inkscape:label="mainPath1" />
+   <path id="mainPath2" style="display:none;fill:none;stroke:#800000;stroke-width:2" d="m 72,78 h 18 v 42 M 48,78 H 30 v 42 M 80,84 60,36 V 0" inkscape:label="mainPath2" />
+   <path id="mainPath1_2" style="display:none;fill:none;stroke:#800000;stroke-width:2" d="M 48.95833,62.5 H 20 m 0,-5 H 51.04167 M 30.00038,70 c -5.52285,0 -10,-4.47716 -10,-10 0,-5.52285 4.47715,-10 10,-10 M 72,78 h 18 v 42 M 48,78 H 30 v 42 M 40,84 60,36 V 0" inkscape:label="mainPath1_2" sodipodi:nodetypes="cccccscccccccccc" />
    <path id="mainPath2_2" style="display:none;fill:none;stroke:#800000;stroke-width:2" d="M 71.04167,62.5 H 38 m 0,-5 H 69.04167 M 48.00038,70 c -5.52285,0 -10,-4.47716 -10,-10 0,-5.52285 4.47715,-10 10,-10 M 72,78 h 18 v 42 M 48,78 H 30 v 42 M 80,84 60,36 V 0" inkscape:label="mainPath2_2" />
-   <path id="mainPath1_3" style="display:none;fill:none;stroke:#ffffff;stroke-width:2" d="m 30.00038,62.5 m 0,-5 M 20,70 C 25.52285,70 30.00001,65.52284 30,60 30,54.47715 25.52285,50 20,50 M 48.95833,62.5 H 29.68496 m 0,-5 H 51.04167 M 72,78 h 18 v 42 M 48,78 H 30 v 42 M 40,84 60,36 V 0" inkscape:label="mainPath1_3" />
+   <path id="mainPath1_3" style="display:none;fill:none;stroke:#800000;stroke-width:2" d="m 30.00038,62.5 m 0,-5 M 20,70 C 25.52285,70 30.00001,65.52284 30,60 30,54.47715 25.52285,50 20,50 M 48.95833,62.5 H 29.68496 m 0,-5 H 51.04167 M 72,78 h 18 v 42 M 48,78 H 30 v 42 M 40,84 60,36 V 0" inkscape:label="mainPath1_3" />
    <path id="mainPath2_3" style="display:none;fill:none;stroke:#800000;stroke-width:2" d="m 48.00075,62.5 m 0,-5 M 38.00038,70 c 5.52285,0 10,-4.47716 10,-10 0,-5.52285 -4.47715,-10 -10,-10 M 71.04167,62.5 H 47.68534 m 0,-5 H 69.04167 M 72,78 h 18 v 42 M 48,78 H 30 v 42 M 80,84 60,36 V 0" inkscape:label="mainPath2_3" />
-   <path id="mainPath1_4" style="display:none;fill:none;stroke:#ffffff;stroke-width:2" inkscape:label="mainPath1_4" d="M 48.95833,62.5 H 20 m 0,-5 H 51.04167 M 30.00038,70 c -5.52285,0 -10,-4.47716 -10,-10 0,-5.52285 4.47715,-10 10,-10 M 72,78 h 18 v 42 M 48,78 H 30 v 42 M 40,84 60,36 V 0 M 10,70 C 15.52285,70 20,65.52284 20,60 20,54.47715 15.52285,50 10,50" />
+   <path id="mainPath1_4" style="display:none;fill:none;stroke:#800000;stroke-width:2" inkscape:label="mainPath1_4" d="M 48.95833,62.5 H 20 m 0,-5 H 51.04167 M 30.00038,70 c -5.52285,0 -10,-4.47716 -10,-10 0,-5.52285 4.47715,-10 10,-10 M 72,78 h 18 v 42 M 48,78 H 30 v 42 M 40,84 60,36 V 0 M 10,70 C 15.52285,70 20,65.52284 20,60 20,54.47715 15.52285,50 10,50" />
    <path id="mainPath2_4" style="display:none;fill:none;stroke:#800000;stroke-width:2" d="m 28.00038,70 c 5.52285,0 10,-4.47716 10,-10 0,-5.52285 -4.47715,-10 -10,-10 M 71.04167,62.5 H 38 m 0,-5 H 69.04167 M 48.00038,70 c -5.52285,0 -10,-4.47716 -10,-10 0,-5.52285 4.47715,-10 10,-10 M 72,78 h 18 v 42 M 48,78 H 30 v 42 M 80,84 60,36 V 0" inkscape:label="mainPath2_4" />
-   <path id="mainPath1_5" style="display:inline;fill:none;stroke:#ffffff;stroke-width:2" inkscape:label="mainPath1_5" d="M 30.00019,59.999996 30.00038,70 M 50,59.999992 H 21.00038 l 1.9e-4,10.000004 M 72,78 h 17.999999 v 42 M 48,78 H 30 v 42 M 40,84 60,36 V 0" />
+   <path id="mainPath1_5" style="display:none;fill:none;stroke:#800000;stroke-width:2" inkscape:label="mainPath1_5" d="M 30.00019,59.999996 30.00038,70 M 50,59.999992 H 21.00038 l 1.9e-4,10.000004 M 72,78 h 17.999999 v 42 M 48,78 H 30 v 42 M 40,84 60,36 V 0" />
    <path id="mainPath2_5" style="display:none;fill:none;stroke:#800000;stroke-width:2" inkscape:label="mainPath2_5" d="m 50.00019,60.000004 1.9e-4,10.000004 M 70,60 H 41.00038 l 1.9e-4,10.000004 M 72,78 h 17.999999 v 42 M 48,78 H 30 v 42 M 79.999999,84 60,36 V 0" />
 </svg>

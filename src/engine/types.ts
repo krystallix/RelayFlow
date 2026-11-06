@@ -52,6 +52,8 @@ export interface CircuitWire {
   margins: WireMargins;
   potential?: string | null;
   isHot?: boolean;
+  toWireId?: string | number;
+  tapPoint?: Point;
 }
 
 export interface RelayFlowProject {

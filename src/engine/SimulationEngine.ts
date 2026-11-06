@@ -59,41 +59,6 @@ export class SimulationEngine {
       isHot: false,
     }));
 
-    // Map: `${nodeId}:${portId}` -> current potential (e.g., "L1", "L2", "L3", "N", "+24V", "-24V", "PE")
-    const portPotentials = new Map<string, string>();
-
-    // 1. Seed potentials from power sources
-    for (const node of nodes) {
-      const comp = catalog[node.componentId];
-      if (!comp) continue;
-
-      const compId = node.componentId;
-
-      if (compId === "sourceL1L2L3" || compId === "sourceL1L2L3N") {
-        // Node 0: L1, Node 1: L2, Node 2: L3, Node 3: N
-        portPotentials.set(`${node.id}:0`, "L1");
-        portPotentials.set(`${node.id}:1`, "L2");
-        portPotentials.set(`${node.id}:2`, "L3");
-        if (compId === "sourceL1L2L3N") {
-          portPotentials.set(`${node.id}:3`, "N");
-        }
-      } else if (compId === "sourceL1") {
-        portPotentials.set(`${node.id}:0`, "L1");
-      } else if (compId === "sourceL2") {
-        portPotentials.set(`${node.id}:0`, "L2");
-      } else if (compId === "sourceL3") {
-        portPotentials.set(`${node.id}:0`, "L3");
-      } else if (compId === "sourceN") {
-        portPotentials.set(`${node.id}:0`, "N");
-      } else if (compId === "sourcePlus" || compId === "arrowDestination" && node.comment?.includes("+24")) {
-        portPotentials.set(`${node.id}:0`, "+24V");
-      } else if (compId === "sourceNegative" || compId === "arrowDestination" && node.comment?.includes("-24")) {
-        portPotentials.set(`${node.id}:0`, "-24V");
-      } else if (compId === "sourceGnd" || compId === "sourcePE") {
-        portPotentials.set(`${node.id}:0`, "PE");
-      }
-    }
-
     let shortCircuit = false;
     let shortCircuitMessage = "";
     const shortNodes: (string | number)[] = [];
@@ -113,157 +78,193 @@ export class SimulationEngine {
       return false;
     };
 
-    // 2. Iterative Equipotential Propagation
-    let changed = true;
-    let iteration = 0;
-    const maxIterations = 30;
+    // 2. Iterative Convergence Loop (Coupled coil, contact states & equipotential propagation)
+    let outerChanged = true;
+    let outerIteration = 0;
+    const maxOuterIterations = 15;
+    let portPotentials = new Map<string, string>();
 
-    while (changed && iteration < maxIterations) {
-      changed = false;
-      iteration++;
+    while (outerChanged && outerIteration < maxOuterIterations) {
+      outerChanged = false;
+      outerIteration++;
 
-      // A. Propagate through wires
+      // Reset potentials on each evaluation pass to prevent stale potential leakage
+      portPotentials = new Map<string, string>();
       for (const wire of wires) {
-        const keyFrom = `${wire.fromNodeId}:${wire.fromPortId}`;
-        const keyTo = `${wire.toNodeId}:${wire.toPortId}`;
-
-        const potFrom = portPotentials.get(keyFrom);
-        const potTo = portPotentials.get(keyTo);
-
-        if (potFrom && potTo && isConflict(potFrom, potTo)) {
-          shortCircuit = true;
-          shortCircuitMessage = `Short circuit detected between ${potFrom} and ${potTo}!`;
-          shortNodes.push(wire.fromNodeId, wire.toNodeId);
-          break;
-        }
-
-        if (potFrom && !potTo) {
-          portPotentials.set(keyTo, potFrom);
-          wire.potential = potFrom;
-          wire.isHot = true;
-          changed = true;
-        } else if (!potFrom && potTo) {
-          portPotentials.set(keyFrom, potTo);
-          wire.potential = potTo;
-          wire.isHot = true;
-          changed = true;
-        } else if (potFrom && potTo && potFrom === potTo) {
-          wire.potential = potFrom;
-          wire.isHot = true;
-        }
+        wire.potential = null;
+        wire.isHot = false;
       }
 
-      if (shortCircuit) break;
-
-      // B. Propagate internally through junctions, closed contacts, and switches
+      // Seed potentials from power sources
       for (const node of nodes) {
         const comp = catalog[node.componentId];
         if (!comp) continue;
 
-        // B.1. Wire Junctions (all ports are equipotential nodes)
-        const isJunction =
-          comp.type === "junction" ||
-          node.componentId.startsWith("junction") ||
-          comp.tagType === "junctions";
+        const compId = node.componentId;
 
-        if (isJunction && comp.nodes && comp.nodes.length > 1) {
-          // Find any potential assigned to any port of this junction
-          let junctionPot: string | null = null;
-          for (const port of comp.nodes) {
-            const p = portPotentials.get(`${node.id}:${port.id}`);
-            if (p) {
-              if (junctionPot && isConflict(junctionPot, p)) {
+        if (compId === "sourceL1L2L3" || compId === "sourceL1L2L3N") {
+          portPotentials.set(`${node.id}:0`, "L1");
+          portPotentials.set(`${node.id}:1`, "L2");
+          portPotentials.set(`${node.id}:2`, "L3");
+          if (compId === "sourceL1L2L3N") {
+            portPotentials.set(`${node.id}:3`, "N");
+          }
+        } else if (compId === "sourceL1") {
+          portPotentials.set(`${node.id}:0`, "L1");
+        } else if (compId === "sourceL2") {
+          portPotentials.set(`${node.id}:0`, "L2");
+        } else if (compId === "sourceL3") {
+          portPotentials.set(`${node.id}:0`, "L3");
+        } else if (compId === "sourceN") {
+          portPotentials.set(`${node.id}:0`, "N");
+        } else if (compId === "sourcePlus" || compId === "arrowDestination" && node.comment?.includes("+24")) {
+          portPotentials.set(`${node.id}:0`, "+24V");
+        } else if (compId === "sourceNegative" || compId === "arrowDestination" && node.comment?.includes("-24")) {
+          portPotentials.set(`${node.id}:0`, "-24V");
+        } else if (compId === "sourceGnd" || compId === "sourcePE") {
+          portPotentials.set(`${node.id}:0`, "PE");
+        }
+      }
+
+      // Inner Equipotential Propagation
+      let changed = true;
+      let iteration = 0;
+      const maxIterations = 30;
+
+      while (changed && iteration < maxIterations) {
+        changed = false;
+        iteration++;
+
+        // A. Propagate through wires
+        for (const wire of wires) {
+          const keyFrom = `${wire.fromNodeId}:${wire.fromPortId}`;
+          const keyTo = `${wire.toNodeId}:${wire.toPortId}`;
+
+          const potFrom = portPotentials.get(keyFrom);
+          const potTo = portPotentials.get(keyTo);
+
+          if (potFrom && potTo && isConflict(potFrom, potTo)) {
+            shortCircuit = true;
+            shortCircuitMessage = `Short circuit detected between ${potFrom} and ${potTo}!`;
+            shortNodes.push(wire.fromNodeId, wire.toNodeId);
+            break;
+          }
+
+          if (potFrom && !potTo) {
+            portPotentials.set(keyTo, potFrom);
+            wire.potential = potFrom;
+            wire.isHot = true;
+            changed = true;
+          } else if (!potFrom && potTo) {
+            portPotentials.set(keyFrom, potTo);
+            wire.potential = potTo;
+            wire.isHot = true;
+            changed = true;
+          } else if (potFrom && potTo && potFrom === potTo) {
+            wire.potential = potFrom;
+            wire.isHot = true;
+          }
+        }
+
+        if (shortCircuit) break;
+
+        // B. Propagate internally through junctions, closed contacts, and switches
+        for (const node of nodes) {
+          const comp = catalog[node.componentId];
+          if (!comp) continue;
+
+          // B.1. Wire Junctions (all ports are equipotential nodes)
+          const isJunction =
+            comp.type === "junction" ||
+            node.componentId.startsWith("junction") ||
+            comp.tagType === "junctions";
+
+          if (isJunction && comp.nodes && comp.nodes.length > 1) {
+            let junctionPot: string | null = null;
+            for (const port of comp.nodes) {
+              const p = portPotentials.get(`${node.id}:${port.id}`);
+              if (p) {
+                if (junctionPot && isConflict(junctionPot, p)) {
+                  shortCircuit = true;
+                  shortCircuitMessage = `Short circuit detected at wire junction ${node.tag || node.name}!`;
+                  shortNodes.push(node.id);
+                  break;
+                }
+                junctionPot = p;
+              }
+            }
+
+            if (shortCircuit) break;
+
+            if (junctionPot) {
+              for (const port of comp.nodes) {
+                const key = `${node.id}:${port.id}`;
+                if (!portPotentials.has(key)) {
+                  portPotentials.set(key, junctionPot);
+                  changed = true;
+                }
+              }
+            }
+            continue;
+          }
+
+          // Special handling for Power Supply: converts AC (L, N) to DC (+24V, -24V)
+          if (node.componentId === "powerSupply" || node.componentId === "powerSupply2") {
+            const potL = portPotentials.get(`${node.id}:0`);
+            const potN = portPotentials.get(`${node.id}:2`);
+            if (potL && potN) {
+              if (!portPotentials.has(`${node.id}:1`)) {
+                portPotentials.set(`${node.id}:1`, "+24V");
+                changed = true;
+              }
+              if (!portPotentials.has(`${node.id}:3`)) {
+                portPotentials.set(`${node.id}:3`, "-24V");
+                changed = true;
+              }
+            }
+            continue;
+          }
+
+          // B.2. Propagate across connected internal contacts based on component characteristics
+          if (comp.contacts && comp.contacts.length > 0) {
+            for (const c of comp.contacts) {
+              let isContactConducting = false;
+
+              if (c.enableFrames) {
+                const ef = c.enableFrames.split(",").map((s: string) => s.trim());
+                const currentFrame = node.frameIndex ?? 0;
+                isContactConducting = ef[currentFrame] === "1";
+              } else {
+                const isNC = c.type === "nc";
+                isContactConducting = isNC ? (node.frameIndex === 0) : (node.frameIndex === 1);
+              }
+
+              if (!isContactConducting) continue;
+
+              const key1 = `${node.id}:${c.nodeId1}`;
+              const key2 = `${node.id}:${c.nodeId2}`;
+              const p1 = portPotentials.get(key1);
+              const p2 = portPotentials.get(key2);
+
+              if (p1 && p2 && isConflict(p1, p2)) {
                 shortCircuit = true;
-                shortCircuitMessage = `Short circuit detected at wire junction ${node.tag || node.name}!`;
+                shortCircuitMessage = `Short circuit detected inside component ${node.tag || node.name}!`;
                 shortNodes.push(node.id);
                 break;
               }
-              junctionPot = p;
-            }
-          }
 
-          if (shortCircuit) break;
-
-          // Propagate junction potential to all ports of this junction
-          if (junctionPot) {
-            for (const port of comp.nodes) {
-              const key = `${node.id}:${port.id}`;
-              if (!portPotentials.has(key)) {
-                portPotentials.set(key, junctionPot);
+              if (p1 && !p2) {
+                portPotentials.set(key2, p1);
+                changed = true;
+              } else if (!p1 && p2) {
+                portPotentials.set(key1, p2);
                 changed = true;
               }
             }
           }
-          continue;
         }
 
-        // Special handling for Power Supply: converts AC (L, N) to DC (+24V, -24V)
-        if (node.componentId === "powerSupply" || node.componentId === "powerSupply2") {
-          const potL = portPotentials.get(`${node.id}:0`);
-          const potN = portPotentials.get(`${node.id}:2`);
-          if (potL && potN) {
-            if (!portPotentials.has(`${node.id}:1`)) {
-              portPotentials.set(`${node.id}:1`, "+24V");
-              changed = true;
-            }
-            if (!portPotentials.has(`${node.id}:3`)) {
-              portPotentials.set(`${node.id}:3`, "-24V");
-              changed = true;
-            }
-          }
-          continue;
-        }
-
-        // B.2. Propagate across connected internal contacts based on component characteristics
-        if (comp.contacts && comp.contacts.length > 0) {
-          const cid = node.componentId.toLowerCase();
-          const isFuse = cid.startsWith("fuse");
-          const isOverload = cid.startsWith("overload");
-
-          for (const c of comp.contacts) {
-            let isContactConducting = false;
-
-            if (isFuse || isOverload) {
-              // Fuses and Overload power contacts: Frame 0 is intact/conducting, Frame 1 is blown/tripped
-              isContactConducting = node.frameIndex === 0;
-            } else {
-              const isNC =
-                node.componentId.includes("NC") ||
-                comp.type === "contactNC" ||
-                c.type === "nc";
-
-              if (isNC) {
-                // NC: Frame 0 is closed/conducting, Frame 1 is open
-                isContactConducting = node.frameIndex === 0;
-              } else {
-                // NO / regular switches / contactors: Frame 1 is closed/conducting, Frame 0 is open
-                isContactConducting = node.frameIndex === 1;
-              }
-            }
-
-            if (!isContactConducting) continue;
-
-            const key1 = `${node.id}:${c.nodeId1}`;
-            const key2 = `${node.id}:${c.nodeId2}`;
-            const p1 = portPotentials.get(key1);
-            const p2 = portPotentials.get(key2);
-
-            if (p1 && p2 && isConflict(p1, p2)) {
-              shortCircuit = true;
-              shortCircuitMessage = `Short circuit detected inside component ${node.tag || node.name}!`;
-              shortNodes.push(node.id);
-              break;
-            }
-
-            if (p1 && !p2) {
-              portPotentials.set(key2, p1);
-              changed = true;
-            } else if (!p1 && p2) {
-              portPotentials.set(key1, p2);
-              changed = true;
-            }
-          }
-        }
+        if (shortCircuit) break;
       }
 
       if (shortCircuit) break;
@@ -283,7 +284,7 @@ export class SimulationEngine {
         if (node.isEnergized !== energized) {
           node.isEnergized = energized;
           node.frameIndex = energized ? 1 : 0;
-          changed = true;
+          outerChanged = true;
         }
 
         // Check if this coil is a timer coil or standard contactor coil
@@ -300,12 +301,10 @@ export class SimulationEngine {
           if (tType === "delayOn") {
             const preset = node.valueTimeOn ?? 3;
             const elapsed = node.timerElapsed ?? 0;
-            // Only actuate contacts once elapsed has reached preset
             contactsShouldActuate = energized && elapsed >= preset;
           } else if (tType === "delayOff") {
             const preset = node.valueTimeOff ?? 3;
             const elapsed = node.timerElapsed ?? 0;
-            // Off-delay remains actuated while energized, and stays actuated until elapsed exceeds preset after coil drops
             contactsShouldActuate = energized || (elapsed > 0 && elapsed < preset);
           }
         }
@@ -317,22 +316,10 @@ export class SimulationEngine {
               const otherComp = catalog[otherNode.componentId];
               if (!otherComp) continue;
 
-              const isOtherNC = otherNode.componentId.includes("NC") || otherComp.type === "contactNC";
-
-              if (isOtherNC) {
-                // NC: Opens when actuated (frameIndex 1 is open, 0 is closed)
-                const newFrame = contactsShouldActuate ? 1 : 0;
-                if (otherNode.frameIndex !== newFrame) {
-                  otherNode.frameIndex = newFrame;
-                  changed = true;
-                }
-              } else {
-                // NO: Closes when actuated (frameIndex 1 is closed, 0 is open)
-                const newFrame = contactsShouldActuate ? 1 : 0;
-                if (otherNode.frameIndex !== newFrame) {
-                  otherNode.frameIndex = newFrame;
-                  changed = true;
-                }
+              const newFrame = contactsShouldActuate ? 1 : 0;
+              if (otherNode.frameIndex !== newFrame) {
+                otherNode.frameIndex = newFrame;
+                outerChanged = true;
               }
             }
           }
@@ -348,8 +335,11 @@ export class SimulationEngine {
           const p1 = portPotentials.get(`${node.id}:0`);
           const p2 = portPotentials.get(`${node.id}:1`);
           const lampOn = Boolean(p1 && p2 && p1 !== p2);
-          node.isEnergized = lampOn;
-          node.frameIndex = lampOn ? 1 : 0;
+          if (node.isEnergized !== lampOn || node.frameIndex !== (lampOn ? 1 : 0)) {
+            node.isEnergized = lampOn;
+            node.frameIndex = lampOn ? 1 : 0;
+            outerChanged = true;
+          }
         } else if (cid.startsWith("motor3ph") || cid === "motortwospeeds" || cid === "motordhalander") {
           const pU = portPotentials.get(`${node.id}:0`);
           const pV = portPotentials.get(`${node.id}:1`);
@@ -357,13 +347,14 @@ export class SimulationEngine {
           const motorRunning = Boolean(
             pU && pV && pW && pU !== pV && pV !== pW && pU !== pW
           );
-          node.isEnergized = motorRunning;
-          node.frameIndex = motorRunning ? 1 : 0;
+          if (node.isEnergized !== motorRunning || node.frameIndex !== (motorRunning ? 1 : 0)) {
+            node.isEnergized = motorRunning;
+            node.frameIndex = motorRunning ? 1 : 0;
+            outerChanged = true;
+          }
 
           // Determine 3-phase rotation direction
           if (motorRunning) {
-            // Standard CW phase sequence: (L1, L2, L3) or (L2, L3, L1) or (L3, L1, L2)
-            // Inverted CCW phase sequence: swapped 2 phases, e.g. (L1, L3, L2)
             const seq = `${pU}-${pV}-${pW}`;
             if (seq === "L1-L2-L3" || seq === "L2-L3-L1" || seq === "L3-L1-L2") {
               node.motorDirection = "cw";
@@ -379,8 +370,11 @@ export class SimulationEngine {
           const p1 = portPotentials.get(`${node.id}:0`);
           const p2 = portPotentials.get(`${node.id}:1`);
           const running = Boolean(p1 && p2 && p1 !== p2);
-          node.isEnergized = running;
-          node.frameIndex = running ? 1 : 0;
+          if (node.isEnergized !== running || node.frameIndex !== (running ? 1 : 0)) {
+            node.isEnergized = running;
+            node.frameIndex = running ? 1 : 0;
+            outerChanged = true;
+          }
           if (cid === "motordc" && running) {
             node.motorDirection = p1 === "+24V" ? "cw" : "ccw";
           } else if (cid === "motor1ph" && running) {

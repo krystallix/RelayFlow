@@ -1,5 +1,12 @@
 import { Point, WireMargins } from "../types";
 
+export interface Box {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 export interface RoutedWire {
   svgPath: string;
   points: Point[];
@@ -8,15 +15,17 @@ export interface RoutedWire {
 export class ManhattanRouter {
   /**
    * Generates an SVG path string for 90-degree orthogonal wiring
+   * with automatic obstacle clearance and smooth line routing.
    */
   static routeOrthogonal(
     p1: Point,
     dir1: number, // 0=Top, 1=Right, 2=Bottom, 3=Left
     p2: Point,
     dir2: number,
-    margins: WireMargins = { start: 0, center: 0, end: 0 }
+    margins: WireMargins = { start: 0, center: 0, end: 0 },
+    obstacles: Box[] = []
   ): RoutedWire {
-    const STUB_LENGTH = 15; // default stub extending outwards from pin
+    const STUB_LENGTH = 30; // standard 30px CAD grid step
 
     const points: Point[] = [];
     points.push(p1);
@@ -32,23 +41,71 @@ export class ManhattanRouter {
       }
     };
 
-    const d1 = getDelta(dir1, STUB_LENGTH + (margins.start || 0));
-    const startStub: Point = { x: p1.x + d1.x, y: p1.y + d1.y };
+    const d1 = getDelta(dir1, Math.max(30, Math.round((STUB_LENGTH + (margins.start || 0)) / 30) * 30));
+    const startStub: Point = {
+      x: Math.round((p1.x + d1.x) / 30) * 30,
+      y: Math.round((p1.y + d1.y) / 30) * 30,
+    };
     points.push(startStub);
 
-    const d2 = getDelta(dir2, STUB_LENGTH + (margins.end || 0));
-    const endStub: Point = { x: p2.x + d2.x, y: p2.y + d2.y };
+    const d2 = getDelta(dir2, Math.max(30, Math.round((STUB_LENGTH + (margins.end || 0)) / 30) * 30));
+    const endStub: Point = {
+      x: Math.round((p2.x + d2.x) / 30) * 30,
+      y: Math.round((p2.y + d2.y) / 30) * 30,
+    };
 
-    // Intermediate routing with margins.center
-    // If predominantly vertical routing (common in electrical ladder diagrams)
+    // Helper: test if vertical segment x crosses any obstacle box
+    const verticalSegmentCollides = (x: number, yMin: number, yMax: number): Box | null => {
+      for (const box of obstacles) {
+        if (x >= box.x && x <= box.x + box.width && !(yMax < box.y || yMin > box.y + box.height)) {
+          return box;
+        }
+      }
+      return null;
+    };
+
+    // Helper: test if horizontal segment y crosses any obstacle box
+    const horizontalSegmentCollides = (y: number, xMin: number, xMax: number): Box | null => {
+      for (const box of obstacles) {
+        if (y >= box.y && y <= box.y + box.height && !(xMax < box.x || xMin > box.x + box.width)) {
+          return box;
+        }
+      }
+      return null;
+    };
+
+    // Predominantly vertical routing (standard in electrical control / ladder schematics)
     if (dir1 === 0 || dir1 === 2) {
-      const midY = (startStub.y + endStub.y) / 2 + (margins.center || 0);
+      let midY = Math.round(((startStub.y + endStub.y) / 2 + (margins.center || 0)) / 30) * 30;
+
+      const xMin = Math.min(startStub.x, endStub.x);
+      const xMax = Math.max(startStub.x, endStub.x);
+      const obstacle = horizontalSegmentCollides(midY, xMin, xMax);
+
+      if (obstacle && (!margins.center || margins.center === 0)) {
+        // Automatically nudge the horizontal connecting channel above or below the obstructing component
+        const clearance = 30;
+        const nudgeAbove = Math.round((obstacle.y - clearance) / 30) * 30;
+        const nudgeBelow = Math.round((obstacle.y + obstacle.height + clearance) / 30) * 30;
+        midY = Math.abs(midY - nudgeAbove) < Math.abs(midY - nudgeBelow) ? nudgeAbove : nudgeBelow;
+      }
 
       points.push({ x: startStub.x, y: midY });
       points.push({ x: endStub.x, y: midY });
     } else {
       // Horizontal routing
-      const midX = (startStub.x + endStub.x) / 2 + (margins.center || 0);
+      let midX = Math.round(((startStub.x + endStub.x) / 2 + (margins.center || 0)) / 30) * 30;
+
+      const yMin = Math.min(startStub.y, endStub.y);
+      const yMax = Math.max(startStub.y, endStub.y);
+      const obstacle = verticalSegmentCollides(midX, yMin, yMax);
+
+      if (obstacle && (!margins.center || margins.center === 0)) {
+        const clearance = 30;
+        const nudgeLeft = Math.round((obstacle.x - clearance) / 30) * 30;
+        const nudgeRight = Math.round((obstacle.x + obstacle.width + clearance) / 30) * 30;
+        midX = Math.abs(midX - nudgeLeft) < Math.abs(midX - nudgeRight) ? nudgeLeft : nudgeRight;
+      }
 
       points.push({ x: midX, y: startStub.y });
       points.push({ x: midX, y: endStub.y });

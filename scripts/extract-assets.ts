@@ -101,26 +101,25 @@ async function extractAssets() {
       const nodes: ComponentNode[] = [];
       const nodesContainer = metadata.nodes;
       if (nodesContainer) {
-        const nodeList = Array.isArray(nodesContainer)
-          ? nodesContainer
-          : [nodesContainer];
+        // If metadata.nodes is an array of variants (e.g. <nodes id="0">, <nodes id="1">), take only the active/first variant (id="0")
+        const primaryContainer = Array.isArray(nodesContainer)
+          ? nodesContainer.find((item: any) => item["@_id"] === "0" || item["@_id"] === 0) || nodesContainer[0]
+          : nodesContainer;
 
-        for (const item of nodeList) {
-          const rawNodes = item.node
-            ? Array.isArray(item.node)
-              ? item.node
-              : [item.node]
-            : [];
-          for (const n of rawNodes) {
-            nodes.push({
-              id: parseInt(n["@_id"] || "0", 10),
-              tag: n["@_tag"] || "",
-              direction: parseInt(n["@_direction"] || "0", 10),
-              type: n["@_type"] || "contact",
-              dx: parseFloat(n["@_dx"] || "0"),
-              dy: parseFloat(n["@_dy"] || "0"),
-            });
-          }
+        const rawNodes = primaryContainer.node
+          ? Array.isArray(primaryContainer.node)
+            ? primaryContainer.node
+            : [primaryContainer.node]
+          : [];
+        for (const n of rawNodes) {
+          nodes.push({
+            id: parseInt(n["@_id"] || "0", 10),
+            tag: n["@_tag"] || "",
+            direction: parseInt(n["@_direction"] || "0", 10),
+            type: n["@_type"] || "contact",
+            dx: parseFloat(n["@_dx"] || "0"),
+            dy: parseFloat(n["@_dy"] || "0"),
+          });
         }
       }
 

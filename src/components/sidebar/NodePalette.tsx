@@ -11,10 +11,14 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   protections: <Shield className="w-4 h-4 text-zinc-400" />,
   coils: <Zap className="w-4 h-4 text-zinc-400" />,
   contacts: <ToggleLeft className="w-4 h-4 text-zinc-400" />,
+  auxiliaries: <ToggleLeft className="w-4 h-4 text-zinc-400" />,
   switches: <Activity className="w-4 h-4 text-zinc-400" />,
   sources: <Radio className="w-4 h-4 text-zinc-400" />,
   loads: <Cpu className="w-4 h-4 text-zinc-400" />,
+  contactors: <Zap className="w-4 h-4 text-zinc-400" />,
+  motors: <Cpu className="w-4 h-4 text-zinc-400" />,
   general: <Layers className="w-4 h-4 text-zinc-400" />,
+  others: <Layers className="w-4 h-4 text-zinc-400" />,
 };
 
 interface NodePaletteProps {

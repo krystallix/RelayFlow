@@ -11,7 +11,12 @@ export default function Home() {
   const [zoomScale, setZoomScale] = useState(0.85);
   const [panOffset, setPanOffset] = useState({ x: 100, y: 15 });
   const theme = useCircuitStore((state) => state.theme);
+  const hydrateFromLocalStorage = useCircuitStore((state) => state.hydrateFromLocalStorage);
   const isDark = theme === "dark";
+
+  useEffect(() => {
+    hydrateFromLocalStorage();
+  }, [hydrateFromLocalStorage]);
 
   const handleZoomIn = () => {
     setZoomScale((prev) => Math.min(3, prev * 1.15));

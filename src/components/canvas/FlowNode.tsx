@@ -5,6 +5,7 @@ import { CircuitNode } from "@/engine/types";
 import { useCircuitStore } from "@/store/useCircuitStore";
 import catalogData from "@/constants/components-catalog.json";
 import { SimulationEngine } from "@/engine/SimulationEngine";
+import { SymbolRenderer } from "./SymbolRenderer";
 
 const catalog = catalogData as Record<string, any>;
 
@@ -29,6 +30,45 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
 }) => {
   const { theme, isSimulating, toggleComponentState, setComponentPressed, nodes: allNodes } = useCircuitStore();
   const isDark = theme === "dark";
+
+  if (node.componentId === "junctionDot") {
+    return (
+      <div
+        style={{
+          transform: `translate(${node.position.x - 14}px, ${node.position.y - 14}px)`,
+          width: "28px",
+          height: "28px",
+        }}
+        onMouseDown={(e) => {
+          e.stopPropagation();
+          onNodeMouseDown(node.id, e);
+        }}
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onContextMenu?.(node, e);
+        }}
+        className={`absolute flex items-center justify-center cursor-pointer select-none group z-20 ${
+          isSelected ? "ring-2 ring-amber-400 ring-offset-2 rounded-full" : ""
+        }`}
+        title="Junction Dot (Click to select & delete)"
+      >
+        <div
+          className={`w-3.5 h-3.5 rounded-full border-2 transition-all duration-150 ${
+            node.isEnergized
+              ? "bg-red-500 border-red-300 shadow-[0_0_10px_rgba(239,68,68,0.9)] scale-110"
+              : isDark
+              ? "bg-zinc-200 border-zinc-500 shadow-sm"
+              : "bg-slate-800 border-slate-600 shadow-sm"
+          }`}
+        />
+      </div>
+    );
+  }
+
   const comp = catalog[node.componentId];
 
   const width = comp?.width || 120;
@@ -66,9 +106,9 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
     ? allNodes.filter((n) => n.tag === node.tag && n.id !== node.id)
     : [];
 
-  // Show _on.svg for closed switches/contacts or energized lamps
+  // Show _on.svg for activated switches/contacts (frameIndex === 1) or energized lamps
   const shouldShowOnVariant =
-    (isSwitchOrContact && isClosed) ||
+    (isSwitchOrContact && node.frameIndex === 1) ||
     (Boolean(node.isEnergized) && (node.componentId === "lamp" || node.componentId === "lampBlink"));
 
   const svgPath = shouldShowOnVariant ? `/symbols/${node.componentId}_on.svg` : comp?.svgPath;
@@ -160,7 +200,7 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
         </div>
       )}
 
-      {/* Pure Symbol Graphics (Direct Canvas Drawing, Zero Card Box) */}
+      {/* Pure Symbol Graphics (Direct Canvas Drawing) */}
       <div
         className="w-full h-full flex items-center justify-center relative overflow-visible pointer-events-none"
       >
@@ -169,21 +209,26 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
             transform: `rotate(${node.rotation * 90}deg)`,
             transition: "transform 0.15s ease",
           }}
-          className="w-full h-full flex items-center justify-center pointer-events-none relative"
+          className="w-full h-full flex items-center justify-center pointer-events-none relative z-10"
         >
-          {comp?.svgPath ? (
-            <img
-              src={svgPath}
-              alt={node.name}
-              className={`w-full h-full object-contain pointer-events-none select-none transition-all duration-150 ${
-                isDark
-                  ? node.isEnergized
-                    ? "brightness-125"
-                    : "opacity-95"
-                  : node.isEnergized
-                    ? "filter invert brightness-110"
-                    : "filter invert opacity-95"
+          {node.componentId === "junctionDot" ? (
+            <div
+              className={`w-3.5 h-3.5 rounded-full border-2 transition-all duration-150 ${
+                node.isEnergized
+                  ? "bg-red-500 border-red-300 shadow-[0_0_10px_rgba(239,68,68,0.9)] scale-110"
+                  : isDark
+                  ? "bg-zinc-200 border-zinc-500 shadow-sm"
+                  : "bg-slate-800 border-slate-600 shadow-sm"
               }`}
+            />
+          ) : comp?.svgPath ? (
+            <SymbolRenderer
+              svgPath={svgPath}
+              componentId={node.componentId}
+              name={node.name}
+              rotation={node.rotation}
+              isEnergized={node.isEnergized}
+              isDark={isDark}
             />
           ) : (
             <div className="text-[10px] text-zinc-500">{node.componentId}</div>
@@ -243,7 +288,7 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
       </div>
 
       {/* Connection Ports (Magnetic Pins - Only Glow on Hover) */}
-      {nodes.map((port: any) => {
+      {nodes.map((port: any, idx: number) => {
         const transformed = SimulationEngine.getTransformedPort(
           { x: width / 2, y: height / 2 },
           port.dx,
@@ -254,7 +299,7 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
 
         return (
           <div
-            key={port.id}
+            key={`${port.id}-${idx}`}
             style={{
               left: `${transformed.x}px`,
               top: `${transformed.y}px`,

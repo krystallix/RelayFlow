@@ -357,4 +357,128 @@ describe("SimulationEngine Logic", () => {
     const blownResult = SimulationEngine.step([nodePlus, blownFuse, nodeLamp, nodeMinus], wires);
     expect(blownResult.nodes.find((n) => n.id === "l1")?.isEnergized).toBe(false);
   });
+
+  it("should correctly handle coupled contactNONC: NC opens and NO closes when coil energizes", () => {
+    const project: { nodes: CircuitNode[]; wires: CircuitWire[] } = {
+      nodes: [
+        {
+          id: "coil-1",
+          componentId: "coil",
+          name: "Coil",
+          category: "coils",
+          tag: "-KM1",
+          comment: null,
+          position: { x: 0, y: 0 },
+          rotation: 0,
+          frameIndex: 0,
+          isEnergized: false,
+        },
+        {
+          id: "source-p",
+          componentId: "sourcePlus",
+          name: "Source +24V",
+          category: "sources",
+          tag: null,
+          comment: "+24V",
+          position: { x: 0, y: 0 },
+          rotation: 0,
+          frameIndex: 0,
+        },
+        {
+          id: "source-n",
+          componentId: "sourceNegative",
+          name: "Source -24V",
+          category: "sources",
+          tag: null,
+          comment: "-24V",
+          position: { x: 0, y: 0 },
+          rotation: 0,
+          frameIndex: 0,
+        },
+        {
+          id: "sw-1",
+          componentId: "switchNO",
+          name: "Switch NO",
+          category: "switches",
+          tag: "-S1",
+          comment: null,
+          position: { x: 0, y: 0 },
+          rotation: 0,
+          frameIndex: 0,
+        },
+        {
+          id: "contact-1",
+          componentId: "contactNONC",
+          name: "Contact NCNO",
+          category: "auxiliaries",
+          tag: "-KM1",
+          comment: null,
+          position: { x: 0, y: 0 },
+          rotation: 0,
+          frameIndex: 0,
+        },
+        {
+          id: "lamp-nc",
+          componentId: "lamp",
+          name: "Lamp NC",
+          category: "loads",
+          tag: "-L_NC",
+          comment: null,
+          position: { x: 0, y: 0 },
+          rotation: 0,
+          frameIndex: 0,
+        },
+        {
+          id: "lamp-no",
+          componentId: "lamp",
+          name: "Lamp NO",
+          category: "loads",
+          tag: "-L_NO",
+          comment: null,
+          position: { x: 0, y: 0 },
+          rotation: 0,
+          frameIndex: 0,
+        },
+      ],
+      wires: [
+        // Power to switch -> coil
+        { id: "w1", fromNodeId: "source-p", fromPortId: 0, toNodeId: "sw-1", toPortId: 0, margins: { start: 0, center: 0, end: 0 } },
+        { id: "w2", fromNodeId: "sw-1", fromPortId: 1, toNodeId: "coil-1", toPortId: 0, margins: { start: 0, center: 0, end: 0 } },
+        { id: "w3", fromNodeId: "coil-1", fromPortId: 1, toNodeId: "source-n", toPortId: 0, margins: { start: 0, center: 0, end: 0 } },
+
+        // Power to contactNONC NC pair (0 -> 1) -> lamp-nc
+        { id: "w4", fromNodeId: "source-p", fromPortId: 0, toNodeId: "contact-1", toPortId: 0, margins: { start: 0, center: 0, end: 0 } },
+        { id: "w5", fromNodeId: "contact-1", fromPortId: 1, toNodeId: "lamp-nc", toPortId: 0, margins: { start: 0, center: 0, end: 0 } },
+        { id: "w6", fromNodeId: "lamp-nc", fromPortId: 1, toNodeId: "source-n", toPortId: 0, margins: { start: 0, center: 0, end: 0 } },
+
+        // Power to contactNONC NO pair (2 -> 3) -> lamp-no
+        { id: "w7", fromNodeId: "source-p", fromPortId: 0, toNodeId: "contact-1", toPortId: 2, margins: { start: 0, center: 0, end: 0 } },
+        { id: "w8", fromNodeId: "contact-1", fromPortId: 3, toNodeId: "lamp-no", toPortId: 0, margins: { start: 0, center: 0, end: 0 } },
+        { id: "w9", fromNodeId: "lamp-no", fromPortId: 1, toNodeId: "source-n", toPortId: 0, margins: { start: 0, center: 0, end: 0 } },
+      ],
+    };
+
+    // 1. Initial (Switch is OPEN, coil de-energized)
+    const res1 = SimulationEngine.step(project.nodes, project.wires as CircuitWire[]);
+    expect(res1.nodes.find((n) => n.id === "coil-1")?.isEnergized).toBe(false);
+    expect(res1.nodes.find((n) => n.id === "contact-1")?.frameIndex).toBe(0);
+    expect(res1.nodes.find((n) => n.id === "lamp-nc")?.isEnergized).toBe(true);
+    expect(res1.nodes.find((n) => n.id === "lamp-no")?.isEnergized).toBe(false);
+
+    // 2. Close switch (Coil energized -> NC opens, NO closes)
+    const swClosed = res1.nodes.map((n) => (n.id === "sw-1" ? { ...n, frameIndex: 1, isClosed: true } : n));
+    const res2 = SimulationEngine.step(swClosed, project.wires as CircuitWire[]);
+    expect(res2.nodes.find((n) => n.id === "coil-1")?.isEnergized).toBe(true);
+    expect(res2.nodes.find((n) => n.id === "contact-1")?.frameIndex).toBe(1);
+    expect(res2.nodes.find((n) => n.id === "lamp-nc")?.isEnergized).toBe(false);
+    expect(res2.nodes.find((n) => n.id === "lamp-no")?.isEnergized).toBe(true);
+
+    // 3. Open switch again (Coil de-energizes -> NC closes back, NO opens back)
+    const swOpened = res2.nodes.map((n) => (n.id === "sw-1" ? { ...n, frameIndex: 0, isClosed: false } : n));
+    const res3 = SimulationEngine.step(swOpened, project.wires as CircuitWire[]);
+    expect(res3.nodes.find((n) => n.id === "coil-1")?.isEnergized).toBe(false);
+    expect(res3.nodes.find((n) => n.id === "contact-1")?.frameIndex).toBe(0);
+    expect(res3.nodes.find((n) => n.id === "lamp-nc")?.isEnergized).toBe(true);
+    expect(res3.nodes.find((n) => n.id === "lamp-no")?.isEnergized).toBe(false);
+  });
 });

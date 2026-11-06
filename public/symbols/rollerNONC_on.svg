@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg width="120" height="120" viewBox="0 0 120 120" version="1.1" id="svg1" sodipodi:docname="rollerNONC.svg" inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+   <sodipodi:namedview id="namedview1" pagecolor="#505050" bordercolor="#eeeeee" borderopacity="1" inkscape:showpageshadow="0" inkscape:pageopacity="0" inkscape:pagecheckerboard="0" inkscape:deskcolor="#3d3d3d" inkscape:zoom="2.3995286" inkscape:cx="27.088654" inkscape:cy="23.96304" inkscape:window-width="1352" inkscape:window-height="762" inkscape:window-x="88" inkscape:window-y="25" inkscape:window-maximized="0" inkscape:current-layer="svg1" showguides="true" />
+   <defs id="defs1" />
+   <metadata id="metadata1">
+      <info category="switches" isMultiFrames="true" type="switch" tagType="switches" duplicateTag="false" width="120" height="120" name="Switch NCNO" description="Switch NCNO" marginH="0" marginV="0" />
+      <nodes id="0">
+         <node id="0" tag="11" direction="0" type="contact" dx="-30.0" dy="-60.0" />
+         <node id="1" tag="12" direction="2" type="contact" dx="-30.0" dy="60.0" />
+         <node id="2" tag="13" direction="0" type="contact" dx="30.0" dy="-60.0" />
+         <node id="3" tag="14" direction="2" type="contact" dx="30.0" dy="60.0" />
+      </nodes>
+      <nodes id="1">
+         <node id="0" tag="11" direction="0" type="contact" dx="-30.0" dy="-60.0" />
+         <node id="1" tag="12" direction="2" type="contact" dx="-30.0" dy="60.0" />
+         <node id="2" tag="13" direction="0" type="contact" dx="30.0" dy="-60.0" />
+         <node id="3" tag="14" direction="2" type="contact" dx="30.0" dy="60.0" />
+      </nodes>
+      <nodes id="2">
+         <node id="0" tag="11" direction="0" type="contact" dx="-30.0" dy="-60.0" />
+         <node id="1" tag="12" direction="2" type="contact" dx="-30.0" dy="60.0" />
+         <node id="2" tag="13" direction="0" type="contact" dx="30.0" dy="-60.0" />
+         <node id="3" tag="14" direction="2" type="contact" dx="30.0" dy="60.0" />
+      </nodes>
+      <nodes id="3">
+         <node id="0" tag="11" direction="0" type="contact" dx="-30.0" dy="-60.0" />
+         <node id="1" tag="12" direction="2" type="contact" dx="-30.0" dy="60.0" />
+         <node id="2" tag="13" direction="0" type="contact" dx="30.0" dy="-60.0" />
+         <node id="3" tag="14" direction="2" type="contact" dx="30.0" dy="60.0" />
+      </nodes>
+      <nodes id="4">
+         <node id="0" tag="11" direction="0" type="contact" dx="-30.0" dy="-60.0" />
+         <node id="1" tag="12" direction="2" type="contact" dx="-30.0" dy="60.0" />
+         <node id="2" tag="13" direction="0" type="contact" dx="30.0" dy="-60.0" />
+         <node id="3" tag="14" direction="2" type="contact" dx="30.0" dy="60.0" />
+      </nodes>
+      <nodes id="5">
+         <node id="0" tag="11" direction="0" type="contact" dx="-30.0" dy="-60.0" />
+         <node id="1" tag="12" direction="2" type="contact" dx="-30.0" dy="60.0" />
+         <node id="2" tag="13" direction="0" type="contact" dx="30.0" dy="-60.0" />
+         <node id="3" tag="14" direction="2" type="contact" dx="30.0" dy="60.0" />
+      </nodes>
+      <frames id="0">
+         <frame id="0">
+            <pathFrame id="mainPath1" type="main" style="display:none;fill:none;stroke:#800000;stroke-width:2" />
+         </frame>
+         <frame id="1">
+            <pathFrame id="mainPath2" type="main" style="display:inline;fill:none;stroke:#ffffff;stroke-width:2" />
+         </frame>
+      </frames>
+      <frames id="1">
+         <frame id="0">
+            <pathFrame id="mainPath1_2" type="main" style="display:none;fill:none;stroke:#800000;stroke-width:2" />
+         </frame>
+         <frame id="1">
+            <pathFrame id="mainPath2_2" type="main" style="display:none;fill:none;stroke:#800000;stroke-width:2" />
+         </frame>
+      </frames>
+      <frames id="2">
+         <frame id="0">
+            <pathFrame id="mainPath1_3" type="main" style="display:none;fill:none;stroke:#800000;stroke-width:2" />
+            <pathFrame id="textPath1" type="main" style="fill" fixedRotation="true" isCentered="false" />
+         </frame>
+         <frame id="1">
+            <pathFrame id="mainPath2_3" type="main" style="display:none;fill:none;stroke:#800000;stroke-width:2" />
+            <pathFrame id="textPath2" type="main" style="fill" fixedRotation="true" isCentered="false" />
+         </frame>
+      </frames>
+      <frames id="3">
+         <frame id="0">
+            <pathFrame id="mainPath1_4" type="main" style="display:none;fill:none;stroke:#800000;stroke-width:2" />
+         </frame>
+         <frame id="1">
+            <pathFrame id="mainPath2_4" type="main" style="display:none;fill:none;stroke:#800000;stroke-width:2" />
+         </frame>
+      </frames>
+      <frames id="4">
+         <frame id="0">
+            <pathFrame id="mainPath1_5" type="main" style="display:none;fill:none;stroke:#800000;stroke-width:2" />
+         </frame>
+         <frame id="1">
+            <pathFrame id="mainPath2_5" type="main" style="display:none;fill:none;stroke:#800000;stroke-width:2" />
+         </frame>
+      </frames>
+      <frames id="5">
+         <frame id="0">
+            <pathFrame id="mainPath1_6" type="main" style="display:none;fill:none;stroke:#800000;stroke-width:2" />
+         </frame>
+         <frame id="1">
+            <pathFrame id="mainPath2_6" type="main" style="display:none;fill:none;stroke:#800000;stroke-width:2" />
+         </frame>
+      </frames>
+      <contacts>
+         <contact id="0" nodeId1="0" nodeId2="1" type="nc" enableFrames="1,0" />
+         <contact id="1" nodeId1="2" nodeId2="3" type="no" enableFrames="0,1" />
+      </contacts>
+   </metadata>
+   <path id="mainPath2_2" style="display:none;fill:none;stroke:#800000;stroke-width:2" d="m 40.190423,45.53192 11.899331,2.515298 -14.69706,23.905419 z M 84,60 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 M 48,42 H 30 V 3e-7 M 57.000002,40 30,84 v 36 m 58,-86 2,50 v 36 M 90,-6.9999998e-7 V 36" inkscape:label="mainPath2_2" sodipodi:nodetypes="ccccccccccccccccccccccccccc" />
+   <path id="mainPath1_2" style="display:none;fill:none;stroke:#800000;stroke-width:2" d="m 29.536568,47.093763 12.152688,-0.482328 -8.37989,26.781522 z M 48,42 H 30 V 0 M 45,36 30,84 v 36 M 75,36 90,84 v 36 M 90,0 V 36 M 77.5,60 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5" inkscape:label="mainPath1_2" />
+   <path id="mainPath1" style="display:none;fill:none;stroke:#800000;stroke-width:2" inkscape:label="mainPath1" d="m 30.000187,60.020841 h 5.000001 m -13.000001,0 h 5 m -13,0 h 5 m -12.9999998,0 h 4.9999998 m -12.9999998,0 h 5 M 48,42 H 30 V 0 M 45,36 30,84 v 36 M 75,36 90,84 v 36 M 90,0 V 36 M 77.5,60 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 M 3.7479401e-4,60 A 10,10 0 0 1 -9.9996252,70 10,10 0 0 1 -19.999625,60 10,10 0 0 1 -9.9996252,50 10,10 0 0 1 3.7479401e-4,60 Z" />
+   <path id="mainPath2" style="display:inline;fill:none;stroke:#ffffff;stroke-width:2" inkscape:label="mainPath2" d="m 40,60 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 M 7.9999995,60 H 13 m 71,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 M 48,42 H 30 V 3e-7 M 57.000002,40 30,84 v 36 m 58,-86 2,50 v 36 M 90,-6.9999998e-7 V 36 M 10,60.02084 a 10,10 0 0 1 -10,10 10,10 0 0 1 -10,-10 10,10 0 0 1 10,-10 10,10 0 0 1 10,10 z" />
+   <path style="font-weight:bold;font-size:21.3333px;line-height:0px;font-family:Arial;-inkscape-font-specification:'Arial Bold';text-align:center;text-anchor:middle;display:none;fill:#008080;stroke-width:2" d="M -15.851916,67.635407 V 52.364592 h 4.94791 q 2.8124904,0 3.6666604,0.229172 1.3125,0.34375 2.19791,1.5 0.88542,1.145828 0.88542,2.968738 0,1.40625 -0.51042,2.36458 -0.51041,0.95833 -1.30208,1.510419 -0.78125,0.541667 -1.59375,0.718749 -1.10416,0.21875 -3.1979104,0.21875 h -2.01041 v 5.760407 z m 3.08333,-12.687483 v 4.333331 h 1.6875 q 1.8229104,0 2.4374904,-0.23958 0.61458,-0.239591 0.95833,-0.75 0.35417,-0.51042 0.35417,-1.1875 0,-0.833331 -0.48958,-1.375 -0.48959,-0.54166 -1.23958,-0.677081 -0.55209,-0.104169 -2.2187494,-0.104169 z" id="textPath1" aria-label="P" inkscape:label="textPath1" />
+   <path style="font-weight:bold;font-size:21.3333px;line-height:0px;font-family:Arial;-inkscape-font-specification:'Arial Bold';text-align:center;text-anchor:middle;display:inline;fill:#008080;stroke-width:2" d="M -5.8483902,67.63541 V 52.364596 h 4.94791001 q 2.81249999,0 3.66665999,0.22917 1.3125,0.34375 2.19791,1.5 0.88542,1.14583 0.88542,2.96874 0,1.40625 -0.51042,2.36458 -0.51041,0.95833 -1.30208,1.510419 -0.78125,0.541667 -1.59375,0.718749 -1.10416,0.21875 -3.19790999,0.21875 H -2.7650602 v 5.760407 z m 3.08333,-12.687483 v 4.33333 h 1.6875 q 1.82291001,0 2.43749,-0.23958 0.61459,-0.239591 0.95834,-0.75 0.35416,-0.51042 0.35416,-1.1875 0,-0.833331 -0.48958,-1.375 -0.48958,-0.54166 -1.23958003,-0.677081 -0.55208996,-0.104169 -2.21874997,-0.104169 z" id="textPath2" aria-label="P" inkscape:label="textPath2" />
+   <path id="mainPath1_3" style="display:none;fill:none;stroke:#800000;stroke-width:2" d="m 13.999817,60.000041 h 5 m -13.0000002,0 h 5.0000002 m -11.8004302,0 h 3.80043 m -22.9994388,-10 H 3.768e-4 V 70.000037 H -19.999622 Z m 49.999819,10.0208 h 5 m -13.00001,0 h 5 M 48,42 H 29.999999 V -1.4e-5 M 45,35.99999 l -15.000001,48 v 36 m 45.000001,-84 15,48 v 36 M 90,-1.4e-5 V 35.99999 M 77.5,60 h 5 m -13,0 h 5 m -13,0 h 4.999999 M 53.5,60 h 5 m -13,0 h 5 m -13.000001,0 h 5" inkscape:label="mainPath1_3" />
+   <path id="mainPath1_4" style="display:none;fill:none;stroke:#800000;stroke-width:2" d="m -10.081673,52.800421 v -4.8 m 12.6815993,12 c -2.6616,4.156796 -7.32,6.899996 -12.6408003,6.899996 -5.320802,0 -9.979202,-2.7432 -12.640802,-6.899996 2.6616,-4.1568 7.32,-6.9 12.640803,-6.9 5.3207993,0 9.9791993,2.7432 12.6407993,6.9 z m 11.3998907,-3.8e-4 h 5 m -13.0000007,0 h 4.9999997 m 19.000001,0 h 5.000001 m -13.00001,0 h 5 M 48,42.000007 H 30 V 0 m 15,35.999997 -15,48 V 120 m 45,-84.000003 15,48 V 120 M 90,0 v 35.999997 m -12.5,24.00001 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5" inkscape:label="mainPath1_4" sodipodi:nodetypes="cccscscccccccccccccccccccccccccccccccc" />
+   <path id="mainPath1_5" style="display:none;fill:none;stroke:#800000;stroke-width:2" inkscape:label="mainPath1_5" d="M 48,41.999996 H 30 V -1.05e-5 M 45,35.999986 30,83.999984 V 119.99998 M 75,35.999986 90,83.999984 V 119.99998 M 90,-1.05e-5 V 35.999986 m -12.5,24.00001 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 M -2.5e-6,49.99216 l 7,-0.02334 m 6.9994405,10.020838 h 5 m -13.0000005,0 h 5.0000005 m -11.8004305,0 h 3.80043 m -22.9994445,-10 H -2.5e-6 V 69.989657 H -20.000007 Z m 49.999825,10.010383 h 4.999999 m -13.00001,0 h 5" />
+   <path id="mainPath1_6" style="display:none;fill:none;stroke:#800000;stroke-width:2" inkscape:label="mainPath1_6" d="M 48,41.999996 H 30 V -1.4e-5 m 15,36 -15,47.999997 V 119.99998 M 75,35.999986 90,83.999983 V 119.99998 M 90,-1.4e-5 v 36 m -12.5,24.00001 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -47.647314,1.289939 c -1.46728,5.475961 -4.82937,9.332952 -7.50943,8.61483 -2.68006,-0.718124 -3.66322,-5.739418 -2.19594,-11.215376 1.46728,-5.475961 4.82936,-9.332952 7.50943,-8.61483 2.68006,0.718124 3.66322,5.739418 2.19594,11.215376 z m 19.146752,-1.300275 5,-4e-6 m -13,3e-6 5,4e-6 m -13.000002,-6e-6 5.000002,4e-6 m -15.499432,3e-6 5,-5e-6 m 37.499432,-2e-6 h 5 m -13.00001,0 h 5" />
+   <path id="mainPath2_3" style="display:none;fill:none;stroke:#800000;stroke-width:2" inkscape:label="mainPath2_3" d="m 84,60 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 M 48,42 H 30 V -5e-7 M 57,40 30,84 v 36 m 58,-86 2,50 v 36 M 90,-5e-7 V 36 M 24.000004,60 h 5 M 16,60 h 5 M 9.19957,60 H 13 M -9.99944,50.000005 h 20 V 70 h -20 z m 50.000001,9.979155 h 5 m -13,0 h 5" />
+   <path id="mainPath2_4" style="display:none;fill:none;stroke:#800000;stroke-width:2" d="m -0.0814901,52.80038 v -4.8 m 12.6816001,12 c -2.6616,4.156796 -7.3200001,6.899996 -12.6408001,6.899996 -5.3208,0 -9.9791999,-2.7432 -12.6407999,-6.899996 2.6616,-4.1568 7.3199999,-6.9 12.6407999,-6.9 5.3208,0 9.9792001,2.7432 12.6408001,6.9 z M 24,60 h 5 m -13,0 h 5 m 19,0 h 5 m -13,0 h 5 m 47,-10e-7 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 M 48,42 H 30 V 1.5e-7 M 57,40 30,83.999999 V 120 M 88,34 90,83.999999 V 120 M 90,1.5e-7 V 36" inkscape:label="mainPath2_4" />
+   <path id="mainPath2_5" style="display:none;fill:none;stroke:#800000;stroke-width:2" inkscape:label="mainPath2_5" d="m 84,59.999999 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 M 48,42 H 29.999996 V 5e-7 M 57,40 29.999996,84 v 36 M 88,34 90,84 v 36 M 90,5e-7 V 36 m -79.99944,14.002507 7.000001,-0.02334 M 24,60 h 5 m -13,0 h 5 M 9.19957,60 H 13 M -9.9994387,50.000005 H 10.00056 V 70 H -9.9994387 Z m 50.0000207,9.999998 h 5 m -13,0 h 5" />
+   <path id="mainPath2_6" style="display:none;fill:none;stroke:#800000;stroke-width:2" d="m 4.85325,61.300274 c -1.46728,5.475961 -4.82937,9.332952 -7.50943,8.61483 -2.68006,-0.718124 -3.66322,-5.739418 -2.19594,-11.215376 1.46728,-5.475961 4.82936,-9.332952 7.50943,-8.61483 2.68006,0.718124 3.66322,5.739418 2.19594,11.215376 z M 24,59.999999 l 5,-4e-6 m -13,3e-6 5,4e-6 m -13,-6e-6 5,4e-6 m -15.49943,3e-6 5,-5e-6 M 40,59.999996 h 5 m -13,0 h 5 M 84,60 h 5 m -13,0 h 5 m -13,0 h 5 m -13,0 h 5 m -13.000003,0 h 5 m -13,0 h 5 m -1,-17.999999 h -18 V -4e-6 m 27,40.000005 -27,43.999999 v 36 M 88,34.000001 90,84 v 36 M 90,-4e-6 v 36.000005" inkscape:label="mainPath2_6" />
+</svg>

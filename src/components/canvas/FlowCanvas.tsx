@@ -22,6 +22,7 @@ import {
   Square,
 } from "lucide-react";
 import { ManhattanRouter } from "@/engine/router/ManhattanRouter";
+import { WireMargins } from "@/engine/types";
 import catalogData from "@/constants/components-catalog.json";
 import { CircuitNode, CircuitWire } from "@/engine/types";
 
@@ -122,8 +123,10 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     stopSimulation,
     tickTimerSimulation,
     splitWireAtJunction,
+    updateWireMargins,
     undo,
     redo,
+    autoLayout,
     recentComponentIds,
     startWireDraft,
     updateWireDraft,
@@ -132,6 +135,18 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   } = useCircuitStore();
 
   const [isSpacePressed, setIsSpacePressed] = useState(false);
+  const [draggingWireSegment, setDraggingWireSegment] = useState<{
+    wireId: string | number;
+    orientation: "horizontal" | "vertical";
+    defaultMid: number;
+    initialMargins: WireMargins;
+  } | null>(null);
+
+  const zoomScaleRef = useRef(zoomScale);
+  zoomScaleRef.current = zoomScale;
+
+  const panOffsetRef = useRef(panOffset);
+  panOffsetRef.current = panOffset;
 
   // Convert screen coordinates to canvas world coordinates
   const screenToWorld = (clientX: number, clientY: number) => {
@@ -338,6 +353,26 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       y: Math.round(worldPos.y),
     });
 
+    // 0. Live Wire Segment Dragging (draw.io style - aligned to 30px grid)
+    if (draggingWireSegment) {
+      if (draggingWireSegment.orientation === "horizontal") {
+        const newCenter = Math.round((worldPos.y - draggingWireSegment.defaultMid) / 30) * 30;
+        updateWireMargins(
+          draggingWireSegment.wireId,
+          { ...draggingWireSegment.initialMargins, center: newCenter },
+          false
+        );
+      } else {
+        const newCenter = Math.round((worldPos.x - draggingWireSegment.defaultMid) / 30) * 30;
+        updateWireMargins(
+          draggingWireSegment.wireId,
+          { ...draggingWireSegment.initialMargins, center: newCenter },
+          false
+        );
+      }
+      return;
+    }
+
     // 1. Handle active node dragging (120 FPS live update) with Magnetic Alignment Smart Guides
     if (draggingNodeState) {
       let dx = worldPos.x - draggingNodeState.startWorldPos.x;
@@ -429,6 +464,15 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   const handleMouseUp = (e: React.MouseEvent) => {
     setSmartGuidelines([]);
 
+    if (draggingWireSegment) {
+      const currentWire = wires.find((w) => w.id === draggingWireSegment.wireId);
+      if (currentWire) {
+        updateWireMargins(draggingWireSegment.wireId, currentWire.margins || {}, true);
+      }
+      setDraggingWireSegment(null);
+      return;
+    }
+
     if (draggingNodeState) {
       if (draggingNodeState.hasMoved) {
         // Commit final snapped positions with undo history
@@ -491,29 +535,66 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     setIsPanning(false);
   };
 
-  // Mouse Wheel Zoom
-  const handleWheel = (e: React.WheelEvent) => {
-    // Prevent zooming canvas when quick search spotlight is open
-    if (showQuickSearch) return;
+  // Native Wheel & Trackpad Pinch Zoom Listener (Non-passive to prevent browser page-zoom)
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
 
-    e.preventDefault();
-    const zoomFactor = e.deltaY < 0 ? 1.1 : 0.9;
-    const newZoom = Math.min(Math.max(0.2, zoomScale * zoomFactor), 3);
+    const handleWheelNative = (e: WheelEvent) => {
+      // Prevent zooming canvas when quick search spotlight is open
+      if (showQuickSearch) return;
 
-    // Zoom centered on cursor
-    if (containerRef.current) {
-      const rect = containerRef.current.getBoundingClientRect();
+      // Crucial: prevent browser default behavior (page zoom & swipe navigation)
+      e.preventDefault();
+
+      const rect = container.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
 
-      setPanOffset((prev) => ({
-        x: mouseX - (mouseX - prev.x) * (newZoom / zoomScale),
-        y: mouseY - (mouseY - prev.y) * (newZoom / zoomScale),
-      }));
-    }
+      const currentZoom = zoomScaleRef.current;
+      const currentPan = panOffsetRef.current;
 
-    setZoomScale(newZoom);
-  };
+      // Trackpad pinch-to-zoom (or Ctrl+wheel / Cmd+wheel)
+      if (e.ctrlKey || e.metaKey) {
+        const zoomFactor = Math.exp(-e.deltaY * 0.01);
+        const newZoom = Math.min(Math.max(0.2, currentZoom * zoomFactor), 3);
+
+        const newPan = {
+          x: mouseX - (mouseX - currentPan.x) * (newZoom / currentZoom),
+          y: mouseY - (mouseY - currentPan.y) * (newZoom / currentZoom),
+        };
+
+        zoomScaleRef.current = newZoom;
+        panOffsetRef.current = newPan;
+        setZoomScale(newZoom);
+        setPanOffset(newPan);
+      } else {
+        // Trackpad 2-finger pan or wheel scroll
+        const newPan = {
+          x: currentPan.x - e.deltaX,
+          y: currentPan.y - e.deltaY,
+        };
+        panOffsetRef.current = newPan;
+        setPanOffset(newPan);
+      }
+    };
+
+    const handleGesture = (e: Event) => {
+      e.preventDefault();
+    };
+
+    container.addEventListener("wheel", handleWheelNative, { passive: false });
+    container.addEventListener("gesturestart", handleGesture, { passive: false });
+    container.addEventListener("gesturechange", handleGesture, { passive: false });
+    container.addEventListener("gestureend", handleGesture, { passive: false });
+
+    return () => {
+      container.removeEventListener("wheel", handleWheelNative);
+      container.removeEventListener("gesturestart", handleGesture);
+      container.removeEventListener("gesturechange", handleGesture);
+      container.removeEventListener("gestureend", handleGesture);
+    };
+  }, [showQuickSearch, setZoomScale, setPanOffset]);
 
   // Drop component from sidebar
   const handleDrop = (e: React.DragEvent) => {
@@ -583,6 +664,49 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       } else if ((e.ctrlKey || e.metaKey) && e.key === "a") {
         e.preventDefault();
         selectAll();
+      } else if (e.altKey && (e.key === "l" || e.key === "L")) {
+        e.preventDefault();
+        autoLayout();
+      } else if (
+        e.key === "ArrowUp" ||
+        e.key === "ArrowDown" ||
+        e.key === "ArrowLeft" ||
+        e.key === "ArrowRight"
+      ) {
+        e.preventDefault();
+        let dx = 0;
+        let dy = 0;
+        if (e.key === "ArrowUp") dy = -30;
+        else if (e.key === "ArrowDown") dy = 30;
+        else if (e.key === "ArrowLeft") dx = -30;
+        else if (e.key === "ArrowRight") dx = 30;
+
+        // 1. If nodes are selected, move them by 30px on grid
+        if (selectedNodeIds.size > 0 && !isSimulating) {
+          const updates = Array.from(selectedNodeIds).map((id) => {
+            const n = nodes.find((node) => node.id === id);
+            return {
+              id,
+              position: {
+                x: Math.round(((n?.position.x || 0) + dx) / 30) * 30,
+                y: Math.round(((n?.position.y || 0) + dy) / 30) * 30,
+              },
+            };
+          });
+          updateNodesPositions(updates, true);
+        } else if (selectedWireIds.size > 0 && !isSimulating) {
+          // 2. If wires are selected, nudge center position by 30px on grid
+          for (const wireId of selectedWireIds) {
+            const w = wires.find((wire) => wire.id === wireId);
+            if (!w) continue;
+            const currentCenter = w.margins?.center || 0;
+            const delta = dy !== 0 ? dy : dx;
+            updateWireMargins(wireId, { ...w.margins, center: currentCenter + delta }, true);
+          }
+        } else {
+          // 3. Pan canvas smoothly with arrow keys if nothing is selected
+          setPanOffset((prev) => ({ x: prev.x - dx, y: prev.y - dy }));
+        }
       } else if (e.key === "Escape") {
         cancelWireDraft();
         clearSelection();
@@ -599,7 +723,29 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
     };
-  }, [deleteSelection, rotateSelectedNodes, copySelection, pasteSelection, undo, redo, duplicateSelection, selectAll, cancelWireDraft, clearSelection, isSimulating, startSimulation, stopSimulation]);
+  }, [
+    deleteSelection,
+    rotateSelectedNodes,
+    copySelection,
+    pasteSelection,
+    undo,
+    redo,
+    duplicateSelection,
+    selectAll,
+    autoLayout,
+    cancelWireDraft,
+    clearSelection,
+    isSimulating,
+    startSimulation,
+    stopSimulation,
+    selectedNodeIds,
+    selectedWireIds,
+    nodes,
+    wires,
+    updateNodesPositions,
+    updateWireMargins,
+    setPanOffset,
+  ]);
 
   // Global mouse release for spring (momentary) buttons
   useEffect(() => {
@@ -634,6 +780,22 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   const nodeMap = new Map(nodes.map((n) => [n.id, n]));
   const isDark = theme === "dark";
 
+  // Precompute component obstacle boxes for orthogonal routing clearance
+  const nodeObstacles = React.useMemo(() => {
+    return nodes.map((n) => {
+      const c = catalog[n.componentId];
+      const w = c?.width || 120;
+      const h = c?.height || 120;
+      return {
+        id: n.id,
+        x: n.position.x - w / 2,
+        y: n.position.y - h / 2,
+        width: w,
+        height: h,
+      };
+    });
+  }, [nodes]);
+
   // Single selected node for Popover
   const selectedNode =
     selectedNodeIds.size === 1 && !isSimulating
@@ -664,7 +826,6 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
-      onWheel={handleWheel}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
       onContextMenu={(e) => {
@@ -683,7 +844,11 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       className={`flex-1 h-[calc(100vh-3.5rem)] relative overflow-hidden select-none transition-colors duration-150 ${
         isDark ? "bg-[#090b10]" : "bg-[#f8fafc]"
       } ${
-        probeActive
+        draggingWireSegment
+          ? draggingWireSegment.orientation === "horizontal"
+            ? "cursor-ns-resize"
+            : "cursor-ew-resize"
+          : probeActive
           ? "cursor-crosshair"
           : draggingNodeState?.hasMoved
           ? "cursor-grabbing"
@@ -692,6 +857,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
           : "cursor-default"
       }`}
       style={{
+        touchAction: "none",
         // Continuous fine mesh grid lines with low opacity (Engineering CAD style)
         backgroundImage: showGrid
           ? isDark
@@ -704,9 +870,9 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     >
       {/* Short Circuit Warning Floating Banner */}
       {shortCircuit && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 bg-red-500/20 border border-red-500/80 text-red-200 px-4 py-2.5 rounded-2xl shadow-2xl backdrop-blur-md animate-bounce">
-          <AlertTriangle className="w-5 h-5 text-red-400 fill-red-500/30" />
-          <span className="text-xs font-semibold">{shortCircuitMessage || "Short circuit detected! Simulation halted."}</span>
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2.5 bg-white border border-zinc-200 text-black px-4 py-2.5 rounded-2xl shadow-2xl animate-bounce">
+          <AlertTriangle className="w-5 h-5 text-red-600 shrink-0" />
+          <span className="text-xs font-semibold text-black">{shortCircuitMessage || "Short circuit detected! Simulation halted."}</span>
         </div>
       )}
 
@@ -764,9 +930,21 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
                 toNode={nodeMap.get(wire.toNodeId)}
                 isSelected={selectedWireIds.has(wire.id)}
                 routingMode={wireRoutingMode}
+                obstacles={nodeObstacles.filter(
+                  (b) => b.id !== wire.fromNodeId && b.id !== wire.toNodeId
+                )}
+                screenToWorld={screenToWorld}
                 onContextMenu={handleWireContextMenu}
                 onWireHover={handleWireHover}
                 onWireLeave={handleWireLeave}
+                onStartDragSegment={(targetWire, orientation, defaultMid) => {
+                  setDraggingWireSegment({
+                    wireId: targetWire.id,
+                    orientation,
+                    defaultMid,
+                    initialMargins: targetWire.margins || { start: 0, center: 0, end: 0 },
+                  });
+                }}
               />
             ))}
 
@@ -1061,6 +1239,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
           }}
           onZoomToFit={handleZoomToFit}
           onResetZoom={handleResetZoom}
+          onAutoLayout={autoLayout}
           onSelectAll={() => selectAll()}
           onToggleProbe={() => setProbeActive((prev) => !prev)}
         />

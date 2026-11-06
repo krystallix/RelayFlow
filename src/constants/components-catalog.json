@@ -985,103 +985,7 @@
       },
       {
         "id": 2,
-        "tag": "13",
-        "direction": 2,
-        "type": "contact",
-        "dx": 30,
-        "dy": 60
-      },
-      {
-        "id": 0,
-        "tag": "15",
-        "direction": 0,
-        "type": "contact",
-        "dx": 0,
-        "dy": -60
-      },
-      {
-        "id": 1,
-        "tag": "16",
-        "direction": 2,
-        "type": "contact",
-        "dx": -30,
-        "dy": 60
-      },
-      {
-        "id": 2,
-        "tag": "18",
-        "direction": 2,
-        "type": "contact",
-        "dx": 30,
-        "dy": 60
-      },
-      {
-        "id": 0,
-        "tag": "15",
-        "direction": 0,
-        "type": "contact",
-        "dx": 0,
-        "dy": -60
-      },
-      {
-        "id": 1,
-        "tag": "16",
-        "direction": 2,
-        "type": "contact",
-        "dx": -30,
-        "dy": 60
-      },
-      {
-        "id": 2,
-        "tag": "18",
-        "direction": 2,
-        "type": "contact",
-        "dx": 30,
-        "dy": 60
-      },
-      {
-        "id": 0,
-        "tag": "15",
-        "direction": 0,
-        "type": "contact",
-        "dx": 0,
-        "dy": -60
-      },
-      {
-        "id": 1,
-        "tag": "16",
-        "direction": 2,
-        "type": "contact",
-        "dx": -30,
-        "dy": 60
-      },
-      {
-        "id": 2,
-        "tag": "18",
-        "direction": 2,
-        "type": "contact",
-        "dx": 30,
-        "dy": 60
-      },
-      {
-        "id": 0,
-        "tag": "95",
-        "direction": 0,
-        "type": "contact",
-        "dx": 0,
-        "dy": -60
-      },
-      {
-        "id": 1,
-        "tag": "96",
-        "direction": 2,
-        "type": "contact",
-        "dx": -30,
-        "dy": 60
-      },
-      {
-        "id": 2,
-        "tag": "98",
+        "tag": "14",
         "direction": 2,
         "type": "contact",
         "dx": 30,
@@ -1104,7 +1008,7 @@
         "enableFrames": "0,1"
       }
     ],
-    "framesCount": 1
+    "framesCount": 2
   },
   "contactCONDelayOff": {
     "id": "contactCONDelayOff",
@@ -1242,70 +1146,6 @@
         "type": "contact",
         "dx": 0,
         "dy": 60
-      },
-      {
-        "id": 0,
-        "tag": "15",
-        "direction": 0,
-        "type": "contact",
-        "dx": 0,
-        "dy": -60
-      },
-      {
-        "id": 1,
-        "tag": "16",
-        "direction": 2,
-        "type": "contact",
-        "dx": 0,
-        "dy": 60
-      },
-      {
-        "id": 0,
-        "tag": "15",
-        "direction": 0,
-        "type": "contact",
-        "dx": 0,
-        "dy": -60
-      },
-      {
-        "id": 1,
-        "tag": "16",
-        "direction": 2,
-        "type": "contact",
-        "dx": 0,
-        "dy": 60
-      },
-      {
-        "id": 0,
-        "tag": "15",
-        "direction": 0,
-        "type": "contact",
-        "dx": 0,
-        "dy": -60
-      },
-      {
-        "id": 1,
-        "tag": "16",
-        "direction": 2,
-        "type": "contact",
-        "dx": 0,
-        "dy": 60
-      },
-      {
-        "id": 0,
-        "tag": "95",
-        "direction": 0,
-        "type": "contact",
-        "dx": 0,
-        "dy": -60
-      },
-      {
-        "id": 1,
-        "tag": "96",
-        "direction": 2,
-        "type": "contact",
-        "dx": 0,
-        "dy": 60
       }
     ],
     "contacts": [
@@ -1317,7 +1157,7 @@
         "enableFrames": "1,0"
       }
     ],
-    "framesCount": 1
+    "framesCount": 2
   },
   "contactNCDelayOff": {
     "id": "contactNCDelayOff",
@@ -1425,70 +1265,6 @@
         "type": "contact",
         "dx": 0,
         "dy": 60
-      },
-      {
-        "id": 0,
-        "tag": "17",
-        "direction": 0,
-        "type": "contact",
-        "dx": 0,
-        "dy": -60
-      },
-      {
-        "id": 1,
-        "tag": "18",
-        "direction": 2,
-        "type": "contact",
-        "dx": 0,
-        "dy": 60
-      },
-      {
-        "id": 0,
-        "tag": "17",
-        "direction": 0,
-        "type": "contact",
-        "dx": 0,
-        "dy": -60
-      },
-      {
-        "id": 1,
-        "tag": "18",
-        "direction": 2,
-        "type": "contact",
-        "dx": 0,
-        "dy": 60
-      },
-      {
-        "id": 0,
-        "tag": "17",
-        "direction": 0,
-        "type": "contact",
-        "dx": 0,
-        "dy": -60
-      },
-      {
-        "id": 1,
-        "tag": "18",
-        "direction": 2,
-        "type": "contact",
-        "dx": 0,
-        "dy": 60
-      },
-      {
-        "id": 0,
-        "tag": "97",
-        "direction": 0,
-        "type": "contact",
-        "dx": 0,
-        "dy": -60
-      },
-      {
-        "id": 1,
-        "tag": "98",
-        "direction": 2,
-        "type": "contact",
-        "dx": 0,
-        "dy": 60
       }
     ],
     "contacts": [
@@ -1500,7 +1276,7 @@
         "enableFrames": "0,1"
       }
     ],
-    "framesCount": 1
+    "framesCount": 2
   },
   "contactNODelayOff": {
     "id": "contactNODelayOff",
@@ -1624,134 +1400,6 @@
         "type": "contact",
         "dx": 30,
         "dy": 60
-      },
-      {
-        "id": 0,
-        "tag": "15",
-        "direction": 0,
-        "type": "contact",
-        "dx": -30,
-        "dy": -60
-      },
-      {
-        "id": 1,
-        "tag": "16",
-        "direction": 2,
-        "type": "contact",
-        "dx": -30,
-        "dy": 60
-      },
-      {
-        "id": 2,
-        "tag": "17",
-        "direction": 0,
-        "type": "contact",
-        "dx": 30,
-        "dy": -60
-      },
-      {
-        "id": 3,
-        "tag": "18",
-        "direction": 2,
-        "type": "contact",
-        "dx": 30,
-        "dy": 60
-      },
-      {
-        "id": 0,
-        "tag": "15",
-        "direction": 0,
-        "type": "contact",
-        "dx": -30,
-        "dy": -60
-      },
-      {
-        "id": 1,
-        "tag": "16",
-        "direction": 2,
-        "type": "contact",
-        "dx": -30,
-        "dy": 60
-      },
-      {
-        "id": 2,
-        "tag": "17",
-        "direction": 0,
-        "type": "contact",
-        "dx": 30,
-        "dy": -60
-      },
-      {
-        "id": 3,
-        "tag": "18",
-        "direction": 2,
-        "type": "contact",
-        "dx": 30,
-        "dy": 60
-      },
-      {
-        "id": 0,
-        "tag": "15",
-        "direction": 0,
-        "type": "contact",
-        "dx": -30,
-        "dy": -60
-      },
-      {
-        "id": 1,
-        "tag": "16",
-        "direction": 2,
-        "type": "contact",
-        "dx": -30,
-        "dy": 60
-      },
-      {
-        "id": 2,
-        "tag": "17",
-        "direction": 0,
-        "type": "contact",
-        "dx": 30,
-        "dy": -60
-      },
-      {
-        "id": 3,
-        "tag": "18",
-        "direction": 2,
-        "type": "contact",
-        "dx": 30,
-        "dy": 60
-      },
-      {
-        "id": 0,
-        "tag": "95",
-        "direction": 0,
-        "type": "contact",
-        "dx": -30,
-        "dy": -60
-      },
-      {
-        "id": 1,
-        "tag": "96",
-        "direction": 2,
-        "type": "contact",
-        "dx": -30,
-        "dy": 60
-      },
-      {
-        "id": 2,
-        "tag": "97",
-        "direction": 0,
-        "type": "contact",
-        "dx": 30,
-        "dy": -60
-      },
-      {
-        "id": 3,
-        "tag": "98",
-        "direction": 2,
-        "type": "contact",
-        "dx": 30,
-        "dy": 60
       }
     ],
     "contacts": [
@@ -1770,7 +1418,7 @@
         "enableFrames": "0,1"
       }
     ],
-    "framesCount": 1
+    "framesCount": 2
   },
   "contactNONCDelayOff": {
     "id": "contactNONCDelayOff",
@@ -3919,6 +3567,52 @@
     ],
     "framesCount": 2
   },
+  "junctionDot": {
+    "id": "junctionDot",
+    "name": "Connection Point",
+    "description": "Wire Junction Dot",
+    "category": "others",
+    "type": "junction",
+    "tagType": "junctions",
+    "width": 24,
+    "height": 24,
+    "nodes": [
+      {
+        "id": 0,
+        "tag": "",
+        "direction": 0,
+        "type": "junction",
+        "dx": 0,
+        "dy": 0
+      },
+      {
+        "id": 1,
+        "tag": "",
+        "direction": 2,
+        "type": "junction",
+        "dx": 0,
+        "dy": 0
+      },
+      {
+        "id": 2,
+        "tag": "",
+        "direction": 1,
+        "type": "junction",
+        "dx": 0,
+        "dy": 0
+      },
+      {
+        "id": 3,
+        "tag": "",
+        "direction": 3,
+        "type": "junction",
+        "dx": 0,
+        "dy": 0
+      }
+    ],
+    "contacts": [],
+    "framesCount": 1
+  },
   "junction2p": {
     "id": "junction2p",
     "name": "Connection 2P",
@@ -5546,127 +5240,7 @@
       },
       {
         "id": 2,
-        "tag": "13",
-        "direction": 2,
-        "type": "contact",
-        "dx": 30,
-        "dy": 60
-      },
-      {
-        "id": 0,
-        "tag": "11",
-        "direction": 0,
-        "type": "contact",
-        "dx": 0,
-        "dy": -60
-      },
-      {
-        "id": 1,
-        "tag": "12",
-        "direction": 2,
-        "type": "contact",
-        "dx": -30,
-        "dy": 60
-      },
-      {
-        "id": 2,
-        "tag": "13",
-        "direction": 2,
-        "type": "contact",
-        "dx": 30,
-        "dy": 60
-      },
-      {
-        "id": 0,
-        "tag": "11",
-        "direction": 0,
-        "type": "contact",
-        "dx": 0,
-        "dy": -60
-      },
-      {
-        "id": 1,
-        "tag": "12",
-        "direction": 2,
-        "type": "contact",
-        "dx": -30,
-        "dy": 60
-      },
-      {
-        "id": 2,
-        "tag": "13",
-        "direction": 2,
-        "type": "contact",
-        "dx": 30,
-        "dy": 60
-      },
-      {
-        "id": 0,
-        "tag": "11",
-        "direction": 0,
-        "type": "contact",
-        "dx": 0,
-        "dy": -60
-      },
-      {
-        "id": 1,
-        "tag": "12",
-        "direction": 2,
-        "type": "contact",
-        "dx": -30,
-        "dy": 60
-      },
-      {
-        "id": 2,
-        "tag": "13",
-        "direction": 2,
-        "type": "contact",
-        "dx": 30,
-        "dy": 60
-      },
-      {
-        "id": 0,
-        "tag": "11",
-        "direction": 0,
-        "type": "contact",
-        "dx": 0,
-        "dy": -60
-      },
-      {
-        "id": 1,
-        "tag": "12",
-        "direction": 2,
-        "type": "contact",
-        "dx": -30,
-        "dy": 60
-      },
-      {
-        "id": 2,
-        "tag": "13",
-        "direction": 2,
-        "type": "contact",
-        "dx": 30,
-        "dy": 60
-      },
-      {
-        "id": 0,
-        "tag": "11",
-        "direction": 0,
-        "type": "contact",
-        "dx": 0,
-        "dy": -60
-      },
-      {
-        "id": 1,
-        "tag": "12",
-        "direction": 2,
-        "type": "contact",
-        "dx": -30,
-        "dy": 60
-      },
-      {
-        "id": 2,
-        "tag": "13",
+        "tag": "14",
         "direction": 2,
         "type": "contact",
         "dx": 30,
@@ -5689,7 +5263,7 @@
         "enableFrames": "0,1"
       }
     ],
-    "framesCount": 1
+    "framesCount": 2
   },
   "rollerNC": {
     "id": "rollerNC",
@@ -5717,86 +5291,6 @@
         "type": "contact",
         "dx": 0,
         "dy": 60
-      },
-      {
-        "id": 0,
-        "tag": "11",
-        "direction": 0,
-        "type": "contact",
-        "dx": 0,
-        "dy": -60
-      },
-      {
-        "id": 1,
-        "tag": "12",
-        "direction": 2,
-        "type": "contact",
-        "dx": 0,
-        "dy": 60
-      },
-      {
-        "id": 0,
-        "tag": "11",
-        "direction": 0,
-        "type": "contact",
-        "dx": 0,
-        "dy": -60
-      },
-      {
-        "id": 1,
-        "tag": "12",
-        "direction": 2,
-        "type": "contact",
-        "dx": 0,
-        "dy": 60
-      },
-      {
-        "id": 0,
-        "tag": "11",
-        "direction": 0,
-        "type": "contact",
-        "dx": 0,
-        "dy": -60
-      },
-      {
-        "id": 1,
-        "tag": "12",
-        "direction": 2,
-        "type": "contact",
-        "dx": 0,
-        "dy": 60
-      },
-      {
-        "id": 0,
-        "tag": "11",
-        "direction": 0,
-        "type": "contact",
-        "dx": 0,
-        "dy": -60
-      },
-      {
-        "id": 1,
-        "tag": "12",
-        "direction": 2,
-        "type": "contact",
-        "dx": 0,
-        "dy": 60
-      },
-      {
-        "id": 0,
-        "tag": "11",
-        "direction": 0,
-        "type": "contact",
-        "dx": 0,
-        "dy": -60
-      },
-      {
-        "id": 1,
-        "tag": "12",
-        "direction": 2,
-        "type": "contact",
-        "dx": 0,
-        "dy": 60
       }
     ],
     "contacts": [
@@ -5808,7 +5302,7 @@
         "enableFrames": "1,0"
       }
     ],
-    "framesCount": 1
+    "framesCount": 2
   },
   "rollerNO": {
     "id": "rollerNO",
@@ -5836,86 +5330,6 @@
         "type": "contact",
         "dx": 0,
         "dy": 60
-      },
-      {
-        "id": 0,
-        "tag": "13",
-        "direction": 0,
-        "type": "contact",
-        "dx": 0,
-        "dy": -60
-      },
-      {
-        "id": 1,
-        "tag": "14",
-        "direction": 2,
-        "type": "contact",
-        "dx": 0,
-        "dy": 60
-      },
-      {
-        "id": 0,
-        "tag": "13",
-        "direction": 0,
-        "type": "contact",
-        "dx": 0,
-        "dy": -60
-      },
-      {
-        "id": 1,
-        "tag": "14",
-        "direction": 2,
-        "type": "contact",
-        "dx": 0,
-        "dy": 60
-      },
-      {
-        "id": 0,
-        "tag": "13",
-        "direction": 0,
-        "type": "contact",
-        "dx": 0,
-        "dy": -60
-      },
-      {
-        "id": 1,
-        "tag": "14",
-        "direction": 2,
-        "type": "contact",
-        "dx": 0,
-        "dy": 60
-      },
-      {
-        "id": 0,
-        "tag": "13",
-        "direction": 0,
-        "type": "contact",
-        "dx": 0,
-        "dy": -60
-      },
-      {
-        "id": 1,
-        "tag": "14",
-        "direction": 2,
-        "type": "contact",
-        "dx": 0,
-        "dy": 60
-      },
-      {
-        "id": 0,
-        "tag": "13",
-        "direction": 0,
-        "type": "contact",
-        "dx": 0,
-        "dy": -60
-      },
-      {
-        "id": 1,
-        "tag": "14",
-        "direction": 2,
-        "type": "contact",
-        "dx": 0,
-        "dy": 60
       }
     ],
     "contacts": [
@@ -5927,7 +5341,7 @@
         "enableFrames": "0,1"
       }
     ],
-    "framesCount": 1
+    "framesCount": 2
   },
   "rollerNONC": {
     "id": "rollerNONC",
@@ -5940,166 +5354,6 @@
     "height": 120,
     "svgPath": "/symbols/rollerNONC.svg",
     "nodes": [
-      {
-        "id": 0,
-        "tag": "11",
-        "direction": 0,
-        "type": "contact",
-        "dx": -30,
-        "dy": -60
-      },
-      {
-        "id": 1,
-        "tag": "12",
-        "direction": 2,
-        "type": "contact",
-        "dx": -30,
-        "dy": 60
-      },
-      {
-        "id": 2,
-        "tag": "13",
-        "direction": 0,
-        "type": "contact",
-        "dx": 30,
-        "dy": -60
-      },
-      {
-        "id": 3,
-        "tag": "14",
-        "direction": 2,
-        "type": "contact",
-        "dx": 30,
-        "dy": 60
-      },
-      {
-        "id": 0,
-        "tag": "11",
-        "direction": 0,
-        "type": "contact",
-        "dx": -30,
-        "dy": -60
-      },
-      {
-        "id": 1,
-        "tag": "12",
-        "direction": 2,
-        "type": "contact",
-        "dx": -30,
-        "dy": 60
-      },
-      {
-        "id": 2,
-        "tag": "13",
-        "direction": 0,
-        "type": "contact",
-        "dx": 30,
-        "dy": -60
-      },
-      {
-        "id": 3,
-        "tag": "14",
-        "direction": 2,
-        "type": "contact",
-        "dx": 30,
-        "dy": 60
-      },
-      {
-        "id": 0,
-        "tag": "11",
-        "direction": 0,
-        "type": "contact",
-        "dx": -30,
-        "dy": -60
-      },
-      {
-        "id": 1,
-        "tag": "12",
-        "direction": 2,
-        "type": "contact",
-        "dx": -30,
-        "dy": 60
-      },
-      {
-        "id": 2,
-        "tag": "13",
-        "direction": 0,
-        "type": "contact",
-        "dx": 30,
-        "dy": -60
-      },
-      {
-        "id": 3,
-        "tag": "14",
-        "direction": 2,
-        "type": "contact",
-        "dx": 30,
-        "dy": 60
-      },
-      {
-        "id": 0,
-        "tag": "11",
-        "direction": 0,
-        "type": "contact",
-        "dx": -30,
-        "dy": -60
-      },
-      {
-        "id": 1,
-        "tag": "12",
-        "direction": 2,
-        "type": "contact",
-        "dx": -30,
-        "dy": 60
-      },
-      {
-        "id": 2,
-        "tag": "13",
-        "direction": 0,
-        "type": "contact",
-        "dx": 30,
-        "dy": -60
-      },
-      {
-        "id": 3,
-        "tag": "14",
-        "direction": 2,
-        "type": "contact",
-        "dx": 30,
-        "dy": 60
-      },
-      {
-        "id": 0,
-        "tag": "11",
-        "direction": 0,
-        "type": "contact",
-        "dx": -30,
-        "dy": -60
-      },
-      {
-        "id": 1,
-        "tag": "12",
-        "direction": 2,
-        "type": "contact",
-        "dx": -30,
-        "dy": 60
-      },
-      {
-        "id": 2,
-        "tag": "13",
-        "direction": 0,
-        "type": "contact",
-        "dx": 30,
-        "dy": -60
-      },
-      {
-        "id": 3,
-        "tag": "14",
-        "direction": 2,
-        "type": "contact",
-        "dx": 30,
-        "dy": 60
-      },
       {
         "id": 0,
         "tag": "11",
@@ -6149,7 +5403,7 @@
         "enableFrames": "0,1"
       }
     ],
-    "framesCount": 1
+    "framesCount": 2
   },
   "siren": {
     "id": "siren",
