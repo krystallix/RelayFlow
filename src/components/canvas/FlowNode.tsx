@@ -242,10 +242,10 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
       {hasLabel && (
         <div
           style={labelStyle}
-          className={`absolute flex flex-col gap-0.5 pointer-events-none select-none text-xs font-mono whitespace-nowrap z-20 px-1.5 py-0.5 rounded-md backdrop-blur-xs transition-all ${
+          className={`absolute flex flex-col gap-0.5 pointer-events-none select-none text-xs font-mono whitespace-nowrap z-20 px-1.5 py-0.5 rounded-md transition-all ${
             isDark
-              ? "bg-[#090b10]/80 border border-white/10 shadow-sm"
-              : "bg-white/85 border border-slate-200/80 shadow-xs"
+              ? "bg-[#090b10]/40 border border-white/5 shadow-xs"
+              : "bg-white/45 border border-slate-200/50 shadow-xs"
           } ${labelContainerClass}`}
         >
           {/* Tag & Cross-reference row */}

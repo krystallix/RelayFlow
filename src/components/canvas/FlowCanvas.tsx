@@ -329,15 +329,15 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     }
 
     // Middle click or Space+Click initiates Pan
-    if (e.button === 1 || isSpacePressed || (e.button === 0 && e.target === containerRef.current)) {
+    if (e.button === 1 || isSpacePressed) {
       setIsPanning(true);
       setPanStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
       if (!e.shiftKey) clearSelection();
       return;
     }
 
+    // Left Click on empty canvas: Start Marquee Selection (CAD Box Selection)
     if (e.button === 0) {
-      // Start marquee selection on empty area
       const worldPos = screenToWorld(e.clientX, e.clientY);
       setMarquee({ startX: worldPos.x, startY: worldPos.y, currentX: worldPos.x, currentY: worldPos.y });
       if (!e.shiftKey) clearSelection();
@@ -1126,8 +1126,10 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
           ? "cursor-crosshair"
           : draggingNodeState?.hasMoved
           ? "cursor-grabbing"
-          : isPanning
+          : isPanning || isSpacePressed
           ? "cursor-grab active:cursor-grabbing"
+          : marquee
+          ? "cursor-crosshair"
           : "cursor-default"
       }`}
       style={{
@@ -1295,7 +1297,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
           ))}
         </div>
 
-        {/* Marquee Selection Rectangle */}
+        {/* Marquee Selection Rectangle (CAD Blueprint Box Selection) */}
         {marquee && (
           <div
             style={{
@@ -1304,7 +1306,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
               width: `${Math.abs(marquee.currentX - marquee.startX)}px`,
               height: `${Math.abs(marquee.currentY - marquee.startY)}px`,
             }}
-            className="absolute border border-amber-400 bg-amber-500/10 rounded pointer-events-none"
+            className="absolute border border-dashed border-amber-400 bg-amber-500/15 backdrop-blur-[0.5px] rounded-xs pointer-events-none shadow-[0_0_12px_rgba(251,191,36,0.25)] z-30"
           />
         )}
       </div>
