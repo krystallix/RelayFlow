@@ -251,7 +251,7 @@ export const NodePopover: React.FC<NodePopoverProps> = ({
               onChange={(e) => setTagValue(e.target.value)}
               className={`flex-1 px-2 py-1 rounded-lg text-xs font-mono border focus:outline-none focus:border-zinc-500 ${
                 isDark
-                  ? "bg-[#1c1c1c] border-white/10 text-white"
+                  ? "bg-black/40 border-white/10 text-white"
                   : "bg-slate-50 border-slate-300 text-slate-800"
               }`}
               autoFocus
@@ -267,7 +267,7 @@ export const NodePopover: React.FC<NodePopoverProps> = ({
               onChange={(e) => setCommentValue(e.target.value)}
               className={`flex-1 px-2 py-1 rounded-lg text-xs border focus:outline-none focus:border-zinc-500 ${
                 isDark
-                  ? "bg-[#1c1c1c] border-white/10 text-white"
+                  ? "bg-black/40 border-white/10 text-white"
                   : "bg-slate-50 border-slate-300 text-slate-800"
               }`}
             />
@@ -286,7 +286,7 @@ export const NodePopover: React.FC<NodePopoverProps> = ({
                 onChange={(e) => setTimeValue(parseFloat(e.target.value) || 0)}
                 className={`flex-1 px-2 py-1 rounded-lg text-xs font-mono border focus:outline-none focus:border-zinc-500 ${
                   isDark
-                    ? "bg-[#1c1c1c] border-white/10 text-white"
+                    ? "bg-black/40 border-white/10 text-white"
                     : "bg-slate-50 border-slate-300 text-slate-800"
                 }`}
               />

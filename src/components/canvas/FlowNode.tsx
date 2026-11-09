@@ -60,7 +60,7 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
           onContextMenu?.(node, e);
         }}
         className={`absolute flex items-center justify-center cursor-pointer select-none group z-20 ${
-          isSelected ? "ring-2 ring-amber-400 ring-offset-2 ring-offset-[#1c1c1c] rounded-full" : ""
+          isSelected ? "ring-2 ring-amber-400 ring-offset-2 rounded-full" : ""
         }`}
         title="Junction Dot (Click to select & delete)"
       >
@@ -248,15 +248,15 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
           style={labelStyle}
           className={`absolute flex flex-col gap-0.5 pointer-events-none select-none text-xs font-mono whitespace-nowrap z-20 px-1.5 py-0.5 rounded-md transition-all ${
             isDark
-              ? "bg-[#1c1c1c]/90 border border-white/10 shadow-xs"
-              : "bg-white/60 border border-slate-200 shadow-xs"
+              ? "bg-[#090b10]/40 border border-white/5 shadow-xs"
+              : "bg-white/45 border border-slate-200/50 shadow-xs"
           } ${labelContainerClass}`}
         >
           {/* Tag & Cross-reference row */}
           {(showTag || pairedNodes.length > 0) && (
             <div className="flex items-center gap-1.5">
               {showTag && (
-                <span className={`font-bold tracking-tight text-xs ${isDark ? "text-white" : "text-slate-900"}`}>
+                <span className={`font-bold tracking-tight text-xs ${isDark ? "text-amber-400" : "text-amber-600"}`}>
                   {node.tag}
                 </span>
               )}
@@ -264,8 +264,8 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
                 <span
                   className={`text-[9px] px-1 py-0.2 rounded font-sans font-semibold border ${
                     isDark
-                      ? "bg-white/10 text-zinc-200 border-white/20"
-                      : "bg-slate-200 text-slate-800 border-slate-300"
+                      ? "bg-amber-500/15 text-amber-300 border-amber-500/30"
+                      : "bg-amber-100 text-amber-800 border-amber-300"
                   }`}
                   title={`Paired with ${pairedNodes.length} component(s): ${pairedNodes.map((p) => p.name).join(", ")}`}
                 >
@@ -287,7 +287,7 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
             <div
               className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono font-bold border mt-0.5 shadow-xs ${
                 node.isEnergized
-                  ? "bg-white text-black border-white animate-pulse"
+                  ? "bg-amber-500 text-black border-amber-400 animate-pulse"
                   : isDark
                   ? "bg-zinc-800 text-zinc-300 border-zinc-700"
                   : "bg-slate-200 text-slate-700 border-slate-300"
@@ -428,16 +428,16 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
             className="absolute -translate-x-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center group/port cursor-crosshair z-30"
             title={`Terminal ${transformed.tag || transformed.id} (${transformed.type})`}
           >
-            {/* Magnetic Glow Ring: visible on mobile or when drafting/selected, glows on hover */}
+            {/* Magnetic Glow Ring: visible & pulsing on mobile or when drafting/selected, glows on hover */}
             <div
               className={`w-3.5 h-3.5 rounded-full flex items-center justify-center transition-all duration-150 ${
                 wireDraft || isSelected
-                  ? "opacity-100 scale-110 shadow-[0_0_8px_rgba(245,158,11,0.6)]"
+                  ? "opacity-95 scale-110 shadow-[0_0_10px_rgba(251,191,36,0.9)] animate-pulse"
                   : "opacity-40 md:opacity-0 group-hover:opacity-100 group-hover/port:scale-125"
               } ${
                 isDark
-                  ? "bg-[#1c1c1c] border border-amber-400"
-                  : "bg-white border border-amber-500"
+                  ? "bg-black/90 border border-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.7)]"
+                  : "bg-white border border-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]"
               }`}
             >
               <div className="w-1.5 h-1.5 rounded-full bg-amber-400" />
@@ -455,7 +455,7 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
                   : "left-full ml-1.5 top-1/2 -translate-y-1/2"
               } ${
                 isDark
-                  ? "bg-[#1c1c1c]/95 text-zinc-200 border-white/20 shadow-lg"
+                  ? "bg-black/95 text-amber-300 border-amber-500/40 shadow-lg"
                   : "bg-white text-slate-800 border-slate-300 shadow-md"
               }`}
             >
