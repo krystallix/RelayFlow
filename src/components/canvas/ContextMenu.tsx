@@ -17,6 +17,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { CircuitNode, CircuitWire } from "@/engine/types";
+import { useIsMac, useModifierKey } from "@/utils/platform";
 
 export type ContextMenuTarget =
   | { type: "node"; node: CircuitNode; worldPos: { x: number; y: number } }
@@ -69,6 +70,8 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
   onToggleProbe,
 }) => {
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const isMac = useIsMac();
+  const modKey = useModifierKey();
 
   // Close on outside click or Escape
   useEffect(() => {
@@ -108,6 +111,8 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
           ? "bg-[#141824]/95 border-white/10 text-zinc-200 shadow-black/60"
           : "bg-white/95 border-slate-200 text-slate-800 shadow-slate-300/60"
       }`}
+      onMouseDown={(e) => e.stopPropagation()}
+      onTouchStart={(e) => e.stopPropagation()}
       onClick={(e) => e.stopPropagation()}
     >
       {/* 1. NODE CONTEXT MENU */}
@@ -116,7 +121,9 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
           <div className="px-3 py-1.5 border-b border-white/5 text-[11px] font-semibold text-zinc-400 flex items-center justify-between">
             <span className="truncate max-w-[130px]">{target.node.name}</span>
             {target.node.tag && (
-              <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-amber-500/10 text-amber-500 font-bold">
+              <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold border ${
+                isDark ? "bg-white/10 text-zinc-200 border-white/10" : "bg-slate-200 text-slate-800 border-slate-300"
+              }`}>
                 {target.node.tag}
               </span>
             )}
@@ -125,11 +132,12 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
           <div className="py-1">
             {isSimulating && (
               <button
+                type="button"
                 onClick={() => {
                   onToggleNodeState?.(target.node.id);
                   onClose();
                 }}
-                className={`w-full px-2.5 py-1.5 rounded-lg flex items-center gap-2.5 text-xs text-left font-medium transition-colors ${
+                className={`w-full px-2.5 py-1.5 rounded-lg flex items-center gap-2.5 text-xs text-left font-medium transition-colors cursor-pointer ${
                   isDark ? "hover:bg-white/10" : "hover:bg-slate-100"
                 }`}
               >
@@ -139,11 +147,12 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
             )}
 
             <button
+              type="button"
               onClick={() => {
                 onRotateNode?.(target.node.id);
                 onClose();
               }}
-              className={`w-full px-2.5 py-1.5 rounded-lg flex items-center justify-between text-xs text-left font-medium transition-colors ${
+              className={`w-full px-2.5 py-1.5 rounded-lg flex items-center justify-between text-xs text-left font-medium transition-colors cursor-pointer ${
                 isDark ? "hover:bg-white/10" : "hover:bg-slate-100"
               }`}
             >
@@ -151,15 +160,15 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
                 <RotateCw className="w-3.5 h-3.5 text-zinc-400" />
                 <span>Rotate 90° CW</span>
               </div>
-              <span className="text-[10px] text-zinc-500 font-mono">R</span>
             </button>
 
             <button
+              type="button"
               onClick={() => {
                 onDuplicate?.();
                 onClose();
               }}
-              className={`w-full px-2.5 py-1.5 rounded-lg flex items-center justify-between text-xs text-left font-medium transition-colors ${
+              className={`w-full px-2.5 py-1.5 rounded-lg flex items-center justify-between text-xs text-left font-medium transition-colors cursor-pointer ${
                 isDark ? "hover:bg-white/10" : "hover:bg-slate-100"
               }`}
             >
@@ -167,15 +176,16 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
                 <Copy className="w-3.5 h-3.5 text-zinc-400" />
                 <span>Duplicate</span>
               </div>
-              <span className="text-[10px] text-zinc-500 font-mono">Ctrl+D</span>
+              <span className="text-[10px] text-zinc-500 font-mono">{modKey}+D</span>
             </button>
 
             <button
+              type="button"
               onClick={() => {
                 onEditNode?.(target.node);
                 onClose();
               }}
-              className={`w-full px-2.5 py-1.5 rounded-lg flex items-center gap-2.5 text-xs text-left font-medium transition-colors ${
+              className={`w-full px-2.5 py-1.5 rounded-lg flex items-center gap-2.5 text-xs text-left font-medium transition-colors cursor-pointer ${
                 isDark ? "hover:bg-white/10" : "hover:bg-slate-100"
               }`}
             >
@@ -190,13 +200,15 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
                 onDeleteNode?.(target.node.id);
                 onClose();
               }}
-              className="w-full px-2.5 py-1.5 rounded-lg flex items-center justify-between text-xs text-left font-medium text-red-400 hover:bg-red-500/10 transition-colors"
+              className={`w-full px-2.5 py-1.5 rounded-lg flex items-center justify-between text-xs text-left font-medium transition-colors ${
+                isDark ? "text-zinc-300 hover:bg-white/10" : "text-slate-800 hover:bg-slate-100"
+              }`}
             >
               <div className="flex items-center gap-2.5">
-                <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                <Trash2 className="w-3.5 h-3.5 text-zinc-400" />
                 <span>Delete</span>
               </div>
-              <span className="text-[10px] text-red-400/70 font-mono">Del</span>
+              <span className="text-[10px] text-zinc-500 font-mono">Del</span>
             </button>
           </div>
         </>
@@ -208,7 +220,9 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
           <div className="px-3 py-1.5 border-b border-white/5 text-[11px] font-semibold text-zinc-400 flex items-center justify-between">
             <span>Wire Segment</span>
             {target.wire.potential && (
-              <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-red-500/10 text-red-400 font-bold">
+              <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold border ${
+                isDark ? "bg-white/10 text-zinc-200 border-white/10" : "bg-slate-200 text-slate-800 border-slate-300"
+              }`}>
                 {target.wire.potential}
               </span>
             )}
@@ -216,11 +230,12 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
 
           <div className="py-1">
             <button
+              type="button"
               onClick={() => {
                 onInsertJunction?.(target.wire.id, target.worldPos);
                 onClose();
               }}
-              className={`w-full px-2.5 py-1.5 rounded-lg flex items-center gap-2.5 text-xs text-left font-medium transition-colors ${
+              className={`w-full px-2.5 py-1.5 rounded-lg flex items-center gap-2.5 text-xs text-left font-medium transition-colors cursor-pointer ${
                 isDark ? "hover:bg-white/10" : "hover:bg-slate-100"
               }`}
             >
@@ -231,17 +246,20 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
             <div className="my-1 border-t border-white/5" />
 
             <button
+              type="button"
               onClick={() => {
                 onDeleteWire?.(target.wire.id);
                 onClose();
               }}
-              className="w-full px-2.5 py-1.5 rounded-lg flex items-center justify-between text-xs text-left font-medium text-red-400 hover:bg-red-500/10 transition-colors"
+              className={`w-full px-2.5 py-1.5 rounded-lg flex items-center justify-between text-xs text-left font-medium transition-colors cursor-pointer ${
+                isDark ? "text-zinc-300 hover:bg-white/10" : "text-slate-800 hover:bg-slate-100"
+              }`}
             >
               <div className="flex items-center gap-2.5">
-                <Trash2 className="w-3.5 h-3.5 text-red-400" />
+                <Trash2 className="w-3.5 h-3.5 text-zinc-400" />
                 <span>Delete Wire</span>
               </div>
-              <span className="text-[10px] text-red-400/70 font-mono">Del</span>
+              <span className="text-[10px] text-zinc-500 font-mono">Del</span>
             </button>
           </div>
         </>
@@ -251,27 +269,29 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
       {target.type === "canvas" && (
         <div className="py-1">
           <button
+            type="button"
             onClick={() => {
               onAutoLayout?.();
               onClose();
             }}
-            className={`w-full px-2.5 py-1.5 rounded-lg flex items-center justify-between text-xs text-left font-medium transition-colors ${
-              isDark ? "hover:bg-white/10 text-amber-300" : "hover:bg-slate-100 text-amber-700"
+            className={`w-full px-2.5 py-1.5 rounded-lg flex items-center justify-between text-xs text-left font-medium transition-colors cursor-pointer ${
+              isDark ? "hover:bg-white/10 text-zinc-200" : "hover:bg-slate-100 text-slate-800"
             }`}
           >
             <div className="flex items-center gap-2.5">
-              <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+              <Sparkles className="w-3.5 h-3.5 text-zinc-400" />
               <span>Auto Layout Circuit</span>
             </div>
-            <span className="text-[10px] text-zinc-500 font-mono">Alt+L</span>
+            <span className="text-[10px] text-zinc-500 font-mono">{isMac ? "⌥L" : "Alt+L"}</span>
           </button>
 
           <button
+            type="button"
             onClick={() => {
               onOpenSearch?.();
               onClose();
             }}
-            className={`w-full px-2.5 py-1.5 rounded-lg flex items-center justify-between text-xs text-left font-medium transition-colors ${
+            className={`w-full px-2.5 py-1.5 rounded-lg flex items-center justify-between text-xs text-left font-medium transition-colors cursor-pointer ${
               isDark ? "hover:bg-white/10" : "hover:bg-slate-100"
             }`}
           >
@@ -279,15 +299,16 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
               <Search className="w-3.5 h-3.5 text-zinc-400" />
               <span>Add Symbol...</span>
             </div>
-            <span className="text-[10px] text-zinc-500 font-mono">Ctrl+K</span>
+            <span className="text-[10px] text-zinc-500 font-mono">{modKey}+K</span>
           </button>
 
           <button
+            type="button"
             onClick={() => {
               onToggleProbe?.();
               onClose();
             }}
-            className={`w-full px-2.5 py-1.5 rounded-lg flex items-center justify-between text-xs text-left font-medium transition-colors ${
+            className={`w-full px-2.5 py-1.5 rounded-lg flex items-center justify-between text-xs text-left font-medium transition-colors cursor-pointer ${
               isDark ? "hover:bg-white/10" : "hover:bg-slate-100"
             }`}
           >
@@ -307,11 +328,12 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
           <div className="my-1 border-t border-white/5" />
 
           <button
+            type="button"
             onClick={() => {
               onZoomToFit?.();
               onClose();
             }}
-            className={`w-full px-2.5 py-1.5 rounded-lg flex items-center gap-2.5 text-xs text-left font-medium transition-colors ${
+            className={`w-full px-2.5 py-1.5 rounded-lg flex items-center gap-2.5 text-xs text-left font-medium transition-colors cursor-pointer ${
               isDark ? "hover:bg-white/10" : "hover:bg-slate-100"
             }`}
           >
@@ -320,11 +342,12 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
           </button>
 
           <button
+            type="button"
             onClick={() => {
               onResetZoom?.();
               onClose();
             }}
-            className={`w-full px-2.5 py-1.5 rounded-lg flex items-center gap-2.5 text-xs text-left font-medium transition-colors ${
+            className={`w-full px-2.5 py-1.5 rounded-lg flex items-center gap-2.5 text-xs text-left font-medium transition-colors cursor-pointer ${
               isDark ? "hover:bg-white/10" : "hover:bg-slate-100"
             }`}
           >
@@ -335,11 +358,12 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
           <div className="my-1 border-t border-white/5" />
 
           <button
+            type="button"
             onClick={() => {
               onSelectAll?.();
               onClose();
             }}
-            className={`w-full px-2.5 py-1.5 rounded-lg flex items-center justify-between text-xs text-left font-medium transition-colors ${
+            className={`w-full px-2.5 py-1.5 rounded-lg flex items-center justify-between text-xs text-left font-medium transition-colors cursor-pointer ${
               isDark ? "hover:bg-white/10" : "hover:bg-slate-100"
             }`}
           >
@@ -347,7 +371,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
               <CheckSquare className="w-3.5 h-3.5 text-zinc-400" />
               <span>Select All</span>
             </div>
-            <span className="text-[10px] text-zinc-500 font-mono">Ctrl+A</span>
+            <span className="text-[10px] text-zinc-500 font-mono">{modKey}+A</span>
           </button>
         </div>
       )}

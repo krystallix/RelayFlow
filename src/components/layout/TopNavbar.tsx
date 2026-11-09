@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { useCircuitStore } from "@/store/useCircuitStore";
 import { FileAdapter } from "@/engine/serializer/FileAdapter";
+import { useIsMac, useModifierKey } from "@/utils/platform";
 
 interface TopNavbarProps {
   onZoomIn: () => void;
@@ -86,6 +87,8 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
   } = useCircuitStore();
 
   const isDark = theme === "dark";
+  const isMac = useIsMac();
+  const modKey = useModifierKey();
 
   // Close menus on click outside
   useEffect(() => {
@@ -293,7 +296,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                   <FilePlus className="w-4 h-4 text-zinc-400" />
                   <div className="flex-1 flex justify-between">
                     <span>New Circuit</span>
-                    <span className="text-[10px] text-zinc-400 font-mono">Ctrl+N</span>
+                    <span className="text-[10px] text-zinc-400 font-mono">{modKey}+N</span>
                   </div>
                 </button>
 
@@ -397,7 +400,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                     <Undo2 className="w-3.5 h-3.5" />
                     <span>Undo</span>
                   </div>
-                  <span className="text-[10px] text-zinc-400 font-mono">Ctrl+Z</span>
+                  <span className="text-[10px] text-zinc-400 font-mono">{modKey}+Z</span>
                 </button>
 
                 <button
@@ -411,7 +414,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                     <Redo2 className="w-3.5 h-3.5" />
                     <span>Redo</span>
                   </div>
-                  <span className="text-[10px] text-zinc-400 font-mono">Ctrl+Y</span>
+                  <span className="text-[10px] text-zinc-400 font-mono">{modKey}+Y</span>
                 </button>
 
                 <div className={`my-1 h-[1px] ${isDark ? "bg-white/10" : "bg-slate-200"}`} />
@@ -426,20 +429,20 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                     <Copy className="w-3.5 h-3.5" />
                     <span>Duplicate</span>
                   </div>
-                  <span className="text-[10px] text-zinc-400 font-mono">Ctrl+D</span>
+                  <span className="text-[10px] text-zinc-400 font-mono">{modKey}+D</span>
                 </button>
 
                 <button
                   onClick={() => { autoLayout(); setActiveMenu(null); }}
                   className={`w-full text-left px-3 py-2 rounded-lg flex items-center justify-between text-xs transition-colors ${
-                    isDark ? "hover:bg-white/10 text-amber-300" : "hover:bg-slate-100 text-amber-700"
+                    isDark ? "hover:bg-white/10 text-zinc-200" : "hover:bg-slate-100 text-slate-800"
                   }`}
                 >
                   <div className="flex items-center gap-2">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                    <Sparkles className="w-3.5 h-3.5 text-zinc-400" />
                     <span className="font-medium">Auto Layout Circuit</span>
                   </div>
-                  <span className="text-[10px] text-zinc-400 font-mono">Alt+L</span>
+                  <span className="text-[10px] text-zinc-400 font-mono">{isMac ? "⌥L" : "Alt+L"}</span>
                 </button>
 
                 <div className={`my-1 h-[1px] ${isDark ? "bg-white/10" : "bg-slate-200"}`} />
@@ -451,15 +454,17 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                   }`}
                 >
                   <span>Select All</span>
-                  <span className="text-[10px] text-zinc-400 font-mono">Ctrl+A</span>
+                  <span className="text-[10px] text-zinc-400 font-mono">{modKey}+A</span>
                 </button>
 
                 <button
                   onClick={() => { deleteSelection(); setActiveMenu(null); }}
-                  className={`w-full text-left px-3 py-2 rounded-lg flex items-center justify-between text-xs text-red-400 hover:bg-red-500/10 transition-colors`}
+                  className={`w-full text-left px-3 py-2 rounded-lg flex items-center justify-between text-xs ${
+                    isDark ? "text-zinc-300 hover:bg-white/10" : "text-slate-800 hover:bg-slate-100"
+                  } transition-colors`}
                 >
                   <div className="flex items-center gap-2">
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <Trash2 className="w-3.5 h-3.5 text-zinc-400" />
                     <span>Delete Selected</span>
                   </div>
                   <span className="text-[10px] text-zinc-400 font-mono">Del</span>
@@ -546,7 +551,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                   }`}
                 >
                   <span>Reset Zoom (100%)</span>
-                  <span className="text-[10px] text-zinc-400 font-mono">Ctrl+0</span>
+                  <span className="text-[10px] text-zinc-400 font-mono">{modKey}+0</span>
                 </button>
               </div>
             )}
@@ -577,10 +582,10 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                 <button
                   onClick={() => { setShowHelpModal(true); setActiveMenu(null); }}
                   className={`w-full text-left px-3 py-2 rounded-lg flex items-center gap-2 text-xs transition-colors ${
-                    isDark ? "hover:bg-white/10" : "hover:bg-slate-100 text-slate-800"
+                    isDark ? "hover:bg-white/10 text-zinc-200" : "hover:bg-slate-100 text-slate-800"
                   }`}
                 >
-                  <HelpCircle className="w-4 h-4 text-amber-400" />
+                  <HelpCircle className="w-4 h-4 text-zinc-400" />
                   <span>Keyboard Shortcuts</span>
                 </button>
 
@@ -609,7 +614,9 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
             className="bg-transparent border-none focus:outline-none w-28 sm:w-40 font-medium truncate"
             title="Click to rename project"
           />
-          <span className="bg-amber-500/20 text-amber-400 font-mono text-[10px] px-1.5 py-0.5 rounded uppercase font-semibold">
+          <span className={`font-mono text-[10px] px-1.5 py-0.5 rounded uppercase font-semibold border ${
+            isDark ? "bg-white/10 text-zinc-300 border-white/10" : "bg-slate-200 text-slate-700 border-slate-300"
+          }`}>
             .{fileFormat}
           </span>
         </div>
@@ -625,19 +632,23 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
           {isSimulating ? (
             <button
               onClick={stopSimulation}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/20 text-red-400 border border-red-500/40 hover:bg-red-500/30 text-xs font-semibold transition-all shadow-sm shadow-red-500/20 animate-pulse"
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
+                isDark 
+                  ? "bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-600 shadow-sm" 
+                  : "bg-slate-200 hover:bg-slate-300 text-slate-800 border-slate-300"
+              }`}
               title="Stop Simulation"
             >
-              <Square className="w-3.5 h-3.5 fill-current" />
+              <Square className="w-3.5 h-3.5 fill-current text-zinc-300" />
               <span>Stop</span>
             </button>
           ) : (
             <button
               onClick={startSimulation}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-semibold transition-all shadow-md shadow-emerald-500/20"
+              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-white hover:bg-zinc-200 text-black text-xs font-semibold transition-all shadow-sm"
               title="Run Simulation"
             >
-              <Play className="w-3.5 h-3.5 fill-current" />
+              <Play className="w-3.5 h-3.5 fill-current text-black" />
               <span>Simulate</span>
             </button>
           )}
@@ -670,12 +681,12 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
           disabled={nodes.length === 0}
           className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all ${
             isDark
-              ? "bg-[#151922] border-white/10 text-zinc-300 hover:text-white hover:border-amber-500/40 hover:bg-amber-500/10"
-              : "bg-slate-100 border-slate-200 text-slate-700 hover:text-slate-900 hover:border-amber-400 hover:bg-amber-50"
+              ? "bg-[#151922] border-white/10 text-zinc-300 hover:text-white hover:border-white/20 hover:bg-white/5"
+              : "bg-slate-100 border-slate-200 text-slate-700 hover:text-slate-900 hover:border-slate-300 hover:bg-slate-200"
           } disabled:opacity-40 disabled:pointer-events-none`}
           title="Auto Layout Circuit (Arrange into clean ladder diagram, Alt+L)"
         >
-          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+          <Sparkles className="w-3.5 h-3.5 text-zinc-400" />
           <span className="hidden sm:inline">Auto Layout</span>
         </button>
 
@@ -717,7 +728,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
           onClick={toggleTheme}
           className={`p-2 rounded-xl border transition-colors ${
             isDark
-              ? "bg-[#151922] border-white/10 text-amber-400 hover:bg-white/10"
+              ? "bg-[#151922] border-white/10 text-zinc-300 hover:text-white hover:bg-white/10"
               : "bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200"
           }`}
           title={`Switch to ${isDark ? "Light" : "Dark"} Mode`}
@@ -761,7 +772,11 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
         {/* Quick Export Button */}
         <button
           onClick={handleExportRflow}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-semibold transition-colors shadow-md shadow-amber-500/10"
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors border ${
+            isDark
+              ? "bg-white text-black hover:bg-zinc-200 border-white shadow-xs"
+              : "bg-slate-900 text-white hover:bg-slate-800 border-slate-900"
+          }`}
           title="Quick export as .rflow"
         >
           <Download className="w-3.5 h-3.5" />
@@ -783,7 +798,9 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
               onChange={(e) => setProjectTitle(e.target.value)}
               className="bg-transparent border-none focus:outline-none w-24 text-xs font-bold truncate"
             />
-            <span className="bg-amber-500/20 text-amber-400 font-mono text-[9px] px-1 py-0.2 rounded uppercase font-semibold shrink-0">
+            <span className={`font-mono text-[9px] px-1 py-0.2 rounded uppercase font-semibold shrink-0 border ${
+              isDark ? "bg-white/10 text-zinc-300 border-white/10" : "bg-slate-200 text-slate-700 border-slate-300"
+            }`}>
               .{fileFormat}
             </span>
           </div>
@@ -795,7 +812,11 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
           {isSimulating ? (
             <button
               onClick={stopSimulation}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-red-500 text-white text-xs font-bold shadow-md shadow-red-500/20 animate-pulse"
+              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
+                isDark 
+                  ? "bg-zinc-800 text-zinc-200 border-zinc-600" 
+                  : "bg-slate-200 text-slate-800 border-slate-300"
+              }`}
               title="Stop Simulation"
             >
               <Square className="w-3.5 h-3.5 fill-current" />
@@ -804,7 +825,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
           ) : (
             <button
               onClick={startSimulation}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-500 text-black text-xs font-bold shadow-md shadow-emerald-500/20"
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white text-black text-xs font-bold shadow-sm"
               title="Run Simulation"
             >
               <Play className="w-3.5 h-3.5 fill-current" />
@@ -817,7 +838,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
             onClick={onTogglePalette}
             className={`p-1.5 rounded-lg border transition-colors ${
               isPaletteOpen
-                ? "bg-amber-500 text-black border-amber-500"
+                ? isDark ? "bg-white text-black border-white" : "bg-slate-900 text-white border-slate-900"
                 : isDark
                 ? "bg-[#151922] border-white/10 text-zinc-300"
                 : "bg-slate-100 border-slate-200 text-slate-700"
@@ -882,7 +903,11 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                 {isSimulating ? (
                   <button
                     onClick={() => { stopSimulation(); setMobileMenuOpen(false); }}
-                    className="col-span-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-red-500/20 text-red-400 border border-red-500/40 font-bold text-xs"
+                    className={`col-span-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl font-bold text-xs border ${
+                      isDark 
+                        ? "bg-zinc-800 text-zinc-200 border-zinc-600" 
+                        : "bg-slate-200 text-slate-800 border-slate-300"
+                    }`}
                   >
                     <Square className="w-3.5 h-3.5 fill-current" />
                     <span>Stop</span>
@@ -890,7 +915,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                 ) : (
                   <button
                     onClick={() => { startSimulation(); setMobileMenuOpen(false); }}
-                    className="col-span-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-emerald-500 text-black font-bold text-xs"
+                    className="col-span-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-white text-black font-bold text-xs shadow-sm"
                   >
                     <Play className="w-3.5 h-3.5 fill-current" />
                     <span>Simulate</span>
@@ -925,10 +950,14 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                 <button
                   onClick={() => { autoLayout(); setMobileMenuOpen(false); }}
                   disabled={nodes.length === 0}
-                  className="w-full flex items-center justify-between p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-semibold disabled:opacity-40"
+                  className={`w-full flex items-center justify-between p-2.5 rounded-xl border text-xs font-semibold disabled:opacity-40 transition-colors ${
+                    isDark
+                      ? "bg-white/5 border-white/10 text-zinc-200 hover:bg-white/10"
+                      : "bg-slate-100 border-slate-200 text-slate-800 hover:bg-slate-200"
+                  }`}
                 >
                   <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4" />
+                    <Sparkles className="w-4 h-4 text-zinc-400" />
                     <span>Auto Layout Circuit</span>
                   </div>
                   <span className="text-[10px] opacity-70">Clean Ladder</span>
@@ -986,7 +1015,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                     isDark ? "hover:bg-white/10" : "hover:bg-slate-100"
                   }`}
                 >
-                  <Sparkles className="w-4 h-4 text-amber-400" />
+                  <Sparkles className="w-4 h-4 text-zinc-400" />
                   <span>Load DOL Starter Example</span>
                 </button>
                 <button
@@ -1039,7 +1068,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                   }`}
                 >
                   <div className="flex items-center gap-2">
-                    {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-zinc-500" />}
+                    {isDark ? <Sun className="w-4 h-4 text-zinc-300" /> : <Moon className="w-4 h-4 text-zinc-600" />}
                     <span>Theme</span>
                   </div>
                   <span className="font-semibold">{isDark ? "Dark Mode" : "Light Mode"}</span>
@@ -1054,7 +1083,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                     <Grid className="w-4 h-4 text-zinc-400" />
                     <span>Dotted CAD Grid</span>
                   </div>
-                  {showGrid ? <Check className="w-4 h-4 text-emerald-400" /> : <span className="text-zinc-500">Off</span>}
+                  {showGrid ? <Check className="w-4 h-4 text-zinc-200" /> : <span className="text-zinc-500">Off</span>}
                 </button>
                 <button
                   onClick={() => setWireRoutingMode(wireRoutingMode === "orthogonal" ? "bezier" : "orthogonal")}
@@ -1079,7 +1108,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                   isDark ? "bg-white/5 border-white/10 text-zinc-300" : "bg-slate-100 border-slate-200 text-slate-700"
                 }`}
               >
-                <HelpCircle className="w-4 h-4 text-amber-400" />
+                <HelpCircle className="w-4 h-4 text-zinc-400" />
                 <span>Shortcuts & Help</span>
               </button>
             </div>
@@ -1097,14 +1126,15 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
           >
             <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-4">
               <div className="flex items-center gap-2">
-                <HelpCircle className="w-5 h-5 text-amber-400" />
+                <HelpCircle className="w-5 h-5 text-zinc-400" />
                 <h3 className="font-bold text-sm">Keyboard Shortcuts</h3>
               </div>
               <button
                 onClick={() => setShowHelpModal(false)}
-                className="text-xs text-zinc-400 hover:text-white"
+                className="p-1 rounded-lg text-zinc-400 hover:text-white transition-colors"
+                title="Close"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
 
@@ -1119,11 +1149,11 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
               </div>
               <div className="flex justify-between py-1 border-b border-white/5">
                 <span className="text-zinc-400">Rotate Selected Component</span>
-                <span className="font-mono bg-white/10 px-2 py-0.5 rounded">R</span>
+                <span className="font-mono bg-white/10 px-2 py-0.5 rounded text-[11px]">Popover / Toolbar</span>
               </div>
               <div className="flex justify-between py-1 border-b border-white/5">
                 <span className="text-zinc-400">Duplicate Selection</span>
-                <span className="font-mono bg-white/10 px-2 py-0.5 rounded">Ctrl + D</span>
+                <span className="font-mono bg-white/10 px-2 py-0.5 rounded">{modKey} + D</span>
               </div>
               <div className="flex justify-between py-1 border-b border-white/5">
                 <span className="text-zinc-400">Delete Component / Wire</span>
@@ -1131,22 +1161,26 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
               </div>
               <div className="flex justify-between py-1 border-b border-white/5">
                 <span className="text-zinc-400">Undo / Redo</span>
-                <span className="font-mono bg-white/10 px-2 py-0.5 rounded">Ctrl+Z / Ctrl+Y</span>
+                <span className="font-mono bg-white/10 px-2 py-0.5 rounded">{modKey}+Z / {modKey}+Y</span>
               </div>
               <div className="flex justify-between py-1 border-b border-white/5">
                 <span className="text-zinc-400">Auto Layout Circuit</span>
-                <span className="font-mono bg-white/10 px-2 py-0.5 rounded">Alt + L</span>
+                <span className="font-mono bg-white/10 px-2 py-0.5 rounded">{isMac ? "⌥ + L" : "Alt + L"}</span>
               </div>
               <div className="flex justify-between py-1">
                 <span className="text-zinc-400">Select All</span>
-                <span className="font-mono bg-white/10 px-2 py-0.5 rounded">Ctrl + A</span>
+                <span className="font-mono bg-white/10 px-2 py-0.5 rounded">{modKey} + A</span>
               </div>
             </div>
 
             <div className="mt-5 flex justify-end">
               <button
                 onClick={() => setShowHelpModal(false)}
-                className="px-4 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-semibold text-xs transition-colors"
+                className={`px-4 py-1.5 rounded-xl font-semibold text-xs transition-colors border ${
+                  isDark
+                    ? "bg-white text-black hover:bg-zinc-200 border-white"
+                    : "bg-slate-900 text-white hover:bg-slate-800 border-slate-900"
+                }`}
               >
                 Close
               </button>

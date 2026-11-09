@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg width="120" height="120" viewBox="0 0 120 120" version="1.1" id="svg1" sodipodi:docname="overload2p.svg" inkscape:version="1.4 (e7c3feb1, 2024-10-09)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+   <sodipodi:namedview id="namedview1" pagecolor="#505050" bordercolor="#eeeeee" borderopacity="1" inkscape:showpageshadow="0" inkscape:pageopacity="0" inkscape:pagecheckerboard="0" inkscape:deskcolor="#3d3d3d" inkscape:zoom="3.0262649" inkscape:cx="90.540653" inkscape:cy="63.279325" inkscape:window-width="1352" inkscape:window-height="762" inkscape:window-x="88" inkscape:window-y="25" inkscape:window-maximized="0" inkscape:current-layer="svg1" showguides="true" />
+   <defs id="defs1" />
+   <metadata id="metadata1">
+      <info indexAuxFrame="4" category="protections" type="switch" tagType="fuses" duplicateTag="false" width="120" height="120" name="Overload Relay 2P" description="Overload Relay 2P" marginH="0" marginV="0" />
+      <nodes>
+         <node id="0" tag="1" direction="0" type="contact" dx="-30.0" dy="-60.0" />
+         <node id="1" tag="2" direction="2" type="contact" dx="-30.0" dy="60.0" />
+         <node id="2" tag="3" direction="0" type="contact" dx="30.0" dy="-60.0" />
+         <node id="3" tag="4" direction="2" type="contact" dx="30.0" dy="60.0" />
+      </nodes>
+      <contacts>
+         <contact id="0" nodeId1="0" nodeId2="1" enableFrames="1,0" />
+         <contact id="1" nodeId1="2" nodeId2="3" enableFrames="1,0" />
+      </contacts>
+      <frames>
+         <frame id="0">
+            <pathFrame id="mainPath1" type="main" style="stroke" />
+         </frame>
+         <frame id="1">
+            <pathFrame id="mainFill1" type="simulation" style="fill" indexColor="2" />
+            <pathFrame id="mainPath1" type="main" style="stroke" />
+         </frame>
+      </frames>
+   </metadata>
+   <path d="M 0,40 H 120 V 80 H 0 Z" style="display:inline;fill:#ef4444;stroke:none;stroke-width:1.99999" id="mainFill1" inkscape:label="mainFill1" sodipodi:nodetypes="ccccc" />
+   <path id="mainPath1" style="fill:none;stroke:#ffffff;stroke-width:2" d="M 0,40 H 120 V 80 H 0 Z M 30,0 V 50 H 50 V 70 H 30 v 50 M 90,0 v 50 h 20 V 70 H 90 v 50" inkscape:label="pathMain1" sodipodi:nodetypes="ccccccccccccccccc" />
+</svg>

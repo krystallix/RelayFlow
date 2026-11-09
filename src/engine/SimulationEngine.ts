@@ -326,6 +326,42 @@ export class SimulationEngine {
         }
       }
 
+      // C.2. Evaluate Overload Relays (TOR): Couple auxiliary NO/NC contacts sharing the same tag
+      const overloadTrippedTags = new Map<string, boolean>();
+      for (const node of nodes) {
+        const comp = catalog[node.componentId];
+        const isOverload =
+          node.componentId.toLowerCase().startsWith("overload") ||
+          comp?.name?.toLowerCase().includes("overload");
+        if (isOverload && node.tag) {
+          const currentTripped = overloadTrippedTags.get(node.tag) || false;
+          overloadTrippedTags.set(node.tag, currentTripped || node.frameIndex === 1);
+        }
+      }
+
+      if (overloadTrippedTags.size > 0) {
+        for (const [tag, isTripped] of overloadTrippedTags.entries()) {
+          for (const otherNode of nodes) {
+            if (otherNode.tag === tag) {
+              const otherComp = catalog[otherNode.componentId];
+              if (!otherComp) continue;
+
+              const isContact =
+                otherComp.type === "relayContact" ||
+                otherComp.category === "auxiliaries" ||
+                otherNode.componentId.toLowerCase().includes("contact");
+              if (!isContact) continue;
+
+              const newFrame = isTripped ? 1 : 0;
+              if (otherNode.frameIndex !== newFrame) {
+                otherNode.frameIndex = newFrame;
+                outerChanged = true;
+              }
+            }
+          }
+        }
+      }
+
       // D. Evaluate Actuators: Lamps, Motors, Horns, Buzzers, and Solenoids
       for (const node of nodes) {
         const comp = catalog[node.componentId];

@@ -481,4 +481,127 @@ describe("SimulationEngine Logic", () => {
     expect(res3.nodes.find((n) => n.id === "lamp-nc")?.isEnergized).toBe(true);
     expect(res3.nodes.find((n) => n.id === "lamp-no")?.isEnergized).toBe(false);
   });
+
+  it("should couple auxiliary NO/NC contacts to Thermal Overload Relay (TOR) when tripped and reset", () => {
+    const nodes: CircuitNode[] = [
+      {
+        id: "src+",
+        componentId: "sourcePlus",
+        name: "Source +24V",
+        category: "sources",
+        tag: null,
+        comment: "+24V",
+        position: { x: 0, y: 0 },
+        rotation: 0,
+        frameIndex: 0,
+      },
+      {
+        id: "src-",
+        componentId: "sourceNegative",
+        name: "Source -24V",
+        category: "sources",
+        tag: null,
+        comment: "-24V",
+        position: { x: 0, y: 300 },
+        rotation: 0,
+        frameIndex: 0,
+      },
+      // TOR 3P with tag "-F1"
+      {
+        id: "tor-1",
+        componentId: "overload3p",
+        name: "Overload Relay 3P",
+        category: "protections",
+        tag: "-F1",
+        comment: "Thermal Overload",
+        position: { x: 100, y: 100 },
+        rotation: 0,
+        frameIndex: 0, // 0 = normal (untripped)
+      },
+      // Auxiliary NC contact (95-96) sharing tag "-F1"
+      {
+        id: "aux-nc",
+        componentId: "contactNC",
+        name: "Contact NC",
+        category: "auxiliaries",
+        tag: "-F1",
+        comment: "95-96",
+        position: { x: 200, y: 100 },
+        rotation: 0,
+        frameIndex: 0,
+      },
+      // Auxiliary NO contact (97-98) sharing tag "-F1"
+      {
+        id: "aux-no",
+        componentId: "contactNO",
+        name: "Contact NO",
+        category: "auxiliaries",
+        tag: "-F1",
+        comment: "97-98",
+        position: { x: 300, y: 100 },
+        rotation: 0,
+        frameIndex: 0,
+      },
+      // Run Lamp connected through NC contact
+      {
+        id: "lamp-run",
+        componentId: "lamp",
+        name: "Run Lamp",
+        category: "loads",
+        tag: "-H_RUN",
+        comment: null,
+        position: { x: 200, y: 200 },
+        rotation: 0,
+        frameIndex: 0,
+      },
+      // Trip/Fault Lamp connected through NO contact
+      {
+        id: "lamp-trip",
+        componentId: "lamp",
+        name: "Trip Fault Lamp",
+        category: "loads",
+        tag: "-H_TRIP",
+        comment: null,
+        position: { x: 300, y: 200 },
+        rotation: 0,
+        frameIndex: 0,
+      },
+    ];
+
+    const wires: CircuitWire[] = [
+      // Power -> aux-nc (port 0) -> lamp-run (port 0), lamp-run (port 1) -> src-
+      { id: "w1", fromNodeId: "src+", fromPortId: 0, toNodeId: "aux-nc", toPortId: 0, margins: { start: 0, center: 0, end: 0 } },
+      { id: "w2", fromNodeId: "aux-nc", fromPortId: 1, toNodeId: "lamp-run", toPortId: 0, margins: { start: 0, center: 0, end: 0 } },
+      { id: "w3", fromNodeId: "lamp-run", fromPortId: 1, toNodeId: "src-", toPortId: 0, margins: { start: 0, center: 0, end: 0 } },
+
+      // Power -> aux-no (port 0) -> lamp-trip (port 0), lamp-trip (port 1) -> src-
+      { id: "w4", fromNodeId: "src+", fromPortId: 0, toNodeId: "aux-no", toPortId: 0, margins: { start: 0, center: 0, end: 0 } },
+      { id: "w5", fromNodeId: "aux-no", fromPortId: 1, toNodeId: "lamp-trip", toPortId: 0, margins: { start: 0, center: 0, end: 0 } },
+      { id: "w6", fromNodeId: "lamp-trip", fromPortId: 1, toNodeId: "src-", toPortId: 0, margins: { start: 0, center: 0, end: 0 } },
+    ];
+
+    // 1. Initial State: TOR is normal (untripped, frame 0)
+    const resNormal = SimulationEngine.step(nodes, wires);
+    expect(resNormal.shortCircuit).toBe(false);
+    expect(resNormal.nodes.find((n) => n.id === "aux-nc")?.frameIndex).toBe(0);
+    expect(resNormal.nodes.find((n) => n.id === "aux-no")?.frameIndex).toBe(0);
+    expect(resNormal.nodes.find((n) => n.id === "lamp-run")?.isEnergized).toBe(true);
+    expect(resNormal.nodes.find((n) => n.id === "lamp-trip")?.isEnergized).toBe(false);
+
+    // 2. Trip TOR (frameIndex = 1)
+    const nodesTripped = resNormal.nodes.map((n) => (n.id === "tor-1" ? { ...n, frameIndex: 1 } : n));
+    const resTripped = SimulationEngine.step(nodesTripped, wires);
+    expect(resTripped.nodes.find((n) => n.id === "aux-nc")?.frameIndex).toBe(1); // NC opened!
+    expect(resTripped.nodes.find((n) => n.id === "aux-no")?.frameIndex).toBe(1); // NO closed!
+    expect(resTripped.nodes.find((n) => n.id === "lamp-run")?.isEnergized).toBe(false); // Run circuit stopped
+    expect(resTripped.nodes.find((n) => n.id === "lamp-trip")?.isEnergized).toBe(true); // Fault indicator lit
+
+    // 3. Reset TOR (frameIndex = 0)
+    const nodesReset = resTripped.nodes.map((n) => (n.id === "tor-1" ? { ...n, frameIndex: 0 } : n));
+    const resReset = SimulationEngine.step(nodesReset, wires);
+    expect(resReset.nodes.find((n) => n.id === "aux-nc")?.frameIndex).toBe(0); // NC closed back
+    expect(resReset.nodes.find((n) => n.id === "aux-no")?.frameIndex).toBe(0); // NO opened back
+    expect(resReset.nodes.find((n) => n.id === "lamp-run")?.isEnergized).toBe(true);
+    expect(resReset.nodes.find((n) => n.id === "lamp-trip")?.isEnergized).toBe(false);
+  });
 });

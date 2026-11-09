@@ -5,6 +5,7 @@ import { useCircuitStore } from "@/store/useCircuitStore";
 import { FlowNode } from "./FlowNode";
 import { FlowWire } from "./FlowWire";
 import { NodePopover } from "./NodePopover";
+import { MultiNodePopover } from "./MultiNodePopover";
 import { MiniMap } from "./MiniMap";
 import { ContextMenu, ContextMenuTarget } from "./ContextMenu";
 import { VirtualProbeHUD, ProbeReading } from "./VirtualProbeHUD";
@@ -152,6 +153,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     clearSelection,
     selectAll,
     selectNode,
+    selectWire,
     toggleComponentState,
     setComponentPressed,
     updateNodesPositions,
@@ -170,6 +172,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     updateWireDraft,
     completeWireDraft,
     cancelWireDraft,
+    updateNodeData,
   } = useCircuitStore();
 
   const [isSpacePressed, setIsSpacePressed] = useState(false);
@@ -299,6 +302,9 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   const handleNodeContextMenu = (node: CircuitNode, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!selectedNodeIds.has(node.id)) {
+      selectNode(node.id, false);
+    }
     const worldPos = screenToWorld(e.clientX, e.clientY);
     setContextMenu({
       x: e.clientX,
@@ -310,6 +316,9 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   const handleWireContextMenu = (wire: CircuitWire, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (!selectedWireIds.has(wire.id)) {
+      selectWire(wire.id, false);
+    }
     const worldPos = screenToWorld(e.clientX, e.clientY);
     setContextMenu({
       x: e.clientX,
@@ -908,15 +917,26 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
         setQuickSearchPos({ ...mouseWorldPosRef.current });
         setShowQuickSearch(true);
         setQuickSearchQuery("");
-      } else if (e.key === "Delete" || e.key === "Backspace") {
+      } else if (e.key === "Delete") {
         deleteSelection();
+      } else if (e.key === "Backspace") {
+        if (selectedNodeIds.size === 1 && !isSimulating) {
+          // Direct backspace deletes character from comment
+          e.preventDefault();
+          const targetNodeId = Array.from(selectedNodeIds)[0];
+          const targetNode = nodes.find((n) => n.id === targetNodeId);
+          if (targetNode) {
+            const currentComment = targetNode.comment || "";
+            const nextComment = currentComment.slice(0, -1);
+            updateNodeData(targetNodeId, { comment: nextComment || null }, false);
+          }
+        } else {
+          deleteSelection();
+        }
       } else if (e.key === "F5") {
         e.preventDefault();
         if (isSimulating) stopSimulation();
         else startSimulation();
-      } else if (e.key === "r" || e.key === "R") {
-        if (e.shiftKey) rotateSelectedNodes("ccw");
-        else rotateSelectedNodes("cw");
       } else if ((e.ctrlKey || e.metaKey) && (e.key === "c" || e.key === "C")) {
         e.preventDefault();
         copySelection();
@@ -980,6 +1000,22 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       } else if (e.key === "Escape") {
         cancelWireDraft();
         clearSelection();
+      } else if (
+        selectedNodeIds.size === 1 &&
+        !isSimulating &&
+        !e.ctrlKey &&
+        !e.metaKey &&
+        !e.altKey &&
+        e.key.length === 1
+      ) {
+        // Direct type to comment on selected symbol (CAD smart annotation)
+        const targetNodeId = Array.from(selectedNodeIds)[0];
+        const targetNode = nodes.find((n) => n.id === targetNodeId);
+        if (targetNode) {
+          const currentComment = targetNode.comment || "";
+          const nextComment = currentComment + e.key;
+          updateNodeData(targetNodeId, { comment: nextComment || null }, false);
+        }
       }
     };
 
@@ -1015,6 +1051,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     updateNodesPositions,
     updateWireMargins,
     setPanOffset,
+    updateNodeData,
   ]);
 
   // Global mouse release for spring (momentary) buttons
@@ -1072,10 +1109,18 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       ? nodeMap.get(Array.from(selectedNodeIds)[0])
       : null;
 
+  // Multiple selected nodes for Alignment & Distribution Popover (2 or more nodes)
+  const selectedNodesList =
+    selectedNodeIds.size >= 2 && !isSimulating
+      ? Array.from(selectedNodeIds)
+          .map((id) => nodeMap.get(id))
+          .filter(Boolean) as CircuitNode[]
+      : [];
+
   const comp = selectedNode ? catalog[selectedNode.componentId] : null;
   const compHeight = comp?.height || 120;
 
-  // Compute screen coordinates for popover relative to FlowCanvas container
+  // Compute screen coordinates for single node popover
   const screenNodeTopY = selectedNode
     ? panOffset.y + (selectedNode.position.y - compHeight / 2) * zoomScale
     : 0;
@@ -1089,6 +1134,37 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   const isNearTop = screenNodeTopY < 65;
   const popoverY = isNearTop ? screenNodeBottomY + 12 : screenNodeTopY - 14;
   const placement = isNearTop ? "bottom" : "top";
+
+  // Compute collective bounding box for multi-node popover
+  let multiPopoverCenterX = 0;
+  let multiPopoverY = 0;
+  let multiIsNearTop = false;
+
+  if (selectedNodesList.length >= 2) {
+    let minX = Infinity;
+    let maxX = -Infinity;
+    let minY = Infinity;
+    let maxY = -Infinity;
+
+    for (const n of selectedNodesList) {
+      const c = catalog[n.componentId];
+      const w = c?.width || 120;
+      const h = c?.height || 120;
+      minX = Math.min(minX, n.position.x - w / 2);
+      maxX = Math.max(maxX, n.position.x + w / 2);
+      minY = Math.min(minY, n.position.y - h / 2);
+      maxY = Math.max(maxY, n.position.y + h / 2);
+    }
+
+    const screenMinX = panOffset.x + minX * zoomScale;
+    const screenMaxX = panOffset.x + maxX * zoomScale;
+    const screenMinY = panOffset.y + minY * zoomScale;
+    const screenMaxY = panOffset.y + maxY * zoomScale;
+
+    multiPopoverCenterX = (screenMinX + screenMaxX) / 2;
+    multiIsNearTop = screenMinY < 65;
+    multiPopoverY = multiIsNearTop ? screenMaxY + 14 : screenMinY - 14;
+  }
 
   return (
     <div
@@ -1154,12 +1230,12 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
 
       {/* Wire Drafting Active Indicator Pill (Super clear on mobile & desktop) */}
       {wireDraft && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2.5 bg-amber-500 text-black px-4 py-2 rounded-2xl shadow-2xl text-xs font-semibold animate-in fade-in zoom-in-95">
-          <span className="w-2.5 h-2.5 rounded-full bg-black animate-ping" />
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2.5 bg-white text-black px-4 py-2 rounded-2xl shadow-2xl text-xs font-semibold border border-zinc-200 animate-in fade-in zoom-in-95">
+          <span className="w-2 h-2 rounded-full bg-black animate-ping" />
           <span>Tap destination terminal to complete wire</span>
           <button
             onClick={() => cancelWireDraft()}
-            className="ml-1 bg-black/20 hover:bg-black/30 active:scale-95 text-black px-2 py-0.5 rounded-lg text-[10px] uppercase font-bold transition-all"
+            className="ml-1 bg-black/10 hover:bg-black/20 active:scale-95 text-black px-2 py-0.5 rounded-lg text-[10px] uppercase font-bold transition-all"
           >
             Cancel
           </button>
@@ -1306,12 +1382,14 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
               width: `${Math.abs(marquee.currentX - marquee.startX)}px`,
               height: `${Math.abs(marquee.currentY - marquee.startY)}px`,
             }}
-            className="absolute border border-dashed border-amber-400 bg-amber-500/15 backdrop-blur-[0.5px] rounded-xs pointer-events-none shadow-[0_0_12px_rgba(251,191,36,0.25)] z-30"
+            className={`absolute border border-dashed rounded-xs pointer-events-none z-30 ${
+              isDark ? "border-white/50 bg-white/5" : "border-slate-800/40 bg-slate-900/5"
+            }`}
           />
         )}
       </div>
 
-      {/* Node Action Popover (when symbol is selected) */}
+      {/* Node Action Popover (when 1 symbol is selected) */}
       {selectedNode && !draggingNodeState?.hasMoved && (
         <div
           style={{
@@ -1335,6 +1413,31 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
                 y: selectedNode.position.y + 30,
               })
             }
+            onDelete={() => deleteSelection()}
+          />
+        </div>
+      )}
+
+      {/* Multi-Node Alignment & Distribution Popover (when 2 or more symbols are selected) */}
+      {selectedNodesList.length >= 2 && !draggingNodeState?.hasMoved && (
+        <div
+          onMouseDown={(e) => e.stopPropagation()}
+          onTouchStart={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            left: `${multiPopoverCenterX}px`,
+            top: `${multiPopoverY}px`,
+            transform: multiIsNearTop ? "translate(-50%, 0)" : "translate(-50%, -100%)",
+          }}
+          className="absolute z-40 pointer-events-auto"
+        >
+          <MultiNodePopover
+            selectedNodes={selectedNodesList}
+            isDark={isDark}
+            placement={multiIsNearTop ? "bottom" : "top"}
+            onRotateRight={() => rotateSelectedNodes("cw")}
+            onRotateLeft={() => rotateSelectedNodes("ccw")}
+            onCopy={() => copySelection()}
             onDelete={() => deleteSelection()}
           />
         </div>
@@ -1471,11 +1574,11 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
                 shortCircuit
                   ? "bg-red-500 animate-ping"
                   : isSimulating
-                  ? "bg-emerald-500 animate-pulse"
+                  ? "bg-white animate-pulse"
                   : "bg-zinc-500"
               }`}
             />
-            <span className={shortCircuit ? "text-red-400" : isSimulating ? "text-emerald-400" : "text-zinc-400"}>
+            <span className={shortCircuit ? "text-red-400" : isSimulating ? (isDark ? "text-white" : "text-slate-900") : "text-zinc-400"}>
               {shortCircuit ? "SHORT CIRCUIT" : isSimulating ? "SIMULATING" : "STANDBY"}
             </span>
           </div>
@@ -1494,7 +1597,11 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
           {/* Add Component Palette Button */}
           <button
             onClick={onOpenPalette}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-xl bg-amber-500 text-black text-xs font-bold shadow-md shadow-amber-500/20 active:scale-95 transition-transform"
+            className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm active:scale-95 transition-transform border ${
+              isDark
+                ? "bg-white text-black border-white"
+                : "bg-slate-900 text-white border-slate-900"
+            }`}
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Add</span>
@@ -1529,11 +1636,11 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
             onClick={autoLayout}
             disabled={nodes.length === 0}
             className={`p-2 rounded-xl transition-all disabled:opacity-30 active:scale-95 ${
-              isDark ? "hover:bg-white/10 text-amber-400" : "hover:bg-slate-100 text-amber-600"
+              isDark ? "hover:bg-white/10 text-zinc-300" : "hover:bg-slate-100 text-slate-700"
             }`}
             title="Auto Layout"
           >
-            <Sparkles className="w-4 h-4" />
+            <Sparkles className="w-4 h-4 text-zinc-400" />
           </button>
 
           {/* Zoom to Fit */}
@@ -1690,7 +1797,9 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
                     }`}
                   >
                     <div className="flex items-center gap-2.5">
-                      <div className="w-6 h-6 flex items-center justify-center rounded bg-amber-500/10 p-1">
+                      <div className={`w-6 h-6 flex items-center justify-center rounded p-1 border ${
+                        isDark ? "bg-white/5 border-white/10" : "bg-slate-100 border-slate-200"
+                      }`}>
                         <img
                           src={comp.svgPath}
                           alt={comp.name}

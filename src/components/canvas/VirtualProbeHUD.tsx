@@ -39,36 +39,31 @@ export const VirtualProbeHUD: React.FC<VirtualProbeHUDProps> = ({
     mode = "AC RMS";
     freq = "50.0 Hz";
     statusText = reading.isEnergized ? "ACTIVE (LIVE PHASE)" : "POTENTIAL PRESENT";
-    statusColor = "text-red-400";
-    badgeColor = "bg-red-500/10 text-red-400 border-red-500/30";
+    statusColor = reading.isEnergized ? "text-zinc-100 font-semibold" : "text-zinc-400";
   } else if (p === "N") {
     voltage = "0.05 V";
     mode = "AC";
     freq = "50.0 Hz";
     statusText = reading.isEnergized ? "RETURN CURRENT (ACTIVE)" : "NEUTRAL REFERENCE";
-    statusColor = "text-cyan-400";
-    badgeColor = "bg-cyan-500/10 text-cyan-400 border-cyan-500/30";
+    statusColor = reading.isEnergized ? "text-zinc-100 font-semibold" : "text-zinc-400";
   } else if (p === "+24V") {
     voltage = "+24.0 V";
     mode = "DC";
     freq = "---";
     statusText = reading.isEnergized ? "CLOSED CIRCUIT (+24V)" : "SUPPLY BUS";
-    statusColor = "text-emerald-400";
-    badgeColor = "bg-emerald-500/10 text-emerald-400 border-emerald-500/30";
+    statusColor = reading.isEnergized ? "text-zinc-100 font-semibold" : "text-zinc-400";
   } else if (p === "-24V") {
     voltage = "0.0 V";
     mode = "DC";
     freq = "---";
     statusText = reading.isEnergized ? "RETURN (0V DC)" : "COMMON REFERENCE";
-    statusColor = "text-cyan-400";
-    badgeColor = "bg-cyan-500/10 text-cyan-400 border-cyan-500/30";
+    statusColor = reading.isEnergized ? "text-zinc-100 font-semibold" : "text-zinc-400";
   } else if (p === "PE") {
     voltage = "0.0 V";
     mode = "GND";
     freq = "---";
     statusText = "PROTECTIVE EARTH";
-    statusColor = "text-emerald-400";
-    badgeColor = "bg-emerald-500/10 text-emerald-400 border-emerald-500/30";
+    statusColor = "text-zinc-400";
   }
 
   const screenW = typeof window !== "undefined" ? window.innerWidth : 400;

@@ -131,7 +131,8 @@ interface CircuitStoreState {
   addNode: (componentId: string, position: { x: number; y: number }) => void;
   updateNodeData: (
     nodeId: string | number,
-    data: { tag?: string | null; comment?: string | null; valueTimeOn?: number; valueTimeOff?: number }
+    data: { tag?: string | null; comment?: string | null; valueTimeOn?: number; valueTimeOff?: number },
+    commitToHistory?: boolean
   ) => void;
   moveSelectedNodes: (delta: { x: number; y: number }) => void;
   updateNodesPositions: (updates: Array<{ id: string | number; position: { x: number; y: number } }>, commitToHistory?: boolean) => void;
@@ -399,9 +400,9 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
       });
     },
 
-    updateNodeData: (nodeId, data) => {
+    updateNodeData: (nodeId, data, commitToHistory = true) => {
       set((state) => {
-        const history = pushHistory(state);
+        const history = commitToHistory ? pushHistory(state) : {};
         const updatedNodes = state.nodes.map((n) => {
           if (n.id !== nodeId) return n;
           return {
@@ -855,13 +856,38 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
 
     toggleComponentState: (nodeId) => {
       set((state) => {
+        const targetNode = state.nodes.find((n) => n.id === nodeId);
+        if (!targetNode) return {};
+
+        const targetComp = catalog[targetNode.componentId];
+        const isTargetOverload =
+          targetNode.componentId.toLowerCase().startsWith("overload") ||
+          targetComp?.name?.toLowerCase().includes("overload");
+
+        const nextFrame = targetNode.frameIndex === 0 ? 1 : 0;
+
         const updatedNodes = state.nodes.map((n) => {
-          if (n.id !== nodeId) return n;
-          const comp = catalog[n.componentId];
-          const isNC = n.componentId.includes("NC") || comp?.type === "contactNC";
-          const nextFrame = n.frameIndex === 0 ? 1 : 0;
-          const isClosed = isNC ? nextFrame === 0 : nextFrame === 1;
-          return { ...n, frameIndex: nextFrame, isClosed };
+          if (n.id === nodeId) {
+            const isNC = n.componentId.includes("NC") || targetComp?.type === "contactNC";
+            const isClosed = isNC ? nextFrame === 0 : nextFrame === 1;
+            return { ...n, frameIndex: nextFrame, isClosed };
+          }
+
+          // If target is an overload relay (TOR), couple auxiliary contacts sharing the same tag
+          if (isTargetOverload && targetNode.tag && n.tag === targetNode.tag) {
+            const nComp = catalog[n.componentId];
+            const isContact =
+              nComp?.type === "relayContact" ||
+              nComp?.category === "auxiliaries" ||
+              n.componentId.toLowerCase().includes("contact");
+            if (isContact) {
+              const contactNC = n.componentId.includes("NC") || nComp?.type === "contactNC";
+              const contactClosed = contactNC ? nextFrame === 0 : nextFrame === 1;
+              return { ...n, frameIndex: nextFrame, isClosed: contactClosed };
+            }
+          }
+
+          return n;
         });
 
         // If simulation is running, evaluate step immediately

@@ -81,10 +81,12 @@ export const SymbolRenderer: React.FC<SymbolRendererProps> = ({
   isDark,
 }) => {
   const hasText = Boolean(TEXT_CENTERS[componentId]);
+  const isOverload = componentId.toLowerCase().startsWith("overload");
+  const needsInline = hasText || isOverload;
   const [svgContent, setSvgContent] = useState<string | null>(() => svgCache.get(svgPath) || null);
 
   useEffect(() => {
-    if (!hasText) return;
+    if (!needsInline) return;
     if (svgCache.has(svgPath)) {
       setSvgContent(svgCache.get(svgPath)!);
       return;
@@ -103,9 +105,11 @@ export const SymbolRenderer: React.FC<SymbolRendererProps> = ({
     }
 
     promise.then((text) => setSvgContent(text));
-  }, [svgPath, hasText]);
+  }, [svgPath, needsInline]);
 
-  const filterClass = isDark
+  const filterClass = isOverload
+    ? ""
+    : isDark
     ? isEnergized
       ? "brightness-125"
       : "opacity-95"
@@ -113,12 +117,34 @@ export const SymbolRenderer: React.FC<SymbolRendererProps> = ({
     ? "filter invert brightness-110"
     : "filter invert opacity-95";
 
-  if (!hasText || !svgContent) {
+  if (!needsInline || !svgContent) {
     return (
       <img
         src={svgPath}
         alt={name}
         className={`w-full h-full object-contain pointer-events-none select-none transition-all duration-150 ${filterClass}`}
+      />
+    );
+  }
+
+  if (isOverload && svgContent) {
+    let cleanSvg = svgContent
+      .replace(/<\?xml[^>]*\?>/g, "")
+      .replace(/<!--[\s\S]*?-->/g, "")
+      .trim();
+
+    if (!isDark) {
+      // In light mode, turn white strokes into dark slate CAD strokes, preserving vivid red fill
+      cleanSvg = cleanSvg
+        .replace(/stroke:#ffffff/g, "stroke:#0f172a")
+        .replace(/stroke="#ffffff"/g, 'stroke="#0f172a"')
+        .replace(/stroke:#f9f9f9/g, "stroke:#0f172a");
+    }
+
+    return (
+      <div
+        className="w-full h-full flex items-center justify-center pointer-events-none select-none transition-all duration-150 [&>svg]:w-full [&>svg]:h-full [&>svg]:object-contain"
+        dangerouslySetInnerHTML={{ __html: cleanSvg }}
       />
     );
   }

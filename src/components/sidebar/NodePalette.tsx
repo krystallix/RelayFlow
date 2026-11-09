@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Search, ChevronDown, ChevronRight, Layers, Shield, Zap, ToggleLeft, Activity, Radio, Cpu, Clock } from "lucide-react";
+import { Search, ChevronDown, ChevronRight, Layers, Shield, Zap, ToggleLeft, Activity, Radio, Cpu, Clock, X } from "lucide-react";
 import catalogData from "@/constants/components-catalog.json";
 import { useCircuitStore } from "@/store/useCircuitStore";
 
@@ -100,7 +100,7 @@ export const NodePalette: React.FC<NodePaletteProps> = ({
         {/* Mobile Header Bar */}
         <div className={`p-3 border-b flex items-center justify-between md:hidden ${isDark ? "border-white/10" : "border-slate-200"}`}>
           <div className="flex items-center gap-2">
-            <Layers className="w-4 h-4 text-amber-400" />
+            <Layers className="w-4 h-4 text-zinc-300" />
             <span className="font-bold text-sm tracking-tight">Component Palette</span>
           </div>
           <button
@@ -108,8 +108,9 @@ export const NodePalette: React.FC<NodePaletteProps> = ({
             className={`p-1.5 rounded-xl border transition-colors ${
               isDark ? "bg-white/5 border-white/10 text-zinc-400 hover:text-white" : "bg-slate-100 border-slate-200 text-slate-600 hover:text-slate-900"
             }`}
+            title="Close"
           >
-            ✕
+            <X className="w-4 h-4" />
           </button>
         </div>
 
@@ -122,7 +123,7 @@ export const NodePalette: React.FC<NodePaletteProps> = ({
               placeholder="Search symbols..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className={`w-full pl-8 pr-3 py-2 rounded-xl text-xs placeholder-zinc-500 focus:outline-none focus:border-amber-500/50 border transition-colors ${
+              className={`w-full pl-8 pr-3 py-2 rounded-xl text-xs placeholder-zinc-500 focus:outline-none focus:border-zinc-500 border transition-colors ${
                 isDark
                   ? "bg-[#151922] border-white/10 text-zinc-200"
                   : "bg-slate-100 border-slate-200 text-slate-900"
@@ -259,8 +260,8 @@ export const NodePalette: React.FC<NodePaletteProps> = ({
                       <span
                         className={`text-[11px] font-medium truncate w-full transition-colors ${
                           isDark
-                            ? "text-zinc-300 group-hover:text-amber-300"
-                            : "text-slate-700 group-hover:text-amber-700"
+                            ? "text-zinc-300 group-hover:text-white"
+                            : "text-slate-700 group-hover:text-slate-900"
                         }`}
                       >
                         {comp.name}

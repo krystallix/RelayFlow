@@ -11,11 +11,13 @@ import {
   Sparkles,
   Tag as TagIcon,
   Pencil,
+  Clock,
   X,
 } from "lucide-react";
 import { CircuitNode } from "@/engine/types";
 import catalogData from "@/constants/components-catalog.json";
 import { useCircuitStore } from "@/store/useCircuitStore";
+import { useModifierKey } from "@/utils/platform";
 
 const catalog = catalogData as Record<string, any>;
 
@@ -47,6 +49,7 @@ export const NodePopover: React.FC<NodePopoverProps> = ({
   const [tagValue, setTagValue] = useState(node.tag || "");
   const [commentValue, setCommentValue] = useState(node.comment || "");
   const [timeValue, setTimeValue] = useState<number>(node.valueTimeOn ?? 3);
+  const modKey = useModifierKey();
 
   const updateNodeData = useCircuitStore((state) => state.updateNodeData);
   const comp = catalog[node.componentId];
@@ -180,11 +183,11 @@ export const NodePopover: React.FC<NodePopoverProps> = ({
               ? "text-zinc-300 hover:text-white hover:bg-white/10 active:bg-white/15"
               : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 active:bg-slate-200"
           }`}
-          title="Copy (Ctrl+C)"
+          title={`Copy (${modKey}+C)`}
           aria-label="Copy"
         >
           {copied ? (
-            <Check className="w-4 h-4 text-emerald-400" />
+            <Check className="w-4 h-4 text-zinc-100" />
           ) : (
             <Copy className="w-4 h-4" />
           )}
@@ -203,7 +206,7 @@ export const NodePopover: React.FC<NodePopoverProps> = ({
               ? "text-zinc-300 hover:text-white hover:bg-white/10 active:bg-white/15 cursor-pointer"
               : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 active:bg-slate-200 cursor-pointer"
           }`}
-          title={canPaste ? "Paste (Ctrl+V)" : "Paste (Clipboard kosong)"}
+          title={canPaste ? `Paste (${modKey}+V)` : "Paste (Clipboard kosong)"}
           aria-label="Paste"
         >
           <ClipboardPaste className="w-4 h-4" />
@@ -221,8 +224,8 @@ export const NodePopover: React.FC<NodePopoverProps> = ({
           onMouseDown={(e) => e.stopPropagation()}
           className={`p-1.5 rounded-lg text-xs transition-colors cursor-pointer ${
             isDark
-              ? "text-zinc-400 hover:text-red-400 hover:bg-red-500/15 active:bg-red-500/25"
-              : "text-slate-400 hover:text-red-600 hover:bg-red-50 active:bg-red-100"
+              ? "text-zinc-400 hover:text-white hover:bg-white/10 active:bg-white/15"
+              : "text-slate-500 hover:text-slate-900 hover:bg-slate-200 active:bg-slate-300"
           }`}
           title="Delete (Del)"
           aria-label="Delete"
@@ -240,13 +243,13 @@ export const NodePopover: React.FC<NodePopoverProps> = ({
           }`}
         >
           <div className="flex items-center gap-1.5">
-            <TagIcon className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+            <TagIcon className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
             <input
               type="text"
               placeholder="Tag (e.g. -KM1)"
               value={tagValue}
               onChange={(e) => setTagValue(e.target.value)}
-              className={`flex-1 px-2 py-1 rounded-lg text-xs font-mono border focus:outline-none focus:border-amber-400 ${
+              className={`flex-1 px-2 py-1 rounded-lg text-xs font-mono border focus:outline-none focus:border-zinc-500 ${
                 isDark
                   ? "bg-black/40 border-white/10 text-white"
                   : "bg-slate-50 border-slate-300 text-slate-800"
@@ -262,7 +265,7 @@ export const NodePopover: React.FC<NodePopoverProps> = ({
               placeholder="Comment (e.g. Main Motor)"
               value={commentValue}
               onChange={(e) => setCommentValue(e.target.value)}
-              className={`flex-1 px-2 py-1 rounded-lg text-xs border focus:outline-none focus:border-amber-400 ${
+              className={`flex-1 px-2 py-1 rounded-lg text-xs border focus:outline-none focus:border-zinc-500 ${
                 isDark
                   ? "bg-black/40 border-white/10 text-white"
                   : "bg-slate-50 border-slate-300 text-slate-800"
@@ -272,7 +275,7 @@ export const NodePopover: React.FC<NodePopoverProps> = ({
 
           {isTimerCoil && (
             <div className="flex items-center gap-1.5">
-              <span className="text-[10px] text-amber-400 w-3.5 text-center shrink-0">⏱</span>
+              <Clock className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
               <input
                 type="number"
                 min="0.5"
@@ -281,7 +284,7 @@ export const NodePopover: React.FC<NodePopoverProps> = ({
                 placeholder="Delay (seconds)"
                 value={timeValue}
                 onChange={(e) => setTimeValue(parseFloat(e.target.value) || 0)}
-                className={`flex-1 px-2 py-1 rounded-lg text-xs font-mono border focus:outline-none focus:border-amber-400 ${
+                className={`flex-1 px-2 py-1 rounded-lg text-xs font-mono border focus:outline-none focus:border-zinc-500 ${
                   isDark
                     ? "bg-black/40 border-white/10 text-white"
                     : "bg-slate-50 border-slate-300 text-slate-800"
@@ -303,7 +306,11 @@ export const NodePopover: React.FC<NodePopoverProps> = ({
             </button>
             <button
               type="submit"
-              className="px-2.5 py-0.5 rounded bg-amber-500 hover:bg-amber-400 text-black font-semibold text-[11px] transition-colors"
+              className={`px-2.5 py-0.5 rounded font-semibold text-[11px] transition-colors border ${
+                isDark
+                  ? "bg-white text-black hover:bg-zinc-200 border-white"
+                  : "bg-slate-900 text-white hover:bg-slate-800 border-slate-900"
+              }`}
             >
               Apply
             </button>

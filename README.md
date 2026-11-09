@@ -1,4 +1,4 @@
-# RelayFlow ⚡
+# RelayFlow
 
 Modern web-based relay logic CAD and circuit simulation tool engineered to Simurelay standards.
 

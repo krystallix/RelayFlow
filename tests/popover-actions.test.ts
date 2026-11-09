@@ -260,4 +260,63 @@ describe("Popover Symbol Actions in CircuitStore", () => {
     expect(updated?.tag).toBe("-KA1");
     expect(updated?.comment).toBe("Control Relay");
   });
+
+  it("should couple paired auxiliary NO and NC contacts when TOR is toggled via toggleComponentState", () => {
+    const torNode: CircuitNode = {
+      id: 801,
+      componentId: "overload3p",
+      name: "Overload Relay 3P",
+      category: "protections",
+      tag: "-F1",
+      comment: null,
+      position: { x: 100, y: 100 },
+      rotation: 0,
+      frameIndex: 0,
+    };
+
+    const auxNCNode: CircuitNode = {
+      id: 802,
+      componentId: "contactNC",
+      name: "Contact NC",
+      category: "auxiliaries",
+      tag: "-F1",
+      comment: "95-96",
+      position: { x: 200, y: 100 },
+      rotation: 0,
+      frameIndex: 0,
+    };
+
+    const auxNONode: CircuitNode = {
+      id: 803,
+      componentId: "contactNO",
+      name: "Contact NO",
+      category: "auxiliaries",
+      tag: "-F1",
+      comment: "97-98",
+      position: { x: 300, y: 100 },
+      rotation: 0,
+      frameIndex: 0,
+    };
+
+    useCircuitStore.setState({
+      nodes: [torNode, auxNCNode, auxNONode],
+      wires: [],
+    });
+
+    // 1. Click / toggle TOR -> Tripped (frameIndex 1)
+    useCircuitStore.getState().toggleComponentState(801);
+
+    let nodes = useCircuitStore.getState().nodes;
+    expect(nodes.find((n) => n.id === 801)?.frameIndex).toBe(1);
+    expect(nodes.find((n) => n.id === 802)?.frameIndex).toBe(1); // NC opened
+    expect(nodes.find((n) => n.id === 803)?.frameIndex).toBe(1); // NO closed
+
+    // 2. Click / toggle TOR again -> Reset (frameIndex 0)
+    useCircuitStore.getState().toggleComponentState(801);
+
+    nodes = useCircuitStore.getState().nodes;
+    expect(nodes.find((n) => n.id === 801)?.frameIndex).toBe(0);
+    expect(nodes.find((n) => n.id === 802)?.frameIndex).toBe(0); // NC closed back
+    expect(nodes.find((n) => n.id === 803)?.frameIndex).toBe(0); // NO opened back
+  });
 });

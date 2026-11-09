@@ -27,6 +27,6 @@
          </frame>
       </frames>
    </metadata>
-   <path d="M 0,40 H 60 V 80 H 0 Z" style="fill:#aa0000;stroke:none;stroke-width:1.99999" id="mainFill1" inkscape:label="mainFill1" sodipodi:nodetypes="ccccc" />
+   <path d="M 0,40 H 60 V 80 H 0 Z" style="display:none;fill:#ef4444;stroke:none;stroke-width:1.99999" id="mainFill1" inkscape:label="mainFill1" sodipodi:nodetypes="ccccc" />
    <path id="mainPath1" style="fill:none;stroke:#ffffff;stroke-width:2" d="M 0,40 H 60 V 80 H 0 Z M 30,0 V 50 H 50 V 70 H 30 v 50" inkscape:label="pathMain1" sodipodi:nodetypes="ccccccccccc" />
 </svg>
