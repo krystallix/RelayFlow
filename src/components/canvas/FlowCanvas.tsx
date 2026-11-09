@@ -1373,7 +1373,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
           ))}
         </div>
 
-        {/* Marquee Selection Rectangle (CAD Blueprint Box Selection) */}
+        {/* Marquee Selection Rectangle (Amber CAD Selection) */}
         {marquee && (
           <div
             style={{
@@ -1382,9 +1382,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
               width: `${Math.abs(marquee.currentX - marquee.startX)}px`,
               height: `${Math.abs(marquee.currentY - marquee.startY)}px`,
             }}
-            className={`absolute border border-dashed rounded-xs pointer-events-none z-30 ${
-              isDark ? "border-white/50 bg-white/5" : "border-slate-800/40 bg-slate-900/5"
-            }`}
+            className="absolute border border-dashed border-amber-400 bg-amber-500/15 backdrop-blur-[0.5px] rounded-xs pointer-events-none shadow-[0_0_12px_rgba(251,191,36,0.25)] z-30"
           />
         )}
       </div>

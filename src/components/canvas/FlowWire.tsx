@@ -216,9 +216,9 @@ export const FlowWire: React.FC<FlowWireProps> = ({
     onStartDragSegment?.(wire, segmentOrientation, defaultMid);
   };
 
-  // Uniform Wire color (clean CAD standard, zero phase differentiation)
+  // Uniform Wire color (clean CAD standard, amber highlight for selection)
   const getWireColor = () => {
-    if (isSelected) return isDark ? "#ffffff" : "#0f172a"; // Highlight selection in crisp contrast
+    if (isSelected) return "#f59e0b"; // Highlight selection in clear visible amber
     if (isHot) return "#ef4444"; // Uniform energized wire color across all potentials
     return isDark ? "#94a3b8" : "#334155"; // Uniform idle schematic wire
   };
@@ -310,7 +310,7 @@ export const FlowWire: React.FC<FlowWireProps> = ({
         strokeWidth={isSelected ? 2.5 : 2}
         strokeLinecap="round"
         strokeLinejoin="round"
-        className={`transition-colors ${isDark ? "group-hover:stroke-white" : "group-hover:stroke-slate-900"}`}
+        className="transition-colors group-hover:stroke-amber-400"
       />
 
       {/* 5. Active Current Animation (Flowing Dashes) */}
@@ -357,8 +357,8 @@ export const FlowWire: React.FC<FlowWireProps> = ({
       {/* 7. Magnetic snap target indicator when connecting wire from component terminal */}
       {wireDraft && hoverPos && !isSimulating && (
         <g transform={`translate(${hoverPos.x}, ${hoverPos.y})`} className="pointer-events-none">
-          <circle r={11} fill="none" stroke={isDark ? "#ffffff" : "#0f172a"} strokeWidth={2} strokeDasharray="3 3" />
-          <circle r={4.5} fill={isDark ? "#ffffff" : "#0f172a"} stroke={isDark ? "#090b10" : "#ffffff"} strokeWidth={1.5} />
+          <circle r={11} fill="none" stroke="#f59e0b" strokeWidth={2.5} strokeDasharray="3 3" />
+          <circle r={5} fill="#f59e0b" stroke="#ffffff" strokeWidth={1.5} />
         </g>
       )}
     </g>

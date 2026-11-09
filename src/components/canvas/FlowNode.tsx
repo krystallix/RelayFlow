@@ -60,7 +60,7 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
           onContextMenu?.(node, e);
         }}
         className={`absolute flex items-center justify-center cursor-pointer select-none group z-20 ${
-          isSelected ? (isDark ? "ring-2 ring-white ring-offset-2 ring-offset-[#090b10] rounded-full" : "ring-2 ring-slate-900 ring-offset-2 rounded-full") : ""
+          isSelected ? "ring-2 ring-amber-400 ring-offset-2 ring-offset-[#090b10] rounded-full" : ""
         }`}
         title="Junction Dot (Click to select & delete)"
       >
@@ -238,10 +238,8 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
           : "cursor-grab active:cursor-grabbing"
       } ${
         isSelected
-          ? isDark
-            ? "border border-dashed border-zinc-300/80 bg-white/[0.03]"
-            : "border border-dashed border-slate-700/80 bg-black/[0.03]"
-          : ""
+          ? "border border-dashed border-amber-400/80 bg-amber-500/[0.04]"
+          : "hover:border hover:border-dashed hover:border-amber-400/40"
       }`}
     >
       {/* Schematic Annotation Label (Tag & Comment & Timer - Simurelay CAD Style) */}
@@ -434,15 +432,15 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
             <div
               className={`w-3.5 h-3.5 rounded-full flex items-center justify-center transition-all duration-150 ${
                 wireDraft || isSelected
-                  ? "opacity-100 scale-110 shadow-sm"
+                  ? "opacity-100 scale-110 shadow-[0_0_8px_rgba(245,158,11,0.6)]"
                   : "opacity-40 md:opacity-0 group-hover:opacity-100 group-hover/port:scale-125"
               } ${
                 isDark
-                  ? "bg-black border border-white/80"
-                  : "bg-white border border-slate-900"
+                  ? "bg-black border border-amber-400"
+                  : "bg-white border border-amber-500"
               }`}
             >
-              <div className={`w-1.5 h-1.5 rounded-full ${isDark ? "bg-white" : "bg-slate-900"}`} />
+              <div className="w-1.5 h-1.5 rounded-full bg-amber-400" />
             </div>
 
             {/* Terminal Tag Tooltip on Direct Port Hover: points OUTWARD away from symbol */}
