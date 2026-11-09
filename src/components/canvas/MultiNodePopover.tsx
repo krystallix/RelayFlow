@@ -258,7 +258,7 @@ export const MultiNodePopover: React.FC<MultiNodePopoverProps> = ({
       {showAlignSubmenu && (
         <div
           className={`px-2 py-1.5 border-t flex items-center gap-1 text-xs animate-in slide-in-from-top-1 duration-150 ${
-            isDark ? "border-white/10 bg-black/25" : "border-slate-200 bg-slate-50/90"
+            isDark ? "border-white/10 bg-[#1c1c1c]" : "border-slate-200 bg-slate-50/90"
           }`}
         >
           <span className="text-[10px] text-zinc-400 font-medium px-1 uppercase tracking-wider font-mono">

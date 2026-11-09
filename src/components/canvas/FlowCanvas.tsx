@@ -1192,7 +1192,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
         });
       }}
       className={`flex-1 h-[calc(100vh-3.5rem)] relative overflow-hidden select-none transition-colors duration-150 ${
-        isDark ? "bg-[#090b10]" : "bg-[#f8fafc]"
+        isDark ? "bg-[#1c1c1c]" : "bg-[#f8fafc]"
       } ${
         draggingWireSegment
           ? draggingWireSegment.orientation === "horizontal"

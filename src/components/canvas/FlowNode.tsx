@@ -60,7 +60,7 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
           onContextMenu?.(node, e);
         }}
         className={`absolute flex items-center justify-center cursor-pointer select-none group z-20 ${
-          isSelected ? "ring-2 ring-amber-400 ring-offset-2 ring-offset-[#090b10] rounded-full" : ""
+          isSelected ? "ring-2 ring-amber-400 ring-offset-2 ring-offset-[#1c1c1c] rounded-full" : ""
         }`}
         title="Junction Dot (Click to select & delete)"
       >
@@ -248,7 +248,7 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
           style={labelStyle}
           className={`absolute flex flex-col gap-0.5 pointer-events-none select-none text-xs font-mono whitespace-nowrap z-20 px-1.5 py-0.5 rounded-md transition-all ${
             isDark
-              ? "bg-[#090b10]/60 border border-white/10 shadow-xs"
+              ? "bg-[#1c1c1c]/90 border border-white/10 shadow-xs"
               : "bg-white/60 border border-slate-200 shadow-xs"
           } ${labelContainerClass}`}
         >
@@ -436,7 +436,7 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
                   : "opacity-40 md:opacity-0 group-hover:opacity-100 group-hover/port:scale-125"
               } ${
                 isDark
-                  ? "bg-black border border-amber-400"
+                  ? "bg-[#1c1c1c] border border-amber-400"
                   : "bg-white border border-amber-500"
               }`}
             >
@@ -455,7 +455,7 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
                   : "left-full ml-1.5 top-1/2 -translate-y-1/2"
               } ${
                 isDark
-                  ? "bg-black/95 text-zinc-200 border-white/20 shadow-lg"
+                  ? "bg-[#1c1c1c]/95 text-zinc-200 border-white/20 shadow-lg"
                   : "bg-white text-slate-800 border-slate-300 shadow-md"
               }`}
             >

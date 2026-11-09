@@ -340,7 +340,7 @@ export const FlowWire: React.FC<FlowWireProps> = ({
           cy={p2.y}
           r={4.5}
           fill={wireColor}
-          stroke={isDark ? "#090b10" : "#ffffff"}
+          stroke={isDark ? "#1c1c1c" : "#ffffff"}
           strokeWidth={1.5}
           className="transition-all"
         />
