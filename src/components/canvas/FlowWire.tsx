@@ -138,15 +138,13 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
   const [isHovered, setIsHovered] = useState(false);
 
   // Use parent-provided memoized maps for optimal O(1) resolution without reallocating
-  const fallbackNodeMap = useCircuitStore((s) => s.nodes);
-  const fallbackWireMap = useCircuitStore((s) => s.wires);
   const effectiveNodeMap = React.useMemo(
-    () => nodeMap || new Map(fallbackNodeMap.map((n) => [n.id, n])),
-    [nodeMap, fallbackNodeMap]
+    () => nodeMap || new Map(useCircuitStore.getState().nodes.map((n) => [n.id, n])),
+    [nodeMap]
   );
   const effectiveWireMap = React.useMemo(
-    () => wireMap || new Map(fallbackWireMap.map((w) => [w.id, w])),
-    [wireMap, fallbackWireMap]
+    () => wireMap || new Map(useCircuitStore.getState().wires.map((w) => [w.id, w])),
+    [wireMap]
   );
 
   const endpoints = ManhattanRouter.resolveWireEndpoints(wire, effectiveNodeMap, effectiveWireMap);

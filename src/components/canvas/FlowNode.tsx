@@ -239,24 +239,23 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
   }
 
   // Cross-reference: count of other components that share the same tag
-  const fallbackNodes = useCircuitStore((s) => s.nodes);
   const effectivePairedCount =
     pairedCount !== undefined
       ? pairedCount
       : node.tag
-      ? fallbackNodes.filter((n) => n.tag === node.tag && n.id !== node.id).length
+      ? useCircuitStore.getState().nodes.filter((n) => n.tag === node.tag && n.id !== node.id).length
       : 0;
 
-  const fallbackWires = useCircuitStore((s) => s.wires);
   const effectiveConnectedPortIds = useMemo(() => {
     if (connectedPortIds) return connectedPortIds;
+    const fallbackWires = useCircuitStore.getState().wires;
     const set = new Set<number>();
     for (const wire of fallbackWires) {
       if (wire.fromNodeId === node.id) set.add(wire.fromPortId);
       if (wire.toNodeId === node.id) set.add(wire.toPortId);
     }
     return set;
-  }, [connectedPortIds, fallbackWires, node.id]);
+  }, [connectedPortIds, node.id]);
 
   // Show _on.svg for activated switches/contacts (frameIndex === 1) or energized lamps
   const shouldShowOnVariant =

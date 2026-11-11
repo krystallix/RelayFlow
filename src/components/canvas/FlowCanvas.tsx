@@ -215,6 +215,11 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   const panOffsetRef = useRef(panOffset);
   panOffsetRef.current = panOffset;
 
+  const panRafRef = useRef<number | null>(null);
+  const draftRafRef = useRef<number | null>(null);
+  const draftMousePosRef = useRef<Point | null>(null);
+  const smartGuidelinesRef = useRef<SmartGuideline[]>([]);
+
   // Cached container rect to completely eliminate DOM layout thrashing (getBoundingClientRect) during 60-120fps mouse moves
   const cachedRectRef = useRef<DOMRect | null>(null);
 
@@ -513,7 +518,10 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
         }
       }
 
-      setSmartGuidelines(newGuidelines);
+      if (newGuidelines.length > 0 || smartGuidelinesRef.current.length > 0) {
+        smartGuidelinesRef.current = newGuidelines;
+        setSmartGuidelines(newGuidelines);
+      }
 
       const updates = Array.from(draggingNodeState.initialPositions.entries()).map(([id, pos]) => ({
         id,
@@ -527,7 +535,10 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   };
 
   const finishDraggingNode = () => {
-    setSmartGuidelines([]);
+    if (smartGuidelinesRef.current.length > 0) {
+      smartGuidelinesRef.current = [];
+      setSmartGuidelines([]);
+    }
     if (!draggingNodeState) return;
 
     if (draggingNodeState.hasMoved) {
@@ -732,17 +743,32 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       return;
     }
 
-    // 2. Update active wire draft line
+    // 2. Update active wire draft line (RAF synced 60-120fps)
     if (wireDraft) {
-      updateWireDraft(worldPos);
+      draftMousePosRef.current = worldPos;
+      if (!draftRafRef.current) {
+        draftRafRef.current = requestAnimationFrame(() => {
+          draftRafRef.current = null;
+          if (draftMousePosRef.current) {
+            updateWireDraft(draftMousePosRef.current);
+          }
+        });
+      }
     }
 
-    // 3. Pan canvas
+    // 3. Pan canvas (RAF synced 60-120fps)
     if (isPanning) {
-      setPanOffset({
+      const nextPan = {
         x: e.clientX - panStart.x,
         y: e.clientY - panStart.y,
-      });
+      };
+      panOffsetRef.current = nextPan;
+      if (!panRafRef.current) {
+        panRafRef.current = requestAnimationFrame(() => {
+          panRafRef.current = null;
+          setPanOffset(panOffsetRef.current);
+        });
+      }
       return;
     }
 
@@ -754,7 +780,20 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
 
   // Canvas Mouse Up
   const handleMouseUp = (e: React.MouseEvent) => {
-    setSmartGuidelines([]);
+    if (smartGuidelinesRef.current.length > 0) {
+      smartGuidelinesRef.current = [];
+      setSmartGuidelines([]);
+    }
+
+    if (panRafRef.current) {
+      cancelAnimationFrame(panRafRef.current);
+      panRafRef.current = null;
+      setPanOffset(panOffsetRef.current);
+    }
+    if (draftRafRef.current) {
+      cancelAnimationFrame(draftRafRef.current);
+      draftRafRef.current = null;
+    }
 
     if (draggingTapPointState) {
       const currentWire = wires.find((w) => w.id === draggingTapPointState.wireId);
@@ -1012,6 +1051,16 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     const container = containerRef.current;
     if (!container) return;
 
+    let wheelRaf: number | null = null;
+    const scheduleWheelState = () => {
+      if (wheelRaf !== null) return;
+      wheelRaf = requestAnimationFrame(() => {
+        wheelRaf = null;
+        setZoomScale(zoomScaleRef.current);
+        setPanOffset(panOffsetRef.current);
+      });
+    };
+
     const handleWheelNative = (e: WheelEvent) => {
       // Prevent zooming canvas when quick search spotlight is open
       if (showQuickSearch) return;
@@ -1041,8 +1090,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
 
         zoomScaleRef.current = newZoom;
         panOffsetRef.current = newPan;
-        setZoomScale(newZoom);
-        setPanOffset(newPan);
+        scheduleWheelState();
       } else {
         // Trackpad 2-finger pan or wheel scroll
         const newPan = {
@@ -1050,7 +1098,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
           y: currentPan.y - e.deltaY,
         };
         panOffsetRef.current = newPan;
-        setPanOffset(newPan);
+        scheduleWheelState();
       }
     };
 
@@ -1064,6 +1112,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     container.addEventListener("gestureend", handleGesture, { passive: false });
 
     return () => {
+      if (wheelRaf !== null) cancelAnimationFrame(wheelRaf);
       container.removeEventListener("wheel", handleWheelNative);
       container.removeEventListener("gesturestart", handleGesture);
       container.removeEventListener("gesturechange", handleGesture);
@@ -1563,6 +1612,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
         style={{
           transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoomScale})`,
           transformOrigin: "0 0",
+          willChange: "transform",
         }}
         className="w-full h-full absolute inset-0 pointer-events-none"
       >
