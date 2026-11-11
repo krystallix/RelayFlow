@@ -17,6 +17,7 @@ interface FlowNodeProps {
   pairedCount?: number;
   isEditingComment?: boolean;
   initialCommentChar?: string | null;
+  isLOD?: boolean;
   onStartEditComment?: (nodeId: string | number) => void;
   onEndEditComment?: () => void;
   onPortMouseDown: (nodeId: string | number, portId: number, portPos: { x: number; y: number }, e: React.MouseEvent | React.TouchEvent) => void;
@@ -47,6 +48,7 @@ function areNodePropsEqual(prev: FlowNodeProps, next: FlowNodeProps): boolean {
   if (prev.pairedCount !== next.pairedCount) return false;
   if (prev.isEditingComment !== next.isEditingComment) return false;
   if (prev.initialCommentChar !== next.initialCommentChar) return false;
+  if (prev.isLOD !== next.isLOD) return false;
 
   if (prev.connectedPortIds !== next.connectedPortIds) {
     if (!prev.connectedPortIds || !next.connectedPortIds) return false;
@@ -63,6 +65,7 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
   pairedCount,
   isEditingComment = false,
   initialCommentChar = null,
+  isLOD = false,
   onStartEditComment,
   onEndEditComment,
   onPortMouseDown,
@@ -316,6 +319,9 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
         width: `${width}px`,
         height: `${height}px`,
         touchAction: "none",
+        contain: isSelected ? "none" : "layout style",
+        contentVisibility: isSelected ? "visible" : "auto",
+        containIntrinsicSize: `${width}px ${height}px`,
       }}
       onMouseDown={handleMouseDown}
       onTouchStart={handleTouchStart}
@@ -593,23 +599,25 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
             )}
 
             {/* Terminal Tag Tooltip on Direct Port Hover: points OUTWARD away from symbol */}
-            <span
-              className={`absolute opacity-0 group-hover/port:opacity-100 text-[9px] font-mono px-1 py-0.5 rounded border whitespace-nowrap pointer-events-none transition-opacity z-30 ${
-                transformed.y <= 15
-                  ? "bottom-full mb-1.5 left-1/2 -translate-x-1/2"
-                  : transformed.y >= height - 15
-                  ? "top-full mt-1.5 left-1/2 -translate-x-1/2"
-                  : transformed.x <= 15
-                  ? "right-full mr-1.5 top-1/2 -translate-y-1/2"
-                  : "left-full ml-1.5 top-1/2 -translate-y-1/2"
-              } ${
-                isDark
-                  ? "bg-black/95 text-amber-300 border-amber-500/40 shadow-lg"
-                  : "bg-white text-slate-800 border-slate-300 shadow-md"
-              }`}
-            >
-              {transformed.tag || transformed.id}
-            </span>
+            {!isLOD && (
+              <span
+                className={`absolute opacity-0 group-hover/port:opacity-100 text-[9px] font-mono px-1 py-0.5 rounded border whitespace-nowrap pointer-events-none transition-opacity z-30 ${
+                  transformed.y <= 15
+                    ? "bottom-full mb-1.5 left-1/2 -translate-x-1/2"
+                    : transformed.y >= height - 15
+                    ? "top-full mt-1.5 left-1/2 -translate-x-1/2"
+                    : transformed.x <= 15
+                    ? "right-full mr-1.5 top-1/2 -translate-y-1/2"
+                    : "left-full ml-1.5 top-1/2 -translate-y-1/2"
+                } ${
+                  isDark
+                    ? "bg-black/95 text-amber-300 border-amber-500/40 shadow-lg"
+                    : "bg-white text-slate-800 border-slate-300 shadow-md"
+                }`}
+              >
+                {transformed.tag || transformed.id}
+              </span>
+            )}
           </div>
         );
       })}

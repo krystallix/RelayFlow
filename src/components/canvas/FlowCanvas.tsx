@@ -625,7 +625,14 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
         worldPos,
         draggingTapPointState.targetWirePoints
       );
-      updateWireTapPoint(draggingTapPointState.wireId, nearest.point, false);
+      const currentWire = wires.find((w) => w.id === draggingTapPointState.wireId);
+      if (
+        !currentWire?.tapPoint ||
+        currentWire.tapPoint.x !== nearest.point.x ||
+        currentWire.tapPoint.y !== nearest.point.y
+      ) {
+        updateWireTapPoint(draggingTapPointState.wireId, nearest.point, false);
+      }
       return;
     }
 
@@ -713,26 +720,40 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
         }
       }
 
-      updateWireMargins(wireId, nextMargins, false);
+      const currentWire = wires.find((w) => w.id === wireId);
+      const curMargins = currentWire?.margins;
+      if (
+        curMargins?.start !== nextMargins.start ||
+        curMargins?.center !== nextMargins.center ||
+        curMargins?.end !== nextMargins.end
+      ) {
+        updateWireMargins(wireId, nextMargins, false);
+      }
       return;
     }
 
     // 0. Live Wire Segment Dragging (draw.io style - aligned to 30px grid)
     if (draggingWireSegment) {
+      const currentWire = wires.find((w) => w.id === draggingWireSegment.wireId);
+      const curCenter = currentWire?.margins?.center || 0;
       if (draggingWireSegment.orientation === "horizontal") {
         const newCenter = Math.round((worldPos.y - draggingWireSegment.defaultMid) / 30) * 30;
-        updateWireMargins(
-          draggingWireSegment.wireId,
-          { ...draggingWireSegment.initialMargins, center: newCenter },
-          false
-        );
+        if (curCenter !== newCenter) {
+          updateWireMargins(
+            draggingWireSegment.wireId,
+            { ...draggingWireSegment.initialMargins, center: newCenter },
+            false
+          );
+        }
       } else {
         const newCenter = Math.round((worldPos.x - draggingWireSegment.defaultMid) / 30) * 30;
-        updateWireMargins(
-          draggingWireSegment.wireId,
-          { ...draggingWireSegment.initialMargins, center: newCenter },
-          false
-        );
+        if (curCenter !== newCenter) {
+          updateWireMargins(
+            draggingWireSegment.wireId,
+            { ...draggingWireSegment.initialMargins, center: newCenter },
+            false
+          );
+        }
       }
       return;
     }
@@ -1405,6 +1426,79 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     return map;
   }, [nodes]);
 
+  // Level of detail flag: true when zoomed out past threshold (< 0.65)
+  const isLOD = zoomScale < 0.65;
+
+  // Viewport Culling: Compute visible world rectangle with generous 400px safety margin around screen
+  const viewportBounds = React.useMemo(() => {
+    const cWidth = containerRef.current?.clientWidth || (typeof window !== "undefined" ? window.innerWidth : 1920);
+    const cHeight = containerRef.current?.clientHeight || (typeof window !== "undefined" ? window.innerHeight : 1080);
+    const buffer = 400 / zoomScale;
+
+    return {
+      minX: -panOffset.x / zoomScale - buffer,
+      maxX: (cWidth - panOffset.x) / zoomScale + buffer,
+      minY: -panOffset.y / zoomScale - buffer,
+      maxY: (cHeight - panOffset.y) / zoomScale + buffer,
+    };
+  }, [panOffset.x, panOffset.y, zoomScale]);
+
+  // Culled nodes: only elements inside viewport + buffer or currently selected / interacted with
+  const visibleNodes = React.useMemo(() => {
+    if (nodes.length <= 40) return nodes;
+
+    const { minX, maxX, minY, maxY } = viewportBounds;
+    return nodes.filter((n) => {
+      if (selectedNodeIds.has(n.id) || draggingNodeState?.nodeId === n.id) return true;
+      return (
+        n.position.x >= minX - 100 &&
+        n.position.x <= maxX + 100 &&
+        n.position.y >= minY - 100 &&
+        n.position.y <= maxY + 100
+      );
+    });
+  }, [nodes, viewportBounds, selectedNodeIds, draggingNodeState?.nodeId]);
+
+  // Culled wires: only wires connecting visible nodes or selected / interacted wires
+  const visibleWires = React.useMemo(() => {
+    if (wires.length <= 50) return wires;
+
+    const visibleNodeIdSet = new Set(visibleNodes.map((n) => n.id));
+
+    return wires.filter((w) => {
+      if (
+        selectedWireIds.has(w.id) ||
+        draggingWireSegment?.wireId === w.id ||
+        draggingCornerState?.wireId === w.id ||
+        draggingTapPointState?.wireId === w.id
+      ) {
+        return true;
+      }
+
+      if (visibleNodeIdSet.has(w.fromNodeId) || visibleNodeIdSet.has(w.toNodeId)) return true;
+
+      if (w.toWireId) {
+        const hostWire = wireMap.get(w.toWireId);
+        if (
+          hostWire &&
+          (visibleNodeIdSet.has(hostWire.fromNodeId) || visibleNodeIdSet.has(hostWire.toNodeId))
+        ) {
+          return true;
+        }
+      }
+
+      return false;
+    });
+  }, [
+    wires,
+    visibleNodes,
+    selectedWireIds,
+    draggingWireSegment?.wireId,
+    draggingCornerState?.wireId,
+    draggingTapPointState?.wireId,
+    wireMap,
+  ]);
+
   const handleStartDragSegment = useCallback((targetWire: CircuitWire, orientation: "horizontal" | "vertical", defaultMid: number) => {
     if (useCircuitStore.getState().isReadOnlyViewer) return;
     setDraggingWireSegment({
@@ -1654,7 +1748,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
               </g>
             ))}
 
-            {wires.map((wire) => (
+            {visibleWires.map((wire) => (
               <FlowWire
                 key={wire.id}
                 wire={wire}
@@ -1668,6 +1762,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
                 routingMode={wireRoutingMode}
                 obstacles={nodeObstacles}
                 screenToWorld={screenToWorld}
+                isLOD={isLOD}
                 onContextMenu={handleWireContextMenu}
                 onWireHover={handleWireHover}
                 onWireLeave={handleWireLeave}
@@ -1721,7 +1816,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
 
         {/* DOM Layer for Component Nodes */}
         <div className="pointer-events-auto">
-          {nodes.map((node) => (
+          {visibleNodes.map((node) => (
             <FlowNode
               key={node.id}
               node={node}
@@ -1730,6 +1825,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
               pairedCount={node.tag && tagCountMap.get(node.tag) ? tagCountMap.get(node.tag)! - 1 : 0}
               isEditingComment={editingCommentNodeId === node.id}
               initialCommentChar={editingCommentNodeId === node.id ? initialCommentChar : null}
+              isLOD={isLOD}
               onStartEditComment={handleStartEditComment}
               onEndEditComment={handleEndEditComment}
               onPortMouseDown={handlePortMouseDown}
