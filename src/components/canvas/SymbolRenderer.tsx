@@ -72,7 +72,7 @@ interface SymbolRendererProps {
   isDark: boolean;
 }
 
-export const SymbolRenderer: React.FC<SymbolRendererProps> = ({
+export const SymbolRenderer: React.FC<SymbolRendererProps> = React.memo(({
   svgPath,
   componentId,
   name,
@@ -157,4 +157,5 @@ export const SymbolRenderer: React.FC<SymbolRendererProps> = ({
       dangerouslySetInnerHTML={{ __html: processed }}
     />
   );
-};
+});
+SymbolRenderer.displayName = "SymbolRenderer";

@@ -617,17 +617,28 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
       set((state) => {
         const history = commitToHistory ? pushHistory(state) : {};
         const updateMap = new Map(updates.map((u) => [u.id, u.position]));
+        let hasChanged = false;
         const updatedNodes = state.nodes.map((n) => {
           const newPos = updateMap.get(n.id);
           if (!newPos) return n;
+          const targetX = Math.round(newPos.x / 30) * 30;
+          const targetY = Math.round(newPos.y / 30) * 30;
+          if (n.position.x === targetX && n.position.y === targetY) {
+            return n;
+          }
+          hasChanged = true;
           return {
             ...n,
             position: {
-              x: Math.round(newPos.x / 30) * 30,
-              y: Math.round(newPos.y / 30) * 30,
+              x: targetX,
+              y: targetY,
             },
           };
         });
+
+        if (!hasChanged && !commitToHistory) {
+          return state;
+        }
 
         if (commitToHistory) {
           saveToLocalStorage({ projectTitle: state.projectTitle, nodes: updatedNodes, wires: state.wires });

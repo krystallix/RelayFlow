@@ -100,8 +100,9 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     }
   }, []);
 
-  // Real-time Cursor Coordinates
-  const [cursorCoords, setCursorCoords] = useState({ x: 0, y: 0 });
+  // Real-time Cursor Coordinates via DOM refs (zero React re-renders on mouse movement!)
+  const cursorXRef = useRef<HTMLElement>(null);
+  const cursorYRef = useRef<HTMLElement>(null);
 
   // Touch gesture state ref for silky-smooth mobile multi-touch
   const touchStateRef = useRef<{
@@ -212,14 +213,32 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   const panOffsetRef = useRef(panOffset);
   panOffsetRef.current = panOffset;
 
-  // Convert screen coordinates to canvas world coordinates
-  const screenToWorld = (clientX: number, clientY: number) => {
+  // Cached container rect to completely eliminate DOM layout thrashing (getBoundingClientRect) during 60-120fps mouse moves
+  const cachedRectRef = useRef<DOMRect | null>(null);
+
+  useEffect(() => {
+    const handleResize = () => {
+      cachedRectRef.current = null;
+    };
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("scroll", handleResize, { passive: true });
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("scroll", handleResize);
+    };
+  }, []);
+
+  // Convert screen coordinates to canvas world coordinates with stable callback
+  const screenToWorld = useCallback((clientX: number, clientY: number) => {
     if (!containerRef.current) return { x: 0, y: 0 };
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = (clientX - rect.left - panOffset.x) / zoomScale;
-    const y = (clientY - rect.top - panOffset.y) / zoomScale;
+    if (!cachedRectRef.current) {
+      cachedRectRef.current = containerRef.current.getBoundingClientRect();
+    }
+    const rect = cachedRectRef.current;
+    const x = (clientX - rect.left - panOffsetRef.current.x) / zoomScaleRef.current;
+    const y = (clientY - rect.top - panOffsetRef.current.y) / zoomScaleRef.current;
     return { x, y };
-  };
+  }, []);
 
   // Zoom to Fit (Fits all circuit nodes neatly inside viewport)
   const handleZoomToFit = useCallback(() => {
@@ -578,10 +597,12 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   const handleMouseMove = (e: React.MouseEvent) => {
     const worldPos = screenToWorld(e.clientX, e.clientY);
     mouseWorldPosRef.current = worldPos;
-    setCursorCoords({
-      x: Math.round(worldPos.x),
-      y: Math.round(worldPos.y),
-    });
+
+    // Fast O(1) text update without re-rendering the whole canvas tree
+    const rx = Math.round(worldPos.x);
+    const ry = Math.round(worldPos.y);
+    if (cursorXRef.current) cursorXRef.current.textContent = String(rx);
+    if (cursorYRef.current) cursorYRef.current.textContent = String(ry);
 
     // -1. Live Wire Connection Point (Tap Junction Dot) Dragging - strictly constrained to host wire segments
     if (draggingTapPointState) {
@@ -819,7 +840,10 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       const cx = (t1.clientX + t2.clientX) / 2;
       const cy = (t1.clientY + t2.clientY) / 2;
 
-      const rect = containerRef.current?.getBoundingClientRect() || { left: 0, top: 0 };
+      if (!cachedRectRef.current && containerRef.current) {
+        cachedRectRef.current = containerRef.current.getBoundingClientRect();
+      }
+      const rect = cachedRectRef.current || { left: 0, top: 0 };
       const currentZoom = zoomScaleRef.current;
       const currentPan = panOffsetRef.current;
 
@@ -898,7 +922,10 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       const cx = (t1.clientX + t2.clientX) / 2;
       const cy = (t1.clientY + t2.clientY) / 2;
 
-      const rect = containerRef.current?.getBoundingClientRect() || { left: 0, top: 0 };
+      if (!cachedRectRef.current && containerRef.current) {
+        cachedRectRef.current = containerRef.current.getBoundingClientRect();
+      }
+      const rect = cachedRectRef.current || { left: 0, top: 0 };
       const ratio = dist / Math.max(1, touchStateRef.current.startDistance);
       const newZoom = Math.min(Math.max(0.2, touchStateRef.current.startZoom * ratio), 3);
 
@@ -931,10 +958,10 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
 
       const worldPos = screenToWorld(touch.clientX, touch.clientY);
       mouseWorldPosRef.current = worldPos;
-      setCursorCoords({
-        x: Math.round(worldPos.x),
-        y: Math.round(worldPos.y),
-      });
+      const rx = Math.round(worldPos.x);
+      const ry = Math.round(worldPos.y);
+      if (cursorXRef.current) cursorXRef.current.textContent = String(rx);
+      if (cursorYRef.current) cursorYRef.current.textContent = String(ry);
 
       // Dragging a node with touch
       if (draggingNodeState) {
@@ -988,7 +1015,10 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       // Crucial: prevent browser default behavior (page zoom & swipe navigation)
       e.preventDefault();
 
-      const rect = container.getBoundingClientRect();
+      if (!cachedRectRef.current) {
+        cachedRectRef.current = container.getBoundingClientRect();
+      }
+      const rect = cachedRectRef.current;
       const mouseX = e.clientX - rect.left;
       const mouseY = e.clientY - rect.top;
 
@@ -1253,7 +1283,8 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     return () => clearInterval(interval);
   }, [isSimulating, tickTimerSimulation]);
 
-  const nodeMap = new Map(nodes.map((n) => [n.id, n]));
+  const nodeMap = React.useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes]);
+  const wireMap = React.useMemo(() => new Map(wires.map((w) => [w.id, w])), [wires]);
   const isDark = theme === "dark";
 
   // Precompute component obstacle boxes for orthogonal routing clearance
@@ -1270,6 +1301,44 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
         height: h,
       };
     });
+  }, [nodes]);
+
+  // Precompute wire nets once at top level instead of in every render loop
+  const wireNetMap = React.useMemo(() => {
+    if (!showWireLabels) return null;
+    return WireNetResolver.resolveWireNets(wires, nodes);
+  }, [showWireLabels, wires, nodes]);
+
+  // Precompute port connectivity map: Map<nodeId, Set<portId>>
+  const nodeConnectedPortsMap = React.useMemo(() => {
+    const map = new Map<string | number, Set<number>>();
+    for (const wire of wires) {
+      let s1 = map.get(wire.fromNodeId);
+      if (!s1) {
+        s1 = new Set<number>();
+        map.set(wire.fromNodeId, s1);
+      }
+      s1.add(wire.fromPortId);
+
+      let s2 = map.get(wire.toNodeId);
+      if (!s2) {
+        s2 = new Set<number>();
+        map.set(wire.toNodeId, s2);
+      }
+      s2.add(wire.toPortId);
+    }
+    return map;
+  }, [wires]);
+
+  // Precompute component tag counts for cross-reference badges
+  const tagCountMap = React.useMemo(() => {
+    const map = new Map<string, number>();
+    for (const n of nodes) {
+      if (n.tag) {
+        map.set(n.tag, (map.get(n.tag) || 0) + 1);
+      }
+    }
+    return map;
   }, [nodes]);
 
   // Single selected node for Popover
@@ -1460,83 +1529,79 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
               </g>
             ))}
 
-            {(() => {
-              const wireNetMap = showWireLabels ? WireNetResolver.resolveWireNets(wires, nodes) : null;
-              return wires.map((wire) => (
-                <FlowWire
-                  key={wire.id}
-                  wire={wire}
-                  label={wireNetMap?.get(wire.id)?.label || wire.label}
-                  showLabel={showWireLabels}
-                  fromNode={nodeMap.get(wire.fromNodeId)}
-                  toNode={nodeMap.get(wire.toNodeId)}
-                  isSelected={selectedWireIds.has(wire.id)}
-                  routingMode={wireRoutingMode}
-                  obstacles={nodeObstacles.filter(
-                    (b) => b.id !== wire.fromNodeId && b.id !== wire.toNodeId
-                  )}
-                  screenToWorld={screenToWorld}
-                  onContextMenu={handleWireContextMenu}
-                  onWireHover={handleWireHover}
-                  onWireLeave={handleWireLeave}
-                  onStartDragSegment={(targetWire, orientation, defaultMid) => {
-                    if (isReadOnlyViewer) return;
-                    setDraggingWireSegment({
-                      wireId: targetWire.id,
-                      orientation,
-                      defaultMid,
-                      initialMargins: targetWire.margins || { start: 0, center: 0, end: 0 },
-                    });
-                  }}
-                  onStartDragCorner={(targetWire, cornerIndex, cornerPoint, points, dir1, dir2) => {
-                    if (isReadOnlyViewer) return;
-                    setDraggingCornerState({
-                      wireId: targetWire.id,
-                      cornerIndex,
-                      cornerCount: points.length >= 3 ? points.length - 2 : 1,
-                      initialPoint: cornerPoint,
-                      initialMargins: targetWire.margins || { start: 0, center: 0, end: 0 },
-                      p1: points[0],
-                      dir1,
-                      p2: points[points.length - 1],
-                      dir2,
-                      points,
-                      isVerticalRouting: dir1 === 0 || dir1 === 2,
-                    });
-                  }}
-                  onStartDragTapPoint={(targetWire, currentTapPoint) => {
-                    if (isReadOnlyViewer || isSimulating || !targetWire.toWireId) return;
+            {wires.map((wire) => (
+              <FlowWire
+                key={wire.id}
+                wire={wire}
+                label={wireNetMap?.get(wire.id)?.label || wire.label}
+                showLabel={showWireLabels}
+                fromNode={nodeMap.get(wire.fromNodeId)}
+                toNode={nodeMap.get(wire.toNodeId)}
+                nodeMap={nodeMap}
+                wireMap={wireMap}
+                isSelected={selectedWireIds.has(wire.id)}
+                routingMode={wireRoutingMode}
+                obstacles={nodeObstacles}
+                screenToWorld={screenToWorld}
+                onContextMenu={handleWireContextMenu}
+                onWireHover={handleWireHover}
+                onWireLeave={handleWireLeave}
+                onStartDragSegment={(targetWire, orientation, defaultMid) => {
+                  if (isReadOnlyViewer) return;
+                  setDraggingWireSegment({
+                    wireId: targetWire.id,
+                    orientation,
+                    defaultMid,
+                    initialMargins: targetWire.margins || { start: 0, center: 0, end: 0 },
+                  });
+                }}
+                onStartDragCorner={(targetWire, cornerIndex, cornerPoint, points, dir1, dir2) => {
+                  if (isReadOnlyViewer) return;
+                  setDraggingCornerState({
+                    wireId: targetWire.id,
+                    cornerIndex,
+                    cornerCount: points.length >= 3 ? points.length - 2 : 1,
+                    initialPoint: cornerPoint,
+                    initialMargins: targetWire.margins || { start: 0, center: 0, end: 0 },
+                    p1: points[0],
+                    dir1,
+                    p2: points[points.length - 1],
+                    dir2,
+                    points,
+                    isVerticalRouting: dir1 === 0 || dir1 === 2,
+                  });
+                }}
+                onStartDragTapPoint={(targetWire, currentTapPoint) => {
+                  if (isReadOnlyViewer || isSimulating || !targetWire.toWireId) return;
 
-                    const hostWire = wires.find((w) => w.id === targetWire.toWireId);
-                    if (!hostWire) return;
+                  const hostWire = wireMap.get(targetWire.toWireId);
+                  if (!hostWire) return;
 
-                    const currentWireMap = new Map(wires.map((w) => [w.id, w]));
-                    const endpoints = ManhattanRouter.resolveWireEndpoints(hostWire, nodeMap, currentWireMap);
-                    if (!endpoints) return;
+                  const endpoints = ManhattanRouter.resolveWireEndpoints(hostWire, nodeMap, wireMap);
+                  if (!endpoints) return;
 
-                    const effectiveTargetMargins = endpoints.isTapWire
-                      ? { ...hostWire.margins, end: -30 }
-                      : hostWire.margins;
+                  const effectiveTargetMargins = endpoints.isTapWire
+                    ? { ...hostWire.margins, end: -30 }
+                    : hostWire.margins;
 
-                    const routedTarget = ManhattanRouter.routeOrthogonal(
-                      endpoints.p1,
-                      endpoints.dir1,
-                      endpoints.p2,
-                      endpoints.dir2,
-                      effectiveTargetMargins
-                    );
+                  const routedTarget = ManhattanRouter.routeOrthogonal(
+                    endpoints.p1,
+                    endpoints.dir1,
+                    endpoints.p2,
+                    endpoints.dir2,
+                    effectiveTargetMargins
+                  );
 
-                    if (!routedTarget.points || routedTarget.points.length < 2) return;
+                  if (!routedTarget.points || routedTarget.points.length < 2) return;
 
-                    setDraggingTapPointState({
-                      wireId: targetWire.id,
-                      initialTapPoint: currentTapPoint,
-                      targetWirePoints: routedTarget.points,
-                    });
-                  }}
-                />
-              ));
-            })()}
+                  setDraggingTapPointState({
+                    wireId: targetWire.id,
+                    initialTapPoint: currentTapPoint,
+                    targetWirePoints: routedTarget.points,
+                  });
+                }}
+              />
+            ))}
 
             {/* Wire Draft Line (Active Connection under cursor) */}
             {wireDraft && (
@@ -1587,6 +1652,8 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
               key={node.id}
               node={node}
               isSelected={selectedNodeIds.has(node.id)}
+              connectedPortIds={nodeConnectedPortsMap.get(node.id)}
+              pairedCount={node.tag && tagCountMap.get(node.tag) ? tagCountMap.get(node.tag)! - 1 : 0}
               isEditingComment={editingCommentNodeId === node.id}
               initialCommentChar={editingCommentNodeId === node.id ? initialCommentChar : null}
               onStartEditComment={() => {
@@ -1687,8 +1754,8 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
         >
           <div className="flex items-center gap-1.5 font-mono text-[11px]">
             <Crosshair className="w-3.5 h-3.5 text-zinc-400" />
-            <span>X: <strong className={isDark ? "text-zinc-200" : "text-slate-800"}>{cursorCoords.x}</strong></span>
-            <span>Y: <strong className={isDark ? "text-zinc-200" : "text-slate-800"}>{cursorCoords.y}</strong></span>
+            <span>X: <strong ref={cursorXRef} className={isDark ? "text-zinc-200" : "text-slate-800"}>0</strong></span>
+            <span>Y: <strong ref={cursorYRef} className={isDark ? "text-zinc-200" : "text-slate-800"}>0</strong></span>
           </div>
           <span className={isDark ? "text-zinc-700" : "text-slate-300"}>|</span>
           <span className="text-[10px] text-zinc-500 font-mono">Snap: 30px</span>

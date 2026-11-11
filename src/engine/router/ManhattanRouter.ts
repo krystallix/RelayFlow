@@ -5,6 +5,7 @@ import catalogData from "@/constants/components-catalog.json";
 const catalog = catalogData as Record<string, any>;
 
 export interface Box {
+  id?: string | number;
   x: number;
   y: number;
   width: number;
@@ -16,7 +17,15 @@ export interface RoutedWire {
   points: Point[];
 }
 
+const orthogonalRouteCache = new Map<string, RoutedWire>();
+const bezierRouteCache = new Map<string, RoutedWire>();
+const MAX_ROUTE_CACHE = 5000;
+
 export class ManhattanRouter {
+  static clearRouteCache(): void {
+    orthogonalRouteCache.clear();
+    bezierRouteCache.clear();
+  }
   /**
    * Simplifies an array of points by:
    * 1. Removing consecutive identical points.
@@ -101,13 +110,22 @@ export class ManhattanRouter {
     p2: Point,
     dir2: number,
     margins: WireMargins = { start: 0, center: 0, end: 0 },
-    obstacles: Box[] = []
+    obstacles: Box[] = [],
+    ignoreIds?: (string | number)[]
   ): RoutedWire {
+    const ignoreKey = ignoreIds ? `${ignoreIds[0] || ""}_${ignoreIds[1] || ""}` : "";
+    const cacheKey = `${p1.x},${p1.y},${dir1}_${p2.x},${p2.y},${dir2}_${margins?.start || 0},${margins?.center || 0},${margins?.end || 0}_${obstacles.length}_${ignoreKey}`;
+    const cached = orthogonalRouteCache.get(cacheKey);
+    if (cached) return cached;
+
     const STUB_LENGTH = 30; // standard 30px CAD grid step
 
     // Helper: test if vertical segment x crosses any obstacle box
     const verticalSegmentCollides = (x: number, yMin: number, yMax: number): Box | null => {
       for (const box of obstacles) {
+        if (box.id !== undefined && ignoreIds && (box.id === ignoreIds[0] || box.id === ignoreIds[1])) {
+          continue;
+        }
         if (x >= box.x && x <= box.x + box.width && !(yMax < box.y || yMin > box.y + box.height)) {
           return box;
         }
@@ -118,6 +136,9 @@ export class ManhattanRouter {
     // Helper: test if horizontal segment y crosses any obstacle box
     const horizontalSegmentCollides = (y: number, xMin: number, xMax: number): Box | null => {
       for (const box of obstacles) {
+        if (box.id !== undefined && ignoreIds && (box.id === ignoreIds[0] || box.id === ignoreIds[1])) {
+          continue;
+        }
         if (y >= box.y && y <= box.y + box.height && !(xMax < box.x || xMin > box.x + box.width)) {
           return box;
         }
@@ -285,7 +306,12 @@ export class ManhattanRouter {
       svgPath += ` L ${simplified[i].x} ${simplified[i].y}`;
     }
 
-    return { svgPath, points: simplified };
+    const result: RoutedWire = { svgPath, points: simplified };
+    if (orthogonalRouteCache.size >= MAX_ROUTE_CACHE) {
+      orthogonalRouteCache.clear();
+    }
+    orthogonalRouteCache.set(cacheKey, result);
+    return result;
   }
 
   /**
@@ -297,6 +323,10 @@ export class ManhattanRouter {
     p2: Point,
     dir2: number
   ): RoutedWire {
+    const cacheKey = `${p1.x},${p1.y},${dir1}_${p2.x},${p2.y},${dir2}`;
+    const cached = bezierRouteCache.get(cacheKey);
+    if (cached) return cached;
+
     const dx = Math.abs(p2.x - p1.x);
     const dy = Math.abs(p2.y - p1.y);
     const dist = Math.max(40, Math.sqrt(dx * dx + dy * dy) * 0.4);
@@ -317,10 +347,15 @@ export class ManhattanRouter {
 
     const svgPath = `M ${p1.x} ${p1.y} C ${cp1.x} ${cp1.y}, ${cp2.x} ${cp2.y}, ${p2.x} ${p2.y}`;
 
-    return {
+    const result: RoutedWire = {
       svgPath,
       points: [p1, cp1, cp2, p2],
     };
+    if (bezierRouteCache.size >= MAX_ROUTE_CACHE) {
+      bezierRouteCache.clear();
+    }
+    bezierRouteCache.set(cacheKey, result);
+    return result;
   }
 
   /**

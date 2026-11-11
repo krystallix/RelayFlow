@@ -20,6 +20,8 @@ interface FlowWireProps {
   isSelected: boolean;
   routingMode: "orthogonal" | "bezier";
   obstacles?: Array<{ x: number; y: number; width: number; height: number }>;
+  nodeMap?: Map<string | number, CircuitNode>;
+  wireMap?: Map<string | number, CircuitWire>;
   screenToWorld: (clientX: number, clientY: number) => { x: number; y: number };
   onContextMenu?: (wire: CircuitWire, e: React.MouseEvent) => void;
   onWireHover?: (wire: CircuitWire, e: React.MouseEvent) => void;
@@ -37,7 +39,19 @@ interface FlowWireProps {
   onStartDragTapPoint?: (wire: CircuitWire, tapPoint: Point, e: React.MouseEvent) => void;
 }
 
-export const FlowWire: React.FC<FlowWireProps> = ({
+function areWirePropsEqual(prev: FlowWireProps, next: FlowWireProps): boolean {
+  if (prev.wire !== next.wire) return false;
+  if (prev.isSelected !== next.isSelected) return false;
+  if (prev.label !== next.label) return false;
+  if (prev.showLabel !== next.showLabel) return false;
+  if (prev.routingMode !== next.routingMode) return false;
+  if (prev.fromNode !== next.fromNode) return false;
+  if (prev.toNode !== next.toNode) return false;
+  if (prev.wire.toWireId) return false;
+  return true;
+}
+
+export const FlowWire: React.FC<FlowWireProps> = React.memo(({
   wire,
   label,
   showLabel = true,
@@ -46,6 +60,8 @@ export const FlowWire: React.FC<FlowWireProps> = ({
   isSelected,
   routingMode,
   obstacles = [],
+  nodeMap,
+  wireMap,
   screenToWorld,
   onContextMenu,
   onWireHover,
@@ -54,29 +70,39 @@ export const FlowWire: React.FC<FlowWireProps> = ({
   onStartDragCorner,
   onStartDragTapPoint,
 }) => {
-  const {
-    selectWire,
-    isSimulating,
-    wireDraft,
-    connectWireToWire,
-    theme,
-    nodes: allNodes,
-    wires: allWires,
-  } = useCircuitStore();
+  const selectWire = useCircuitStore((s) => s.selectWire);
+  const isSimulating = useCircuitStore((s) => s.isSimulating);
+  const wireDraft = useCircuitStore((s) => s.wireDraft);
+  const connectWireToWire = useCircuitStore((s) => s.connectWireToWire);
+  const theme = useCircuitStore((s) => s.theme);
   const isDark = theme === "dark";
 
   const [hoverPos, setHoverPos] = useState<Point | null>(null);
   const [isHovered, setIsHovered] = useState(false);
 
-  const nodeMap = React.useMemo(() => new Map(allNodes.map((n) => [n.id, n])), [allNodes]);
-  const wireMap = React.useMemo(() => new Map(allWires.map((w) => [w.id, w])), [allWires]);
+  // Use parent-provided memoized maps for optimal O(1) resolution without reallocating
+  const fallbackNodeMap = useCircuitStore((s) => s.nodes);
+  const fallbackWireMap = useCircuitStore((s) => s.wires);
+  const effectiveNodeMap = React.useMemo(
+    () => nodeMap || new Map(fallbackNodeMap.map((n) => [n.id, n])),
+    [nodeMap, fallbackNodeMap]
+  );
+  const effectiveWireMap = React.useMemo(
+    () => wireMap || new Map(fallbackWireMap.map((w) => [w.id, w])),
+    [wireMap, fallbackWireMap]
+  );
 
-  const endpoints = ManhattanRouter.resolveWireEndpoints(wire, nodeMap, wireMap);
+  const endpoints = ManhattanRouter.resolveWireEndpoints(wire, effectiveNodeMap, effectiveWireMap);
   if (!endpoints) return null;
 
   const { p1, dir1, p2, dir2, isTapWire } = endpoints;
 
   const effectiveMargins = isTapWire ? { ...wire.margins, end: -30 } : wire.margins;
+
+  const ignoreObstacleIds = React.useMemo(
+    () => (wire.toWireId ? [wire.fromNodeId] : [wire.fromNodeId, wire.toNodeId]),
+    [wire.fromNodeId, wire.toNodeId, wire.toWireId]
+  );
 
   const routed =
     routingMode === "bezier"
@@ -87,7 +113,8 @@ export const FlowWire: React.FC<FlowWireProps> = ({
           p2,
           dir2,
           effectiveMargins,
-          obstacles
+          obstacles,
+          ignoreObstacleIds
         );
 
   const isHot = wire.isHot;
@@ -453,4 +480,5 @@ export const FlowWire: React.FC<FlowWireProps> = ({
       )}
     </g>
   );
-};
+}, areWirePropsEqual);
+FlowWire.displayName = "FlowWire";

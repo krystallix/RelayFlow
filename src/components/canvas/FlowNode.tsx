@@ -13,6 +13,8 @@ const catalog = catalogData as Record<string, any>;
 interface FlowNodeProps {
   node: CircuitNode;
   isSelected: boolean;
+  connectedPortIds?: Set<number>;
+  pairedCount?: number;
   isEditingComment?: boolean;
   initialCommentChar?: string | null;
   onStartEditComment?: () => void;
@@ -25,9 +27,24 @@ interface FlowNodeProps {
   onPortLeave?: () => void;
 }
 
-export const FlowNode: React.FC<FlowNodeProps> = ({
+function areNodePropsEqual(prev: FlowNodeProps, next: FlowNodeProps): boolean {
+  if (prev.node !== next.node) return false;
+  if (prev.isSelected !== next.isSelected) return false;
+  if (prev.pairedCount !== next.pairedCount) return false;
+  if (prev.isEditingComment !== next.isEditingComment) return false;
+  if (prev.initialCommentChar !== next.initialCommentChar) return false;
+  if (prev.connectedPortIds !== next.connectedPortIds) {
+    if (!prev.connectedPortIds || !next.connectedPortIds) return false;
+    if (prev.connectedPortIds.size !== next.connectedPortIds.size) return false;
+  }
+  return true;
+}
+
+export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
   node,
   isSelected,
+  connectedPortIds,
+  pairedCount,
   isEditingComment = false,
   initialCommentChar = null,
   onStartEditComment,
@@ -39,17 +56,13 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
   onPortHover,
   onPortLeave,
 }) => {
-  const {
-    theme,
-    isSimulating,
-    isReadOnlyViewer,
-    toggleComponentState,
-    setComponentPressed,
-    nodes: allNodes,
-    wireDraft,
-    wires,
-    updateNodeData,
-  } = useCircuitStore();
+  const theme = useCircuitStore((s) => s.theme);
+  const isSimulating = useCircuitStore((s) => s.isSimulating);
+  const isReadOnlyViewer = useCircuitStore((s) => s.isReadOnlyViewer);
+  const toggleComponentState = useCircuitStore((s) => s.toggleComponentState);
+  const setComponentPressed = useCircuitStore((s) => s.setComponentPressed);
+  const hasWireDraft = useCircuitStore((s) => Boolean(s.wireDraft));
+  const updateNodeData = useCircuitStore((s) => s.updateNodeData);
   const isDark = theme === "dark";
   const [commentEditValue, setCommentEditValue] = useState(node.comment || "");
   const commentInputRef = useRef<HTMLInputElement>(null);
@@ -209,20 +222,25 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
     }
   }
 
-  // Cross-reference: find all other nodes that share the same tag
-  const pairedNodes = node.tag
-    ? allNodes.filter((n) => n.tag === node.tag && n.id !== node.id)
-    : [];
+  // Cross-reference: count of other components that share the same tag
+  const fallbackNodes = useCircuitStore((s) => s.nodes);
+  const effectivePairedCount =
+    pairedCount !== undefined
+      ? pairedCount
+      : node.tag
+      ? fallbackNodes.filter((n) => n.tag === node.tag && n.id !== node.id).length
+      : 0;
 
-  const connectedPortIds = useMemo(() => {
+  const fallbackWires = useCircuitStore((s) => s.wires);
+  const effectiveConnectedPortIds = useMemo(() => {
+    if (connectedPortIds) return connectedPortIds;
     const set = new Set<number>();
-    if (!wires) return set;
-    for (const wire of wires) {
+    for (const wire of fallbackWires) {
       if (wire.fromNodeId === node.id) set.add(wire.fromPortId);
       if (wire.toNodeId === node.id) set.add(wire.toPortId);
     }
     return set;
-  }, [wires, node.id]);
+  }, [connectedPortIds, fallbackWires, node.id]);
 
   // Show _on.svg for activated switches/contacts (frameIndex === 1) or energized lamps
   const shouldShowOnVariant =
@@ -324,23 +342,23 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
           } ${labelContainerClass}`}
         >
           {/* Tag & Cross-reference row */}
-          {(showTag || pairedNodes.length > 0) && (
+          {(showTag || effectivePairedCount > 0) && (
             <div className="flex items-center gap-1.5">
               {showTag && (
                 <span className={`font-bold tracking-tight text-xs ${isDark ? "text-amber-400" : "text-amber-600"}`}>
                   {node.tag}
                 </span>
               )}
-              {pairedNodes.length > 0 && (
+              {effectivePairedCount > 0 && (
                 <span
                   className={`text-[9px] px-1 py-0.2 rounded font-sans font-semibold border ${
                     isDark
                       ? "bg-amber-500/15 text-amber-300 border-amber-500/30"
                       : "bg-amber-100 text-amber-800 border-amber-300"
                   }`}
-                  title={`Paired with ${pairedNodes.length} component(s): ${pairedNodes.map((p) => p.name).join(", ")}`}
+                  title={`Paired with ${effectivePairedCount} component(s)`}
                 >
-                  ↔ {pairedNodes.length}
+                  ↔ {effectivePairedCount}
                 </span>
               )}
             </div>
@@ -544,7 +562,7 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
             {!isReadOnlyViewer && (
               <div
                 className={`w-3.5 h-3.5 rounded-full flex items-center justify-center transition-opacity duration-100 ${
-                  wireDraft || isSelected
+                  hasWireDraft || isSelected
                     ? "opacity-95 shadow-[0_0_8px_rgba(251,191,36,0.8)]"
                     : "opacity-0 group-hover:opacity-100 group-hover/port:opacity-100"
                 } ${
@@ -580,4 +598,5 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
       })}
     </div>
   );
-};
+}, areNodePropsEqual);
+FlowNode.displayName = "FlowNode";
