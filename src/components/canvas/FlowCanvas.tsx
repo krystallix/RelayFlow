@@ -1426,9 +1426,6 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     return map;
   }, [nodes]);
 
-  // Level of detail flag: true when zoomed out past threshold (< 0.65)
-  const isLOD = zoomScale < 0.65;
-
   // Viewport Culling: Compute visible world rectangle with generous 400px safety margin around screen
   const viewportBounds = React.useMemo(() => {
     const cWidth = containerRef.current?.clientWidth || (typeof window !== "undefined" ? window.innerWidth : 1920);
@@ -1762,7 +1759,6 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
                 routingMode={wireRoutingMode}
                 obstacles={nodeObstacles}
                 screenToWorld={screenToWorld}
-                isLOD={isLOD}
                 onContextMenu={handleWireContextMenu}
                 onWireHover={handleWireHover}
                 onWireLeave={handleWireLeave}
@@ -1825,7 +1821,6 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
               pairedCount={node.tag && tagCountMap.get(node.tag) ? tagCountMap.get(node.tag)! - 1 : 0}
               isEditingComment={editingCommentNodeId === node.id}
               initialCommentChar={editingCommentNodeId === node.id ? initialCommentChar : null}
-              isLOD={isLOD}
               onStartEditComment={handleStartEditComment}
               onEndEditComment={handleEndEditComment}
               onPortMouseDown={handlePortMouseDown}

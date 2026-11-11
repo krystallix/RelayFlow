@@ -19,7 +19,6 @@ interface FlowWireProps {
   toNode?: CircuitNode;
   isSelected: boolean;
   routingMode: "orthogonal" | "bezier";
-  isLOD?: boolean;
   obstacles?: Array<{ x: number; y: number; width: number; height: number }>;
   nodeMap?: Map<string | number, CircuitNode>;
   wireMap?: Map<string | number, CircuitWire>;
@@ -48,7 +47,6 @@ function areWirePropsEqual(prev: FlowWireProps, next: FlowWireProps): boolean {
   if (prev.label !== next.label) return false;
   if (prev.showLabel !== next.showLabel) return false;
   if (prev.routingMode !== next.routingMode) return false;
-  if (prev.isLOD !== next.isLOD) return false;
 
   // Check margins
   const pm = prev.wire.margins;
@@ -118,7 +116,6 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
   toNode,
   isSelected,
   routingMode,
-  isLOD = false,
   obstacles = [],
   nodeMap,
   wireMap,
@@ -386,7 +383,7 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
       )}
 
       {/* 3. Glow Layer (when Hot, Selected, or Hovered) */}
-      {(isSelected || (!isLOD && (isHot || isHovered))) && (
+      {(isHot || isSelected || isHovered) && (
         <path
           d={routed.svgPath}
           fill="none"
@@ -482,7 +479,7 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
       )}
 
       {/* 7. Interactive Corner Handles (Sudut Garis) - appear immediately on hover or selection */}
-      {(isHovered || isSelected) && !isSimulating && !hasWireDraft && !isLOD && (
+      {(isHovered || isSelected) && !isSimulating && !hasWireDraft && (
         <g className="corner-handles">
           {cornerPoints.map((corner, idx) => (
             <g
