@@ -379,4 +379,44 @@ describe("Wire Splice and Drag Features", () => {
     store.undo();
     expect(useCircuitStore.getState().wires.find((w) => w.id === branchWire.id)?.tapPoint).toEqual({ x: 210, y: 210 });
   });
+
+  it("port-to-port wire drafting should start, update mouse position, and successfully complete connection", () => {
+    const store = useCircuitStore.getState();
+    store.loadProject(DEFAULT_SIMPLE_LAMP_PROJECT);
+
+    // Add a new motor node
+    store.addNode("motor3ph", { x: 600, y: 300 });
+    const motor = useCircuitStore.getState().nodes.find((n) => n.componentId === "motor3ph")!;
+    expect(motor).toBeDefined();
+
+    // Initial wire count
+    const initialWireCount = useCircuitStore.getState().wires.length;
+
+    // Start wire draft from switch-1 port 1
+    store.startWireDraft("switch-1", 1, { x: 210, y: 180 });
+    let state = useCircuitStore.getState();
+    expect(state.wireDraft).toBeDefined();
+    expect(state.wireDraft?.fromNodeId).toBe("switch-1");
+    expect(state.wireDraft?.fromPortId).toBe(1);
+
+    // Update mouse position during drag
+    store.updateWireDraft({ x: 450, y: 250 });
+    state = useCircuitStore.getState();
+    expect(state.wireDraft?.currentMousePos).toEqual({ x: 450, y: 250 });
+
+    // Connect to motor port 0
+    store.completeWireDraft(motor.id, 0);
+    state = useCircuitStore.getState();
+
+    // Wire draft cleared
+    expect(state.wireDraft).toBeNull();
+    // One new wire added
+    expect(state.wires.length).toBe(initialWireCount + 1);
+
+    const newWire = state.wires[state.wires.length - 1];
+    expect(newWire.fromNodeId).toBe("switch-1");
+    expect(newWire.fromPortId).toBe(1);
+    expect(newWire.toNodeId).toBe(motor.id);
+    expect(newWire.toPortId).toBe(0);
+  });
 });

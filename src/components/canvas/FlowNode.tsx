@@ -17,27 +17,14 @@ interface FlowNodeProps {
   pairedCount?: number;
   isEditingComment?: boolean;
   initialCommentChar?: string | null;
-  onStartEditComment?: () => void;
+  onStartEditComment?: (nodeId: string | number) => void;
   onEndEditComment?: () => void;
-  onPortMouseDown: (portId: number, portPos: { x: number; y: number }, e: React.MouseEvent | React.TouchEvent) => void;
+  onPortMouseDown: (nodeId: string | number, portId: number, portPos: { x: number; y: number }, e: React.MouseEvent | React.TouchEvent) => void;
   onNodeMouseDown: (nodeId: string | number, e: React.MouseEvent) => void;
   onNodeTouchStart?: (nodeId: string | number, e: React.TouchEvent) => void;
   onContextMenu?: (node: CircuitNode, e: React.MouseEvent) => void;
   onPortHover?: (node: CircuitNode, portId: number, e: React.MouseEvent) => void;
   onPortLeave?: () => void;
-}
-
-function areNodePropsEqual(prev: FlowNodeProps, next: FlowNodeProps): boolean {
-  if (prev.node !== next.node) return false;
-  if (prev.isSelected !== next.isSelected) return false;
-  if (prev.pairedCount !== next.pairedCount) return false;
-  if (prev.isEditingComment !== next.isEditingComment) return false;
-  if (prev.initialCommentChar !== next.initialCommentChar) return false;
-  if (prev.connectedPortIds !== next.connectedPortIds) {
-    if (!prev.connectedPortIds || !next.connectedPortIds) return false;
-    if (prev.connectedPortIds.size !== next.connectedPortIds.size) return false;
-  }
-  return true;
 }
 
 export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
@@ -398,7 +385,7 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
               onDoubleClick={(e) => {
                 e.stopPropagation();
                 if (!isSimulating && onStartEditComment) {
-                  onStartEditComment();
+                  onStartEditComment(node.id);
                 }
               }}
               className={`text-[10px] font-normal leading-tight pointer-events-auto cursor-text ${isDark ? "text-zinc-400" : "text-slate-500"}`}
@@ -531,6 +518,7 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
               e.stopPropagation();
               if (isReadOnlyViewer) return;
               onPortMouseDown(
+                node.id,
                 transformed.id,
                 {
                   x: node.position.x - width / 2 + transformed.x,
@@ -543,6 +531,7 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
               e.stopPropagation();
               if (isReadOnlyViewer) return;
               onPortMouseDown(
+                node.id,
                 transformed.id,
                 {
                   x: node.position.x - width / 2 + transformed.x,
@@ -598,5 +587,5 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
       })}
     </div>
   );
-}, areNodePropsEqual);
+});
 FlowNode.displayName = "FlowNode";

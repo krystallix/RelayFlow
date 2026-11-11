@@ -39,18 +39,6 @@ interface FlowWireProps {
   onStartDragTapPoint?: (wire: CircuitWire, tapPoint: Point, e: React.MouseEvent) => void;
 }
 
-function areWirePropsEqual(prev: FlowWireProps, next: FlowWireProps): boolean {
-  if (prev.wire !== next.wire) return false;
-  if (prev.isSelected !== next.isSelected) return false;
-  if (prev.label !== next.label) return false;
-  if (prev.showLabel !== next.showLabel) return false;
-  if (prev.routingMode !== next.routingMode) return false;
-  if (prev.fromNode !== next.fromNode) return false;
-  if (prev.toNode !== next.toNode) return false;
-  if (prev.wire.toWireId) return false;
-  return true;
-}
-
 export const FlowWire: React.FC<FlowWireProps> = React.memo(({
   wire,
   label,
@@ -72,7 +60,7 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
 }) => {
   const selectWire = useCircuitStore((s) => s.selectWire);
   const isSimulating = useCircuitStore((s) => s.isSimulating);
-  const wireDraft = useCircuitStore((s) => s.wireDraft);
+  const hasWireDraft = useCircuitStore((s) => Boolean(s.wireDraft));
   const connectWireToWire = useCircuitStore((s) => s.connectWireToWire);
   const theme = useCircuitStore((s) => s.theme);
   const isDark = theme === "dark";
@@ -180,7 +168,8 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
     e.stopPropagation();
 
     // If currently drafting a wire from a component terminal, clicking anywhere on the wire attaches to it!
-    if (wireDraft) {
+    const currentWireDraft = useCircuitStore.getState().wireDraft;
+    if (currentWireDraft) {
       e.preventDefault();
       const world = screenToWorld(e.clientX, e.clientY);
       const { point } = ManhattanRouter.getNearestPointOnSegments(world, routed.points);
@@ -194,14 +183,15 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
 
   const handleWireClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (wireDraft) return;
+    if (useCircuitStore.getState().wireDraft) return;
     selectWire(wire.id, e.shiftKey);
   };
 
   const handleStartDragSegment = (e: React.MouseEvent) => {
     e.stopPropagation();
 
-    if (wireDraft) {
+    const currentWireDraft = useCircuitStore.getState().wireDraft;
+    if (currentWireDraft) {
       e.preventDefault();
       const world = screenToWorld(e.clientX, e.clientY);
       const { point } = ManhattanRouter.getNearestPointOnSegments(world, routed.points);
@@ -234,7 +224,8 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
   ) => {
     e.stopPropagation();
     e.preventDefault();
-    if (wireDraft) {
+    const currentWireDraft = useCircuitStore.getState().wireDraft;
+    if (currentWireDraft) {
       connectWireToWire(wire.id, cornerPoint);
       return;
     }
@@ -290,7 +281,8 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
         onMouseDown={handleWireMouseDown}
         onTouchStart={(e) => {
           e.stopPropagation();
-          if (wireDraft) {
+          const currentWireDraft = useCircuitStore.getState().wireDraft;
+          if (currentWireDraft) {
             const touch = e.touches[0];
             if (touch) {
               const world = screenToWorld(touch.clientX, touch.clientY);
@@ -313,7 +305,7 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
           stroke="transparent"
           strokeWidth={18}
           className={`pointer-events-auto ${
-            wireDraft
+            hasWireDraft
               ? "cursor-crosshair"
               : segmentOrientation === "horizontal"
               ? "cursor-ns-resize"
@@ -374,7 +366,7 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
           onMouseDown={(e) => {
             e.stopPropagation();
             e.preventDefault();
-            if (isSimulating || wireDraft) return;
+            if (isSimulating || hasWireDraft) return;
             onStartDragTapPoint?.(wire, p2, e);
           }}
           onClick={(e) => {
@@ -420,7 +412,7 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
       )}
 
       {/* 7. Interactive Corner Handles (Sudut Garis) - appear immediately on hover or selection */}
-      {(isHovered || isSelected) && !isSimulating && !wireDraft && (
+      {(isHovered || isSelected) && !isSimulating && !hasWireDraft && (
         <g className="corner-handles">
           {cornerPoints.map((corner, idx) => (
             <g
@@ -454,7 +446,7 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
       )}
 
       {/* 8. Magnetic snap target indicator when connecting wire from component terminal */}
-      {wireDraft && hoverPos && !isSimulating && (
+      {hasWireDraft && hoverPos && !isSimulating && (
         <g transform={`translate(${hoverPos.x}, ${hoverPos.y})`} className="pointer-events-none">
           <circle r={11} fill="none" stroke="#f59e0b" strokeWidth={2.5} strokeDasharray="3 3" />
           <circle r={5} fill="#f59e0b" stroke="#ffffff" strokeWidth={1.5} />
@@ -480,5 +472,5 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
       )}
     </g>
   );
-}, areWirePropsEqual);
+});
 FlowWire.displayName = "FlowWire";

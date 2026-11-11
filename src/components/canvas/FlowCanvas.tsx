@@ -1083,20 +1083,31 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   };
 
   // Port mouse interaction
-  const handlePortMouseDown = (
+  const handlePortMouseDown = useCallback((
+    nodeId: string | number,
     portId: number,
-    portPos: { x: number; y: number },
-    nodeId: string | number
+    portPos: { x: number; y: number }
   ) => {
-    if (isReadOnlyViewer) return;
-    if (wireDraft) {
+    const state = useCircuitStore.getState();
+    if (state.isReadOnlyViewer) return;
+    if (state.wireDraft) {
       // Connect to target port
-      completeWireDraft(nodeId, portId);
+      state.completeWireDraft(nodeId, portId);
     } else {
       // Start dragging new wire
-      startWireDraft(nodeId, portId, portPos);
+      state.startWireDraft(nodeId, portId, portPos);
     }
-  };
+  }, []);
+
+  const handleStartEditComment = useCallback((nodeId: string | number) => {
+    setInitialCommentChar(null);
+    setEditingCommentNodeId(nodeId);
+  }, []);
+
+  const handleEndEditComment = useCallback(() => {
+    setEditingCommentNodeId(null);
+    setInitialCommentChar(null);
+  }, []);
 
   // Global Keyboard Shortcuts
   useEffect(() => {
@@ -1341,6 +1352,66 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     return map;
   }, [nodes]);
 
+  const handleStartDragSegment = useCallback((targetWire: CircuitWire, orientation: "horizontal" | "vertical", defaultMid: number) => {
+    if (useCircuitStore.getState().isReadOnlyViewer) return;
+    setDraggingWireSegment({
+      wireId: targetWire.id,
+      orientation,
+      defaultMid,
+      initialMargins: targetWire.margins || { start: 0, center: 0, end: 0 },
+    });
+  }, []);
+
+  const handleStartDragCorner = useCallback((targetWire: CircuitWire, cornerIndex: number, cornerPoint: Point, points: Point[], dir1: number, dir2: number) => {
+    if (useCircuitStore.getState().isReadOnlyViewer) return;
+    setDraggingCornerState({
+      wireId: targetWire.id,
+      cornerIndex,
+      cornerCount: points.length >= 3 ? points.length - 2 : 1,
+      initialPoint: cornerPoint,
+      initialMargins: targetWire.margins || { start: 0, center: 0, end: 0 },
+      p1: points[0],
+      dir1,
+      p2: points[points.length - 1],
+      dir2,
+      points,
+      isVerticalRouting: dir1 === 0 || dir1 === 2,
+    });
+  }, []);
+
+  const handleStartDragTapPoint = useCallback((targetWire: CircuitWire, currentTapPoint: Point) => {
+    const state = useCircuitStore.getState();
+    if (state.isReadOnlyViewer || state.isSimulating || !targetWire.toWireId) return;
+
+    const hostWire = state.wires.find((w) => w.id === targetWire.toWireId);
+    if (!hostWire) return;
+
+    const currentWireMap = new Map(state.wires.map((w) => [w.id, w]));
+    const currentNodeMap = new Map(state.nodes.map((n) => [n.id, n]));
+    const endpoints = ManhattanRouter.resolveWireEndpoints(hostWire, currentNodeMap, currentWireMap);
+    if (!endpoints) return;
+
+    const effectiveTargetMargins = endpoints.isTapWire
+      ? { ...hostWire.margins, end: -30 }
+      : hostWire.margins;
+
+    const routedTarget = ManhattanRouter.routeOrthogonal(
+      endpoints.p1,
+      endpoints.dir1,
+      endpoints.p2,
+      endpoints.dir2,
+      effectiveTargetMargins
+    );
+
+    if (!routedTarget.points || routedTarget.points.length < 2) return;
+
+    setDraggingTapPointState({
+      wireId: targetWire.id,
+      initialTapPoint: currentTapPoint,
+      targetWirePoints: routedTarget.points,
+    });
+  }, []);
+
   // Single selected node for Popover
   const selectedNode =
     selectedNodeIds.size === 1 && !isSimulating
@@ -1546,60 +1617,9 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
                 onContextMenu={handleWireContextMenu}
                 onWireHover={handleWireHover}
                 onWireLeave={handleWireLeave}
-                onStartDragSegment={(targetWire, orientation, defaultMid) => {
-                  if (isReadOnlyViewer) return;
-                  setDraggingWireSegment({
-                    wireId: targetWire.id,
-                    orientation,
-                    defaultMid,
-                    initialMargins: targetWire.margins || { start: 0, center: 0, end: 0 },
-                  });
-                }}
-                onStartDragCorner={(targetWire, cornerIndex, cornerPoint, points, dir1, dir2) => {
-                  if (isReadOnlyViewer) return;
-                  setDraggingCornerState({
-                    wireId: targetWire.id,
-                    cornerIndex,
-                    cornerCount: points.length >= 3 ? points.length - 2 : 1,
-                    initialPoint: cornerPoint,
-                    initialMargins: targetWire.margins || { start: 0, center: 0, end: 0 },
-                    p1: points[0],
-                    dir1,
-                    p2: points[points.length - 1],
-                    dir2,
-                    points,
-                    isVerticalRouting: dir1 === 0 || dir1 === 2,
-                  });
-                }}
-                onStartDragTapPoint={(targetWire, currentTapPoint) => {
-                  if (isReadOnlyViewer || isSimulating || !targetWire.toWireId) return;
-
-                  const hostWire = wireMap.get(targetWire.toWireId);
-                  if (!hostWire) return;
-
-                  const endpoints = ManhattanRouter.resolveWireEndpoints(hostWire, nodeMap, wireMap);
-                  if (!endpoints) return;
-
-                  const effectiveTargetMargins = endpoints.isTapWire
-                    ? { ...hostWire.margins, end: -30 }
-                    : hostWire.margins;
-
-                  const routedTarget = ManhattanRouter.routeOrthogonal(
-                    endpoints.p1,
-                    endpoints.dir1,
-                    endpoints.p2,
-                    endpoints.dir2,
-                    effectiveTargetMargins
-                  );
-
-                  if (!routedTarget.points || routedTarget.points.length < 2) return;
-
-                  setDraggingTapPointState({
-                    wireId: targetWire.id,
-                    initialTapPoint: currentTapPoint,
-                    targetWirePoints: routedTarget.points,
-                  });
-                }}
+                onStartDragSegment={handleStartDragSegment}
+                onStartDragCorner={handleStartDragCorner}
+                onStartDragTapPoint={handleStartDragTapPoint}
               />
             ))}
 
@@ -1656,15 +1676,9 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
               pairedCount={node.tag && tagCountMap.get(node.tag) ? tagCountMap.get(node.tag)! - 1 : 0}
               isEditingComment={editingCommentNodeId === node.id}
               initialCommentChar={editingCommentNodeId === node.id ? initialCommentChar : null}
-              onStartEditComment={() => {
-                setInitialCommentChar(null);
-                setEditingCommentNodeId(node.id);
-              }}
-              onEndEditComment={() => {
-                setEditingCommentNodeId(null);
-                setInitialCommentChar(null);
-              }}
-              onPortMouseDown={(portId, portPos, e) => handlePortMouseDown(portId, portPos, node.id)}
+              onStartEditComment={handleStartEditComment}
+              onEndEditComment={handleEndEditComment}
+              onPortMouseDown={handlePortMouseDown}
               onNodeMouseDown={handleNodeMouseDown}
               onNodeTouchStart={handleNodeTouchStart}
               onContextMenu={handleNodeContextMenu}
