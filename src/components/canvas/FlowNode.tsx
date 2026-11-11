@@ -27,6 +27,35 @@ interface FlowNodeProps {
   onPortLeave?: () => void;
 }
 
+function areNodePropsEqual(prev: FlowNodeProps, next: FlowNodeProps): boolean {
+  if (prev.node !== next.node) {
+    if (prev.node.position.x !== next.node.position.x) return false;
+    if (prev.node.position.y !== next.node.position.y) return false;
+    if (prev.node.rotation !== next.node.rotation) return false;
+    if (prev.node.tag !== next.node.tag) return false;
+    if (prev.node.comment !== next.node.comment) return false;
+    if (prev.node.isEnergized !== next.node.isEnergized) return false;
+    if (prev.node.isPressed !== next.node.isPressed) return false;
+    if (prev.node.frameIndex !== next.node.frameIndex) return false;
+    if (prev.node.motorDirection !== next.node.motorDirection) return false;
+    if (prev.node.timerElapsed !== next.node.timerElapsed) return false;
+    if (prev.node.valueTimeOn !== next.node.valueTimeOn) return false;
+    if (prev.node.valueTimeOff !== next.node.valueTimeOff) return false;
+    if (prev.node.tagVisibility !== next.node.tagVisibility) return false;
+  }
+  if (prev.isSelected !== next.isSelected) return false;
+  if (prev.pairedCount !== next.pairedCount) return false;
+  if (prev.isEditingComment !== next.isEditingComment) return false;
+  if (prev.initialCommentChar !== next.initialCommentChar) return false;
+
+  if (prev.connectedPortIds !== next.connectedPortIds) {
+    if (!prev.connectedPortIds || !next.connectedPortIds) return false;
+    if (prev.connectedPortIds.size !== next.connectedPortIds.size) return false;
+  }
+
+  return true;
+}
+
 export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
   node,
   isSelected,
@@ -587,5 +616,5 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
       })}
     </div>
   );
-});
+}, areNodePropsEqual);
 FlowNode.displayName = "FlowNode";

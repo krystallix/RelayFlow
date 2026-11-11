@@ -39,6 +39,75 @@ interface FlowWireProps {
   onStartDragTapPoint?: (wire: CircuitWire, tapPoint: Point, e: React.MouseEvent) => void;
 }
 
+function areWirePropsEqual(prev: FlowWireProps, next: FlowWireProps): boolean {
+  if (prev.wire.id !== next.wire.id) return false;
+  if (prev.wire.isHot !== next.wire.isHot) return false;
+  if (prev.wire.potential !== next.wire.potential) return false;
+  if (prev.isSelected !== next.isSelected) return false;
+  if (prev.label !== next.label) return false;
+  if (prev.showLabel !== next.showLabel) return false;
+  if (prev.routingMode !== next.routingMode) return false;
+
+  // Check margins
+  const pm = prev.wire.margins;
+  const nm = next.wire.margins;
+  if (pm?.start !== nm?.start || pm?.center !== nm?.center || pm?.end !== nm?.end) return false;
+
+  // Check tapPoint
+  if (prev.wire.tapPoint?.x !== next.wire.tapPoint?.x || prev.wire.tapPoint?.y !== next.wire.tapPoint?.y) return false;
+  if (prev.wire.toWireId !== next.wire.toWireId) return false;
+
+  // Check connected nodes
+  if (prev.fromNode !== next.fromNode) {
+    if (!prev.fromNode || !next.fromNode) return false;
+    if (
+      prev.fromNode.position.x !== next.fromNode.position.x ||
+      prev.fromNode.position.y !== next.fromNode.position.y ||
+      prev.fromNode.rotation !== next.fromNode.rotation
+    )
+      return false;
+  }
+
+  if (prev.toNode !== next.toNode) {
+    if (!prev.toNode || !next.toNode) return false;
+    if (
+      prev.toNode.position.x !== next.toNode.position.x ||
+      prev.toNode.position.y !== next.toNode.position.y ||
+      prev.toNode.rotation !== next.toNode.rotation
+    )
+      return false;
+  }
+
+  // If this wire is tapped into another wire (toWireId), check if host wire or its endpoints moved
+  if (next.wire.toWireId) {
+    const hostWireId = next.wire.toWireId;
+    const prevHost = prev.wireMap?.get(hostWireId);
+    const nextHost = next.wireMap?.get(hostWireId);
+    if (!prevHost || !nextHost) return false;
+    if (prevHost.tapPoint?.x !== nextHost.tapPoint?.x || prevHost.tapPoint?.y !== nextHost.tapPoint?.y) return false;
+
+    const prevHostFrom = prev.nodeMap?.get(prevHost.fromNodeId);
+    const nextHostFrom = next.nodeMap?.get(nextHost.fromNodeId);
+    if (
+      prevHostFrom?.position.x !== nextHostFrom?.position.x ||
+      prevHostFrom?.position.y !== nextHostFrom?.position.y ||
+      prevHostFrom?.rotation !== nextHostFrom?.rotation
+    )
+      return false;
+
+    const prevHostTo = prev.nodeMap?.get(prevHost.toNodeId);
+    const nextHostTo = next.nodeMap?.get(nextHost.toNodeId);
+    if (
+      prevHostTo?.position.x !== nextHostTo?.position.x ||
+      prevHostTo?.position.y !== nextHostTo?.position.y ||
+      prevHostTo?.rotation !== nextHostTo?.rotation
+    )
+      return false;
+  }
+
+  return true;
+}
+
 export const FlowWire: React.FC<FlowWireProps> = React.memo(({
   wire,
   label,
@@ -472,5 +541,5 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
       )}
     </g>
   );
-});
+}, areWirePropsEqual);
 FlowWire.displayName = "FlowWire";

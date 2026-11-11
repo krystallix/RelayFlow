@@ -90,6 +90,8 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
 
   // Virtual Multimeter / Voltage Probe Tool
   const [probeActive, setProbeActive] = useState(false);
+  const probeActiveRef = useRef(probeActive);
+  probeActiveRef.current = probeActive;
   const [probeReading, setProbeReading] = useState<ProbeReading | null>(null);
 
   // Mini-Map visibility (hidden by default on mobile for screen space)
@@ -286,27 +288,28 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   };
 
   // Virtual Multimeter Probe Handlers
-  const handleWireHover = (wire: CircuitWire, e: React.MouseEvent) => {
-    if (!probeActive) return;
+  const handleWireHover = useCallback((wire: CircuitWire, e: React.MouseEvent) => {
+    if (!probeActiveRef.current) return;
     setProbeReading({
       potential: wire.potential || null,
       isEnergized: Boolean(wire.isHot),
       name: "Wire Conductor",
       screenPos: { x: e.clientX, y: e.clientY },
     });
-  };
+  }, []);
 
-  const handleWireLeave = () => {
-    if (probeActive) setProbeReading(null);
-  };
+  const handleWireLeave = useCallback(() => {
+    if (probeActiveRef.current) setProbeReading(null);
+  }, []);
 
-  const handlePortHover = (node: CircuitNode, portId: number, e: React.MouseEvent) => {
-    if (!probeActive) return;
+  const handlePortHover = useCallback((node: CircuitNode, portId: number, e: React.MouseEvent) => {
+    if (!probeActiveRef.current) return;
+    const state = useCircuitStore.getState();
     const comp = catalog[node.componentId];
     const port = comp?.nodes?.find((n: any) => n.id === portId);
 
     let potential: string | null = null;
-    const connectedWire = wires.find(
+    const connectedWire = state.wires.find(
       (w) =>
         (w.fromNodeId === node.id && w.fromPortId === portId) ||
         (w.toNodeId === node.id && w.toPortId === portId)
@@ -334,19 +337,20 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       terminalTag: port?.tag || String(portId),
       screenPos: { x: e.clientX, y: e.clientY },
     });
-  };
+  }, []);
 
-  const handlePortLeave = () => {
-    if (probeActive) setProbeReading(null);
-  };
+  const handlePortLeave = useCallback(() => {
+    if (probeActiveRef.current) setProbeReading(null);
+  }, []);
 
   // Context Menu Handlers
-  const handleNodeContextMenu = (node: CircuitNode, e: React.MouseEvent) => {
+  const handleNodeContextMenu = useCallback((node: CircuitNode, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (isReadOnlyViewer) return;
-    if (!selectedNodeIds.has(node.id)) {
-      selectNode(node.id, false);
+    const state = useCircuitStore.getState();
+    if (state.isReadOnlyViewer) return;
+    if (!state.selectedNodeIds.has(node.id)) {
+      state.selectNode(node.id, false);
     }
     const worldPos = screenToWorld(e.clientX, e.clientY);
     setContextMenu({
@@ -354,14 +358,15 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       y: e.clientY,
       target: { type: "node", node, worldPos },
     });
-  };
+  }, [screenToWorld]);
 
-  const handleWireContextMenu = (wire: CircuitWire, e: React.MouseEvent) => {
+  const handleWireContextMenu = useCallback((wire: CircuitWire, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (isReadOnlyViewer) return;
-    if (!selectedWireIds.has(wire.id)) {
-      selectWire(wire.id, false);
+    const state = useCircuitStore.getState();
+    if (state.isReadOnlyViewer) return;
+    if (!state.selectedWireIds.has(wire.id)) {
+      state.selectWire(wire.id, false);
     }
     const worldPos = screenToWorld(e.clientX, e.clientY);
     setContextMenu({
@@ -369,7 +374,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       y: e.clientY,
       target: { type: "wire", wire, worldPos },
     });
-  };
+  }, [screenToWorld]);
 
   // Canvas Mouse Down
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -411,18 +416,19 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   };
 
   // Core Node Dragging (Unified for Mouse & Touch)
-  const startDraggingNode = (
+  const startDraggingNode = useCallback((
     nodeId: string | number,
     clientX: number,
     clientY: number,
     shiftKey: boolean = false
   ) => {
-    if (isSimulating) {
-      toggleComponentState(nodeId);
+    const state = useCircuitStore.getState();
+    if (state.isSimulating) {
+      state.toggleComponentState(nodeId);
       return;
     }
 
-    if (isReadOnlyViewer) {
+    if (state.isReadOnlyViewer) {
       return;
     }
 
@@ -430,16 +436,16 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
 
     // Determine nodes to drag together
     let targetIds: (string | number)[] = [nodeId];
-    if (selectedNodeIds.has(nodeId)) {
-      targetIds = Array.from(selectedNodeIds);
+    if (state.selectedNodeIds.has(nodeId)) {
+      targetIds = Array.from(state.selectedNodeIds);
     } else if (!shiftKey) {
-      selectNode(nodeId, false);
+      state.selectNode(nodeId, false);
       targetIds = [nodeId];
     }
 
     const initialPositions = new Map<string | number, { x: number; y: number }>();
     for (const id of targetIds) {
-      const n = nodes.find((node) => node.id === id);
+      const n = state.nodes.find((node) => node.id === id);
       if (n) {
         initialPositions.set(id, { ...n.position });
       }
@@ -452,7 +458,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       hasMoved: false,
       shiftKey,
     });
-  };
+  }, [screenToWorld]);
 
   const moveDraggingNode = (worldPos: { x: number; y: number }) => {
     if (!draggingNodeState) return;
@@ -546,20 +552,18 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   };
 
   // Node Mouse Down (initiates drag or click)
-  const handleNodeMouseDown = (nodeId: string | number, e: React.MouseEvent) => {
+  const handleNodeMouseDown = useCallback((nodeId: string | number, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (editingCommentNodeId && editingCommentNodeId !== nodeId) {
-      setEditingCommentNodeId(null);
-      setInitialCommentChar(null);
-    }
+    setEditingCommentNodeId((prev) => (prev && prev !== nodeId ? null : prev));
+    setInitialCommentChar(null);
     if (e.button !== 0) return;
     startDraggingNode(nodeId, e.clientX, e.clientY, e.shiftKey);
-  };
+  }, [startDraggingNode]);
 
   // Node Touch Start (mobile node touch & drag)
-  const handleNodeTouchStart = (nodeId: string | number, e: React.TouchEvent) => {
+  const handleNodeTouchStart = useCallback((nodeId: string | number, e: React.TouchEvent) => {
     e.stopPropagation();
-    if (contextMenu) setContextMenu(null);
+    setContextMenu(null);
 
     const touch = e.touches[0];
     if (!touch) return;
@@ -570,7 +574,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     }
 
     // Set long press timer for Node Context Menu on mobile (500ms)
-    const targetNode = nodes.find((n) => n.id === nodeId);
+    const targetNode = useCircuitStore.getState().nodes.find((n) => n.id === nodeId);
     if (targetNode) {
       const clientX = touch.clientX;
       const clientY = touch.clientY;
@@ -591,7 +595,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     touchStateRef.current.hasMoved = false;
 
     startDraggingNode(nodeId, touch.clientX, touch.clientY, false);
-  };
+  }, [screenToWorld, startDraggingNode]);
 
   // Canvas Mouse Move
   const handleMouseMove = (e: React.MouseEvent) => {
