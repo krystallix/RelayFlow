@@ -319,4 +319,26 @@ describe("Popover Symbol Actions in CircuitStore", () => {
     expect(nodes.find((n) => n.id === 802)?.frameIndex).toBe(0); // NC closed back
     expect(nodes.find((n) => n.id === 803)?.frameIndex).toBe(0); // NO opened back
   });
+
+  it("should delete selected node when deleteSelection is called", () => {
+    const testNode: CircuitNode = {
+      id: 901,
+      componentId: "coil",
+      name: "Coil to delete",
+      category: "coils",
+      tag: "-KM1",
+      comment: "Delete me",
+      position: { x: 50, y: 50 },
+      rotation: 0,
+      frameIndex: 0,
+    };
+
+    useCircuitStore.setState({
+      nodes: [testNode],
+      selectedNodeIds: new Set([901]),
+    });
+
+    useCircuitStore.getState().deleteSelection();
+    expect(useCircuitStore.getState().nodes.length).toBe(0);
+  });
 });

@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useCircuitStore } from "@/store/useCircuitStore";
 import { FlowNode } from "./FlowNode";
 import { FlowWire } from "./FlowWire";
+import { WireNetResolver } from "@/engine/router/WireNetResolver";
 import { NodePopover } from "./NodePopover";
 import { MultiNodePopover } from "./MultiNodePopover";
 import { MiniMap } from "./MiniMap";
@@ -27,9 +28,8 @@ import {
   Sparkles,
 } from "lucide-react";
 import { ManhattanRouter } from "@/engine/router/ManhattanRouter";
-import { WireMargins } from "@/engine/types";
+import { Point, WireMargins, CircuitNode, CircuitWire } from "@/engine/types";
 import catalogData from "@/constants/components-catalog.json";
-import { CircuitNode, CircuitWire } from "@/engine/types";
 
 const catalog = catalogData as Record<string, any>;
 
@@ -137,7 +137,9 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     wireDraft,
     theme,
     showGrid,
+    showWireLabels,
     isSimulating,
+    isReadOnlyViewer,
     shortCircuit,
     shortCircuitMessage,
     clipboard,
@@ -162,6 +164,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     tickTimerSimulation,
     splitWireAtJunction,
     updateWireMargins,
+    updateWireTapPoint,
     undo,
     redo,
     undoStack,
@@ -176,11 +179,31 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   } = useCircuitStore();
 
   const [isSpacePressed, setIsSpacePressed] = useState(false);
+  const [editingCommentNodeId, setEditingCommentNodeId] = useState<string | number | null>(null);
+  const [initialCommentChar, setInitialCommentChar] = useState<string | null>(null);
   const [draggingWireSegment, setDraggingWireSegment] = useState<{
     wireId: string | number;
     orientation: "horizontal" | "vertical";
     defaultMid: number;
     initialMargins: WireMargins;
+  } | null>(null);
+  const [draggingCornerState, setDraggingCornerState] = useState<{
+    wireId: string | number;
+    cornerIndex: number;
+    cornerCount: number;
+    initialPoint: Point;
+    initialMargins: WireMargins;
+    p1: Point;
+    dir1: number;
+    p2: Point;
+    dir2: number;
+    points: Point[];
+    isVerticalRouting: boolean;
+  } | null>(null);
+  const [draggingTapPointState, setDraggingTapPointState] = useState<{
+    wireId: string | number;
+    initialTapPoint: Point;
+    targetWirePoints: Point[];
   } | null>(null);
 
   const zoomScaleRef = useRef(zoomScale);
@@ -302,6 +325,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   const handleNodeContextMenu = (node: CircuitNode, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (isReadOnlyViewer) return;
     if (!selectedNodeIds.has(node.id)) {
       selectNode(node.id, false);
     }
@@ -316,6 +340,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   const handleWireContextMenu = (wire: CircuitWire, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (isReadOnlyViewer) return;
     if (!selectedWireIds.has(wire.id)) {
       selectWire(wire.id, false);
     }
@@ -330,11 +355,24 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   // Canvas Mouse Down
   const handleMouseDown = (e: React.MouseEvent) => {
     if (contextMenu) setContextMenu(null);
+    if (editingCommentNodeId) {
+      setEditingCommentNodeId(null);
+      setInitialCommentChar(null);
+    }
 
     // If drawing a wire and clicking empty area, cancel draft
     if (wireDraft) {
       cancelWireDraft();
       return;
+    }
+
+    // In Read-Only Viewer mode: Left click drag, Middle click, or Space+Click smoothly pans the diagram
+    if (isReadOnlyViewer) {
+      if (e.button === 0 || e.button === 1 || isSpacePressed) {
+        setIsPanning(true);
+        setPanStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
+        return;
+      }
     }
 
     // Middle click or Space+Click initiates Pan
@@ -362,6 +400,10 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   ) => {
     if (isSimulating) {
       toggleComponentState(nodeId);
+      return;
+    }
+
+    if (isReadOnlyViewer) {
       return;
     }
 
@@ -487,6 +529,10 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   // Node Mouse Down (initiates drag or click)
   const handleNodeMouseDown = (nodeId: string | number, e: React.MouseEvent) => {
     e.stopPropagation();
+    if (editingCommentNodeId && editingCommentNodeId !== nodeId) {
+      setEditingCommentNodeId(null);
+      setInitialCommentChar(null);
+    }
     if (e.button !== 0) return;
     startDraggingNode(nodeId, e.clientX, e.clientY, e.shiftKey);
   };
@@ -537,6 +583,104 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       y: Math.round(worldPos.y),
     });
 
+    // -1. Live Wire Connection Point (Tap Junction Dot) Dragging - strictly constrained to host wire segments
+    if (draggingTapPointState) {
+      const nearest = ManhattanRouter.getNearestPointOnSegments(
+        worldPos,
+        draggingTapPointState.targetWirePoints
+      );
+      updateWireTapPoint(draggingTapPointState.wireId, nearest.point, false);
+      return;
+    }
+
+    // 0. Live Wire Corner Dragging (Corner Handles on hover)
+    if (draggingCornerState) {
+      const {
+        wireId,
+        cornerIndex,
+        cornerCount,
+        initialPoint,
+        initialMargins,
+        dir1,
+        dir2,
+        points,
+        isVerticalRouting,
+      } = draggingCornerState;
+
+      const deltaX = worldPos.x - initialPoint.x;
+      const deltaY = worldPos.y - initialPoint.y;
+
+      const nextMargins = { ...initialMargins };
+
+      if (points.length === 2 || cornerCount === 1) {
+        const delta = isVerticalRouting ? deltaY : deltaX;
+        nextMargins.center = Math.round((initialMargins.center + delta) / 30) * 30;
+      } else if (cornerCount === 2) {
+        const isMiddleHoriz = Math.abs(points[1].y - points[2].y) < 2;
+
+        if (isMiddleHoriz) {
+          nextMargins.center = Math.round((initialMargins.center + deltaY) / 30) * 30;
+
+          if (cornerIndex === 1) {
+            if (dir1 === 1) {
+              nextMargins.start = Math.round((initialMargins.start + deltaX) / 30) * 30;
+            } else if (dir1 === 3) {
+              nextMargins.start = Math.round((initialMargins.start - deltaX) / 30) * 30;
+            }
+          } else if (cornerIndex === 2) {
+            if (dir2 === 1) {
+              nextMargins.end = Math.round((initialMargins.end + deltaX) / 30) * 30;
+            } else if (dir2 === 3) {
+              nextMargins.end = Math.round((initialMargins.end - deltaX) / 30) * 30;
+            }
+          }
+        } else {
+          nextMargins.center = Math.round((initialMargins.center + deltaX) / 30) * 30;
+
+          if (cornerIndex === 1) {
+            if (dir1 === 2) {
+              nextMargins.start = Math.round((initialMargins.start + deltaY) / 30) * 30;
+            } else if (dir1 === 0) {
+              nextMargins.start = Math.round((initialMargins.start - deltaY) / 30) * 30;
+            }
+          } else if (cornerIndex === 2) {
+            if (dir2 === 2) {
+              nextMargins.end = Math.round((initialMargins.end + deltaY) / 30) * 30;
+            } else if (dir2 === 0) {
+              nextMargins.end = Math.round((initialMargins.end - deltaY) / 30) * 30;
+            }
+          }
+        }
+      } else {
+        const isFirstCorner = cornerIndex === 1;
+        const isLastCorner = cornerIndex === points.length - 2;
+
+        if (isFirstCorner) {
+          let deltaStart = 0;
+          if (dir1 === 0) deltaStart = -deltaY;
+          else if (dir1 === 2) deltaStart = +deltaY;
+          else if (dir1 === 1) deltaStart = +deltaX;
+          else if (dir1 === 3) deltaStart = -deltaX;
+
+          nextMargins.start = Math.round((initialMargins.start + deltaStart) / 30) * 30;
+        } else if (isLastCorner) {
+          let deltaEnd = 0;
+          if (dir2 === 0) deltaEnd = -deltaY;
+          else if (dir2 === 2) deltaEnd = +deltaY;
+          else if (dir2 === 1) deltaEnd = +deltaX;
+          else if (dir2 === 3) deltaEnd = -deltaX;
+
+          nextMargins.end = Math.round((initialMargins.end + deltaEnd) / 30) * 30;
+        } else {
+          const delta = isVerticalRouting ? deltaY : deltaX;
+          nextMargins.center = Math.round((initialMargins.center + delta) / 30) * 30;
+        }
+      }
+
+      updateWireMargins(wireId, nextMargins, false);
+      return;
+    }
+
     // 0. Live Wire Segment Dragging (draw.io style - aligned to 30px grid)
     if (draggingWireSegment) {
       if (draggingWireSegment.orientation === "horizontal") {
@@ -586,6 +730,24 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   // Canvas Mouse Up
   const handleMouseUp = (e: React.MouseEvent) => {
     setSmartGuidelines([]);
+
+    if (draggingTapPointState) {
+      const currentWire = wires.find((w) => w.id === draggingTapPointState.wireId);
+      if (currentWire && currentWire.tapPoint) {
+        updateWireTapPoint(draggingTapPointState.wireId, currentWire.tapPoint, true);
+      }
+      setDraggingTapPointState(null);
+      return;
+    }
+
+    if (draggingCornerState) {
+      const currentWire = wires.find((w) => w.id === draggingCornerState.wireId);
+      if (currentWire) {
+        updateWireMargins(draggingCornerState.wireId, currentWire.margins || {}, true);
+      }
+      setDraggingCornerState(null);
+      return;
+    }
 
     if (draggingWireSegment) {
       const currentWire = wires.find((w) => w.id === draggingWireSegment.wireId);
@@ -878,6 +1040,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   // Drop component from sidebar
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
+    if (isReadOnlyViewer) return;
     const componentId = e.dataTransfer.getData("componentId");
     if (!componentId) return;
 
@@ -895,6 +1058,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     portPos: { x: number; y: number },
     nodeId: string | number
   ) => {
+    if (isReadOnlyViewer) return;
     if (wireDraft) {
       // Connect to target port
       completeWireDraft(nodeId, portId);
@@ -912,27 +1076,24 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       if (e.code === "Space") {
         setIsSpacePressed(true);
       }
+
+      // In Read-Only Viewer Mode, permit simulation controls & panning but strictly block canvas mutations
+      if (isReadOnlyViewer) {
+        if (e.key === "F5") {
+          e.preventDefault();
+          if (isSimulating) stopSimulation();
+          else startSimulation();
+        }
+        return;
+      }
+
       if (e.key === "/" || ((e.ctrlKey || e.metaKey) && (e.key === "k" || e.key === "K"))) {
         e.preventDefault();
         setQuickSearchPos({ ...mouseWorldPosRef.current });
         setShowQuickSearch(true);
         setQuickSearchQuery("");
-      } else if (e.key === "Delete") {
+      } else if (e.key === "Delete" || e.key === "Backspace") {
         deleteSelection();
-      } else if (e.key === "Backspace") {
-        if (selectedNodeIds.size === 1 && !isSimulating) {
-          // Direct backspace deletes character from comment
-          e.preventDefault();
-          const targetNodeId = Array.from(selectedNodeIds)[0];
-          const targetNode = nodes.find((n) => n.id === targetNodeId);
-          if (targetNode) {
-            const currentComment = targetNode.comment || "";
-            const nextComment = currentComment.slice(0, -1);
-            updateNodeData(targetNodeId, { comment: nextComment || null }, false);
-          }
-        } else {
-          deleteSelection();
-        }
       } else if (e.key === "F5") {
         e.preventDefault();
         if (isSimulating) stopSimulation();
@@ -998,8 +1159,18 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
           setPanOffset((prev) => ({ x: prev.x - dx, y: prev.y - dy }));
         }
       } else if (e.key === "Escape") {
+        if (editingCommentNodeId) {
+          setEditingCommentNodeId(null);
+          setInitialCommentChar(null);
+          return;
+        }
         cancelWireDraft();
         clearSelection();
+      } else if (e.key === "Enter" && selectedNodeIds.size === 1 && !isSimulating) {
+        e.preventDefault();
+        const targetNodeId = Array.from(selectedNodeIds)[0];
+        setInitialCommentChar(null);
+        setEditingCommentNodeId(targetNodeId);
       } else if (
         selectedNodeIds.size === 1 &&
         !isSimulating &&
@@ -1009,13 +1180,10 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
         e.key.length === 1
       ) {
         // Direct type to comment on selected symbol (CAD smart annotation)
+        e.preventDefault();
         const targetNodeId = Array.from(selectedNodeIds)[0];
-        const targetNode = nodes.find((n) => n.id === targetNodeId);
-        if (targetNode) {
-          const currentComment = targetNode.comment || "";
-          const nextComment = currentComment + e.key;
-          updateNodeData(targetNodeId, { comment: nextComment || null }, false);
-        }
+        setInitialCommentChar(e.key);
+        setEditingCommentNodeId(targetNodeId);
       }
     };
 
@@ -1052,6 +1220,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     updateWireMargins,
     setPanOffset,
     updateNodeData,
+    editingCommentNodeId,
   ]);
 
   // Global mouse release for spring (momentary) buttons
@@ -1180,6 +1349,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       onDragOver={handleDragOver}
       onContextMenu={(e) => {
         e.preventDefault();
+        if (isReadOnlyViewer) return;
         if (wireDraft) {
           cancelWireDraft();
           return;
@@ -1194,7 +1364,9 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       className={`flex-1 h-[calc(100vh-3.5rem)] relative overflow-hidden select-none transition-colors duration-150 ${
         isDark ? "bg-[#090b10]" : "bg-[#f8fafc]"
       } ${
-        draggingWireSegment
+        draggingTapPointState || draggingCornerState
+          ? "cursor-move"
+          : draggingWireSegment
           ? draggingWireSegment.orientation === "horizontal"
             ? "cursor-ns-resize"
             : "cursor-ew-resize"
@@ -1288,31 +1460,83 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
               </g>
             ))}
 
-            {wires.map((wire) => (
-              <FlowWire
-                key={wire.id}
-                wire={wire}
-                fromNode={nodeMap.get(wire.fromNodeId)}
-                toNode={nodeMap.get(wire.toNodeId)}
-                isSelected={selectedWireIds.has(wire.id)}
-                routingMode={wireRoutingMode}
-                obstacles={nodeObstacles.filter(
-                  (b) => b.id !== wire.fromNodeId && b.id !== wire.toNodeId
-                )}
-                screenToWorld={screenToWorld}
-                onContextMenu={handleWireContextMenu}
-                onWireHover={handleWireHover}
-                onWireLeave={handleWireLeave}
-                onStartDragSegment={(targetWire, orientation, defaultMid) => {
-                  setDraggingWireSegment({
-                    wireId: targetWire.id,
-                    orientation,
-                    defaultMid,
-                    initialMargins: targetWire.margins || { start: 0, center: 0, end: 0 },
-                  });
-                }}
-              />
-            ))}
+            {(() => {
+              const wireNetMap = showWireLabels ? WireNetResolver.resolveWireNets(wires, nodes) : null;
+              return wires.map((wire) => (
+                <FlowWire
+                  key={wire.id}
+                  wire={wire}
+                  label={wireNetMap?.get(wire.id)?.label || wire.label}
+                  showLabel={showWireLabels}
+                  fromNode={nodeMap.get(wire.fromNodeId)}
+                  toNode={nodeMap.get(wire.toNodeId)}
+                  isSelected={selectedWireIds.has(wire.id)}
+                  routingMode={wireRoutingMode}
+                  obstacles={nodeObstacles.filter(
+                    (b) => b.id !== wire.fromNodeId && b.id !== wire.toNodeId
+                  )}
+                  screenToWorld={screenToWorld}
+                  onContextMenu={handleWireContextMenu}
+                  onWireHover={handleWireHover}
+                  onWireLeave={handleWireLeave}
+                  onStartDragSegment={(targetWire, orientation, defaultMid) => {
+                    if (isReadOnlyViewer) return;
+                    setDraggingWireSegment({
+                      wireId: targetWire.id,
+                      orientation,
+                      defaultMid,
+                      initialMargins: targetWire.margins || { start: 0, center: 0, end: 0 },
+                    });
+                  }}
+                  onStartDragCorner={(targetWire, cornerIndex, cornerPoint, points, dir1, dir2) => {
+                    if (isReadOnlyViewer) return;
+                    setDraggingCornerState({
+                      wireId: targetWire.id,
+                      cornerIndex,
+                      cornerCount: points.length >= 3 ? points.length - 2 : 1,
+                      initialPoint: cornerPoint,
+                      initialMargins: targetWire.margins || { start: 0, center: 0, end: 0 },
+                      p1: points[0],
+                      dir1,
+                      p2: points[points.length - 1],
+                      dir2,
+                      points,
+                      isVerticalRouting: dir1 === 0 || dir1 === 2,
+                    });
+                  }}
+                  onStartDragTapPoint={(targetWire, currentTapPoint) => {
+                    if (isReadOnlyViewer || isSimulating || !targetWire.toWireId) return;
+
+                    const hostWire = wires.find((w) => w.id === targetWire.toWireId);
+                    if (!hostWire) return;
+
+                    const currentWireMap = new Map(wires.map((w) => [w.id, w]));
+                    const endpoints = ManhattanRouter.resolveWireEndpoints(hostWire, nodeMap, currentWireMap);
+                    if (!endpoints) return;
+
+                    const effectiveTargetMargins = endpoints.isTapWire
+                      ? { ...hostWire.margins, end: -30 }
+                      : hostWire.margins;
+
+                    const routedTarget = ManhattanRouter.routeOrthogonal(
+                      endpoints.p1,
+                      endpoints.dir1,
+                      endpoints.p2,
+                      endpoints.dir2,
+                      effectiveTargetMargins
+                    );
+
+                    if (!routedTarget.points || routedTarget.points.length < 2) return;
+
+                    setDraggingTapPointState({
+                      wireId: targetWire.id,
+                      initialTapPoint: currentTapPoint,
+                      targetWirePoints: routedTarget.points,
+                    });
+                  }}
+                />
+              ));
+            })()}
 
             {/* Wire Draft Line (Active Connection under cursor) */}
             {wireDraft && (
@@ -1363,6 +1587,16 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
               key={node.id}
               node={node}
               isSelected={selectedNodeIds.has(node.id)}
+              isEditingComment={editingCommentNodeId === node.id}
+              initialCommentChar={editingCommentNodeId === node.id ? initialCommentChar : null}
+              onStartEditComment={() => {
+                setInitialCommentChar(null);
+                setEditingCommentNodeId(node.id);
+              }}
+              onEndEditComment={() => {
+                setEditingCommentNodeId(null);
+                setInitialCommentChar(null);
+              }}
               onPortMouseDown={(portId, portPos, e) => handlePortMouseDown(portId, portPos, node.id)}
               onNodeMouseDown={handleNodeMouseDown}
               onNodeTouchStart={handleNodeTouchStart}
@@ -1388,7 +1622,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       </div>
 
       {/* Node Action Popover (when 1 symbol is selected) */}
-      {selectedNode && !draggingNodeState?.hasMoved && (
+      {!isReadOnlyViewer && selectedNode && !draggingNodeState?.hasMoved && (
         <div
           style={{
             left: `${screenNodeCenterX}px`,
@@ -1417,7 +1651,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       )}
 
       {/* Multi-Node Alignment & Distribution Popover (when 2 or more symbols are selected) */}
-      {selectedNodesList.length >= 2 && !draggingNodeState?.hasMoved && (
+      {!isReadOnlyViewer && selectedNodesList.length >= 2 && !draggingNodeState?.hasMoved && (
         <div
           onMouseDown={(e) => e.stopPropagation()}
           onTouchStart={(e) => e.stopPropagation()}
@@ -1592,54 +1826,58 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
               : "bg-white/95 border-slate-200 text-slate-700 shadow-slate-300"
           }`}
         >
-          {/* Add Component Palette Button */}
-          <button
-            onClick={onOpenPalette}
-            className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm active:scale-95 transition-transform border ${
-              isDark
-                ? "bg-white text-black border-white"
-                : "bg-slate-900 text-white border-slate-900"
-            }`}
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Add</span>
-          </button>
+          {/* Add Component Palette Button (Editor Only) */}
+          {!isReadOnlyViewer && (
+            <button
+              onClick={onOpenPalette}
+              className={`flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm active:scale-95 transition-transform border ${
+                isDark
+                  ? "bg-white text-black border-white"
+                  : "bg-slate-900 text-white border-slate-900"
+              }`}
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Add</span>
+            </button>
+          )}
 
-          {/* Undo */}
-          <button
-            onClick={() => undo()}
-            disabled={undoStack.length === 0}
-            className={`p-2 rounded-xl transition-all disabled:opacity-30 active:scale-95 ${
-              isDark ? "hover:bg-white/10 text-zinc-300" : "hover:bg-slate-100 text-slate-700"
-            }`}
-            title="Undo"
-          >
-            <Undo2 className="w-4 h-4" />
-          </button>
+          {/* Undo & Redo & AutoLayout (Editor Only) */}
+          {!isReadOnlyViewer && (
+            <>
+              <button
+                onClick={() => undo()}
+                disabled={undoStack.length === 0}
+                className={`p-2 rounded-xl transition-all disabled:opacity-30 active:scale-95 ${
+                  isDark ? "hover:bg-white/10 text-zinc-300" : "hover:bg-slate-100 text-slate-700"
+                }`}
+                title="Undo"
+              >
+                <Undo2 className="w-4 h-4" />
+              </button>
 
-          {/* Redo */}
-          <button
-            onClick={() => redo()}
-            disabled={redoStack.length === 0}
-            className={`p-2 rounded-xl transition-all disabled:opacity-30 active:scale-95 ${
-              isDark ? "hover:bg-white/10 text-zinc-300" : "hover:bg-slate-100 text-slate-700"
-            }`}
-            title="Redo"
-          >
-            <Redo2 className="w-4 h-4" />
-          </button>
+              <button
+                onClick={() => redo()}
+                disabled={redoStack.length === 0}
+                className={`p-2 rounded-xl transition-all disabled:opacity-30 active:scale-95 ${
+                  isDark ? "hover:bg-white/10 text-zinc-300" : "hover:bg-slate-100 text-slate-700"
+                }`}
+                title="Redo"
+              >
+                <Redo2 className="w-4 h-4" />
+              </button>
 
-          {/* Auto Layout */}
-          <button
-            onClick={autoLayout}
-            disabled={nodes.length === 0}
-            className={`p-2 rounded-xl transition-all disabled:opacity-30 active:scale-95 ${
-              isDark ? "hover:bg-white/10 text-zinc-300" : "hover:bg-slate-100 text-slate-700"
-            }`}
-            title="Auto Layout"
-          >
-            <Sparkles className="w-4 h-4 text-zinc-400" />
-          </button>
+              <button
+                onClick={autoLayout}
+                disabled={nodes.length === 0}
+                className={`p-2 rounded-xl transition-all disabled:opacity-30 active:scale-95 ${
+                  isDark ? "hover:bg-white/10 text-zinc-300" : "hover:bg-slate-100 text-slate-700"
+                }`}
+                title="Auto Layout"
+              >
+                <Sparkles className="w-4 h-4 text-zinc-400" />
+              </button>
+            </>
+          )}
 
           {/* Zoom to Fit */}
           <button
@@ -1743,7 +1981,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       )}
 
       {/* Quick Search Spotlight Modal (Ctrl+K or /) */}
-      {showQuickSearch && (
+      {!isReadOnlyViewer && showQuickSearch && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4"
           onClick={() => setShowQuickSearch(false)}

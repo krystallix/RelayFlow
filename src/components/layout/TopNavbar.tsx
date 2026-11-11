@@ -30,8 +30,24 @@ import {
   SlidersHorizontal,
   Maximize2,
   Layers,
+  Languages,
+  Share2,
+  GitFork,
+  LogIn,
+  LogOut,
+  User,
+  Cloud,
+  CloudUpload,
+  Loader2,
+  Save,
 } from "lucide-react";
 import { useCircuitStore } from "@/store/useCircuitStore";
+import { useAuthStore } from "@/store/useAuthStore";
+import { ProjectsService, CloudProjectRecord } from "@/lib/projectsService";
+import { AuthModal } from "@/components/modals/AuthModal";
+import { ProjectsModal } from "@/components/modals/ProjectsModal";
+import { ShareModal } from "@/components/modals/ShareModal";
+import { getTranslation } from "@/i18n/translations";
 import { FileAdapter } from "@/engine/serializer/FileAdapter";
 import { useIsMac, useModifierKey } from "@/utils/platform";
 
@@ -58,18 +74,39 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const menuBarRef = useRef<HTMLDivElement>(null);
 
+  // Cloud & Auth Modals state
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authCustomMessage, setAuthCustomMessage] = useState<string | undefined>(undefined);
+  const [pendingAction, setPendingAction] = useState<"share" | "fork" | "save" | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [justSaved, setJustSaved] = useState(false);
+  const [showProjectsModal, setShowProjectsModal] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false);
+  const [shareTargetProject, setShareTargetProject] = useState<{ id: string; title: string } | null>(null);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const [exportMenuOpen, setExportMenuOpen] = useState(false);
+  const exportMenuRef = useRef<HTMLDivElement>(null);
+
+  const { user, signOut } = useAuthStore();
+
   const {
     projectTitle,
     fileFormat,
     isSimulating,
     wireRoutingMode,
     theme,
+    locale,
     showGrid,
+    showWireLabels,
+    toggleWireLabels,
+    renumberWires,
     undoStack,
     redoStack,
     setProjectTitle,
     setWireRoutingMode,
     toggleTheme,
+    toggleLocale,
     toggleGrid,
     startSimulation,
     stopSimulation,
@@ -84,11 +121,18 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
     duplicateSelection,
     nodes,
     wires,
+    currentProjectId,
+    isCloudSynced,
+    isReadOnlyViewer,
+    setCloudProjectId,
+    setIsCloudSynced,
+    setIsReadOnlyViewer,
   } = useCircuitStore();
 
   const isDark = theme === "dark";
   const isMac = useIsMac();
   const modKey = useModifierKey();
+  const t = getTranslation(locale);
 
   // Close menus on click outside
   useEffect(() => {
@@ -96,10 +140,204 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
       if (menuBarRef.current && !menuBarRef.current.contains(e.target as Node)) {
         setActiveMenu(null);
       }
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
+        setUserMenuOpen(false);
+      }
+      if (exportMenuRef.current && !exportMenuRef.current.contains(e.target as Node)) {
+        setExportMenuOpen(false);
+      }
     };
     window.addEventListener("mousedown", handleClickOutside);
     return () => window.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const handleSaveProject = async () => {
+    if (isReadOnlyViewer) return;
+
+    if (!user) {
+      setAuthCustomMessage(t.auth.loginSubtitle || "Log in to save your projects and share them with others");
+      setPendingAction("save");
+      setShowAuthModal(true);
+      return;
+    }
+
+    const storeState = useCircuitStore.getState();
+    const effectiveProjectId = storeState.currentProjectId;
+    const effectiveTitle = storeState.projectTitle;
+    const effectiveNodes = storeState.nodes;
+    const effectiveWires = storeState.wires;
+
+    try {
+      setIsSaving(true);
+      const record = await ProjectsService.saveProject(
+        user.id,
+        effectiveTitle,
+        effectiveNodes,
+        effectiveWires,
+        effectiveProjectId
+      );
+      setCloudProjectId(record.id);
+      setIsCloudSynced(true);
+      setIsSaving(false);
+      setJustSaved(true);
+      setTimeout(() => setJustSaved(false), 2500);
+    } catch (e: any) {
+      setIsSaving(false);
+      console.error("Save error:", e);
+      alert("Failed to save project: " + (e?.message || "Unknown error"));
+    }
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+        e.preventDefault();
+        handleSaveProject();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [user, projectTitle, nodes, wires, currentProjectId, isReadOnlyViewer]);
+
+  const handleOpenShare = async () => {
+    if (!user) {
+      setAuthCustomMessage(t.auth.loginToFork || "Please sign in to save and generate a share link.");
+      setPendingAction("share");
+      setShowAuthModal(true);
+      return;
+    }
+
+    const storeState = useCircuitStore.getState();
+    const effectiveProjectId = storeState.currentProjectId;
+    const effectiveTitle = storeState.projectTitle;
+    const effectiveNodes = storeState.nodes;
+    const effectiveWires = storeState.wires;
+
+    if (!effectiveProjectId) {
+      try {
+        const record = await ProjectsService.saveProject(
+          user.id,
+          effectiveTitle,
+          effectiveNodes,
+          effectiveWires,
+          null
+        );
+        setCloudProjectId(record.id);
+        setIsCloudSynced(true);
+        setShareTargetProject({ id: record.id, title: record.title });
+        setShowShareModal(true);
+      } catch (e) {
+        console.error("Save error:", e);
+      }
+    } else {
+      setShareTargetProject({ id: effectiveProjectId, title: effectiveTitle });
+      setShowShareModal(true);
+    }
+  };
+
+  const handleForkToEdit = () => {
+    if (!user) {
+      setAuthCustomMessage(t.auth.loginToFork);
+      setPendingAction("fork");
+      setShowAuthModal(true);
+      return;
+    }
+    setCloudProjectId(null);
+    setIsCloudSynced(false);
+    setIsReadOnlyViewer(false);
+    setProjectTitle(`${projectTitle} (Fork)`);
+    if (typeof window !== "undefined" && window.location.pathname.startsWith("/c/")) {
+      window.history.pushState({}, "", "/");
+    }
+  };
+
+  const handleAuthSuccess = async () => {
+    const currentUser = useAuthStore.getState().user;
+    const storeState = useCircuitStore.getState();
+    const effectiveProjectId = storeState.currentProjectId;
+    const effectiveTitle = storeState.projectTitle;
+    const effectiveNodes = storeState.nodes;
+    const effectiveWires = storeState.wires;
+
+    if (pendingAction === "save" && currentUser) {
+      try {
+        setIsSaving(true);
+        const record = await ProjectsService.saveProject(
+          currentUser.id,
+          effectiveTitle,
+          effectiveNodes,
+          effectiveWires,
+          effectiveProjectId
+        );
+        setCloudProjectId(record.id);
+        setIsCloudSynced(true);
+        setIsSaving(false);
+        setJustSaved(true);
+        setTimeout(() => setJustSaved(false), 2500);
+      } catch (e: any) {
+        setIsSaving(false);
+        console.error("Auth success save error:", e);
+      }
+    } else if (pendingAction === "share" && currentUser) {
+      try {
+        const record = await ProjectsService.saveProject(
+          currentUser.id,
+          effectiveTitle,
+          effectiveNodes,
+          effectiveWires,
+          effectiveProjectId
+        );
+        setCloudProjectId(record.id);
+        setIsCloudSynced(true);
+        setShareTargetProject({ id: record.id, title: record.title });
+        setShowShareModal(true);
+      } catch (e) {
+        console.error("Auth success save error:", e);
+      }
+    } else if (pendingAction === "fork") {
+      setCloudProjectId(null);
+      setIsCloudSynced(false);
+      setIsReadOnlyViewer(false);
+      setProjectTitle(`${effectiveTitle} (Fork)`);
+      if (typeof window !== "undefined" && window.location.pathname.startsWith("/c/")) {
+        window.history.pushState({}, "", "/");
+      }
+    }
+    setPendingAction(null);
+  };
+
+  const handleOpenCloudProject = (proj: CloudProjectRecord) => {
+    if (proj.data?.nodes && proj.data?.wires) {
+      loadProject({
+        format: "relayflow",
+        version: "1.0.0",
+        metadata: {
+          id: proj.id,
+          title: proj.title,
+          createdAt: proj.created_at,
+          updatedAt: proj.updated_at,
+        } as any,
+        settings: { gridSize: 30, wireRouting: "orthogonal", theme },
+        nodes: proj.data.nodes,
+        wires: proj.data.wires,
+      });
+      setCloudProjectId(proj.id);
+      setIsCloudSynced(true);
+      setIsReadOnlyViewer(false);
+    }
+  };
+
+  const handleShareFromProjects = (proj: CloudProjectRecord) => {
+    setShareTargetProject({ id: proj.id, title: proj.title });
+    setShowShareModal(true);
+  };
+
+  const handleNewBlankProject = () => {
+    resetCanvas();
+    setCloudProjectId(null);
+    setIsCloudSynced(false);
+    setIsReadOnlyViewer(false);
+  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -275,7 +513,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                   : isDark ? "text-zinc-300 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
               }`}
             >
-              <span>File</span>
+              <span>{t.navbar.file}</span>
               <ChevronDown className="w-3 h-3 opacity-60" />
             </button>
 
@@ -295,8 +533,25 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                 >
                   <FilePlus className="w-4 h-4 text-zinc-400" />
                   <div className="flex-1 flex justify-between">
-                    <span>New Circuit</span>
+                    <span>{t.navbar.newProject}</span>
                     <span className="text-[10px] text-zinc-400 font-mono">{modKey}+N</span>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setActiveMenu(null);
+                    handleSaveProject();
+                  }}
+                  disabled={isReadOnlyViewer}
+                  className={`w-full text-left px-3 py-2 rounded-lg flex items-center gap-2.5 text-xs transition-colors ${
+                    isDark ? "hover:bg-white/10" : "hover:bg-slate-100 text-slate-800"
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                >
+                  <CloudUpload className="w-4 h-4 text-emerald-400" />
+                  <div className="flex-1 flex justify-between items-center">
+                    <span>{t.navbar.saveProject}</span>
+                    <span className="text-[10px] text-zinc-400 font-mono">{modKey}+S</span>
                   </div>
                 </button>
 
@@ -308,7 +563,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                 >
                   <FolderOpen className="w-4 h-4 text-zinc-400" />
                   <div className="flex-1 flex justify-between">
-                    <span>Open File...</span>
+                    <span>{t.navbar.openProject}</span>
                     <span className="text-[10px] text-zinc-400 font-mono">.rflow / .smrl</span>
                   </div>
                 </button>
@@ -320,7 +575,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                   }`}
                 >
                   <Sparkles className="w-4 h-4 text-zinc-400" />
-                  <span>Load DOL Starter Example</span>
+                  <span>{t.navbar.loadDolExample}</span>
                 </button>
 
                 <div className={`my-1 h-[1px] ${isDark ? "bg-white/10" : "bg-slate-200"}`} />
@@ -333,7 +588,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                 >
                   <Download className="w-4 h-4 text-zinc-400" />
                   <div className="flex-1 flex justify-between items-center">
-                    <span>Save as .rflow</span>
+                    <span>{t.navbar.saveRflow}</span>
                     <span className="text-[10px] font-mono bg-white/10 text-zinc-300 px-1 py-0.5 rounded">Native</span>
                   </div>
                 </button>
@@ -346,7 +601,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                 >
                   <Download className="w-4 h-4 text-zinc-400" />
                   <div className="flex-1 flex justify-between items-center">
-                    <span>Export to .smrl</span>
+                    <span>{t.navbar.exportSmrl}</span>
                     <span className="text-[10px] font-mono bg-white/10 text-zinc-300 px-1 py-0.5 rounded">Simurelay</span>
                   </div>
                 </button>
@@ -359,7 +614,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                 >
                   <FileCode className="w-4 h-4 text-zinc-400" />
                   <div className="flex-1 flex justify-between items-center">
-                    <span>Export BOM (CSV)</span>
+                    <span>{t.navbar.exportBom}</span>
                     <span className="text-[10px] font-mono bg-white/10 text-zinc-300 px-1 py-0.5 rounded">Parts List</span>
                   </div>
                 </button>
@@ -377,7 +632,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                   : isDark ? "text-zinc-300 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
               }`}
             >
-              <span>Edit</span>
+              <span>{t.navbar.edit}</span>
               <ChevronDown className="w-3 h-3 opacity-60" />
             </button>
 
@@ -398,7 +653,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                 >
                   <div className="flex items-center gap-2">
                     <Undo2 className="w-3.5 h-3.5" />
-                    <span>Undo</span>
+                    <span>{t.navbar.undoAction}</span>
                   </div>
                   <span className="text-[10px] text-zinc-400 font-mono">{modKey}+Z</span>
                 </button>
@@ -412,7 +667,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                 >
                   <div className="flex items-center gap-2">
                     <Redo2 className="w-3.5 h-3.5" />
-                    <span>Redo</span>
+                    <span>{t.navbar.redoAction}</span>
                   </div>
                   <span className="text-[10px] text-zinc-400 font-mono">{modKey}+Y</span>
                 </button>
@@ -427,7 +682,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                 >
                   <div className="flex items-center gap-2">
                     <Copy className="w-3.5 h-3.5" />
-                    <span>Duplicate</span>
+                    <span>{t.navbar.duplicateSelection}</span>
                   </div>
                   <span className="text-[10px] text-zinc-400 font-mono">{modKey}+D</span>
                 </button>
@@ -440,7 +695,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                 >
                   <div className="flex items-center gap-2">
                     <Sparkles className="w-3.5 h-3.5 text-zinc-400" />
-                    <span className="font-medium">Auto Layout Circuit</span>
+                    <span className="font-medium">{t.navbar.autoLayout}</span>
                   </div>
                   <span className="text-[10px] text-zinc-400 font-mono">{isMac ? "⌥L" : "Alt+L"}</span>
                 </button>
@@ -453,7 +708,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                     isDark ? "hover:bg-white/10" : "hover:bg-slate-100 text-slate-800"
                   }`}
                 >
-                  <span>Select All</span>
+                  <span>{t.navbar.selectAll}</span>
                   <span className="text-[10px] text-zinc-400 font-mono">{modKey}+A</span>
                 </button>
 
@@ -465,9 +720,24 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                 >
                   <div className="flex items-center gap-2">
                     <Trash2 className="w-3.5 h-3.5 text-zinc-400" />
-                    <span>Delete Selected</span>
+                    <span>{t.navbar.deleteSelection}</span>
                   </div>
                   <span className="text-[10px] text-zinc-400 font-mono">Del</span>
+                </button>
+
+                <div className={`my-1 h-[1px] ${isDark ? "bg-white/10" : "bg-slate-200"}`} />
+
+                <button
+                  onClick={() => { renumberWires(); setActiveMenu(null); }}
+                  className={`w-full text-left px-3 py-2 rounded-lg flex items-center justify-between text-xs transition-colors ${
+                    isDark ? "hover:bg-white/10" : "hover:bg-slate-100 text-slate-800"
+                  }`}
+                  title="Renumber all wire nets sequentially (1, 2, 3...) from top to bottom"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xs font-bold opacity-70">#</span>
+                    <span>{t.navbar.renumberWires}</span>
+                  </div>
                 </button>
               </div>
             )}
@@ -483,7 +753,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                   : isDark ? "text-zinc-300 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
               }`}
             >
-              <span>View</span>
+              <span>{t.navbar.view}</span>
               <ChevronDown className="w-3 h-3 opacity-60" />
             </button>
 
@@ -503,7 +773,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                 >
                   <div className="flex items-center gap-2">
                     {isDark ? <Sun className="w-4 h-4 text-zinc-400" /> : <Moon className="w-4 h-4 text-zinc-400" />}
-                    <span>Theme: {isDark ? "Dark Mode" : "Light Mode"}</span>
+                    <span>{t.common.theme}: {isDark ? t.common.darkMode : t.common.lightMode}</span>
                   </div>
                 </button>
 
@@ -515,31 +785,23 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                 >
                   <div className="flex items-center gap-2">
                     <Grid className="w-4 h-4 text-zinc-400" />
-                    <span>Dotted Grid</span>
+                    <span>{t.navbar.dottedGrid}</span>
                   </div>
                   {showGrid && <Check className="w-3.5 h-3.5 text-zinc-400" />}
                 </button>
 
-                <div className={`my-1 h-[1px] ${isDark ? "bg-white/10" : "bg-slate-200"}`} />
-
                 <button
-                  onClick={() => { setWireRoutingMode("orthogonal"); setActiveMenu(null); }}
+                  onClick={() => { toggleWireLabels(); setActiveMenu(null); }}
                   className={`w-full text-left px-3 py-2 rounded-lg flex items-center justify-between text-xs transition-colors ${
                     isDark ? "hover:bg-white/10" : "hover:bg-slate-100 text-slate-800"
                   }`}
+                  title="Toggle CAD Wire Number Badges (1, 2, 3...)"
                 >
-                  <span>90° Ortho Routing</span>
-                  {wireRoutingMode === "orthogonal" && <Check className="w-3.5 h-3.5 text-zinc-400" />}
-                </button>
-
-                <button
-                  onClick={() => { setWireRoutingMode("bezier"); setActiveMenu(null); }}
-                  className={`w-full text-left px-3 py-2 rounded-lg flex items-center justify-between text-xs transition-colors ${
-                    isDark ? "hover:bg-white/10" : "hover:bg-slate-100 text-slate-800"
-                  }`}
-                >
-                  <span>Curved Bezier Routing</span>
-                  {wireRoutingMode === "bezier" && <Check className="w-3.5 h-3.5 text-zinc-400" />}
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xs font-bold opacity-70">#</span>
+                    <span>{t.navbar.wireNumbers}</span>
+                  </div>
+                  {showWireLabels && <Check className="w-3.5 h-3.5 text-zinc-400" />}
                 </button>
 
                 <div className={`my-1 h-[1px] ${isDark ? "bg-white/10" : "bg-slate-200"}`} />
@@ -550,7 +812,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                     isDark ? "hover:bg-white/10" : "hover:bg-slate-100 text-slate-800"
                   }`}
                 >
-                  <span>Reset Zoom (100%)</span>
+                  <span>{t.navbar.resetZoom}</span>
                   <span className="text-[10px] text-zinc-400 font-mono">{modKey}+0</span>
                 </button>
               </div>
@@ -567,7 +829,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                   : isDark ? "text-zinc-300 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
               }`}
             >
-              <span>Help</span>
+              <span>{t.navbar.help}</span>
               <ChevronDown className="w-3 h-3 opacity-60" />
             </button>
 
@@ -586,7 +848,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                   }`}
                 >
                   <HelpCircle className="w-4 h-4 text-zinc-400" />
-                  <span>Keyboard Shortcuts</span>
+                  <span>{t.navbar.keyboardShortcuts}</span>
                 </button>
 
                 <div className={`my-1 h-[1px] ${isDark ? "bg-white/10" : "bg-slate-200"}`} />
@@ -602,8 +864,8 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
 
         {/* Project Name Pill */}
         <div
-          className={`flex items-center gap-2 rounded-full px-3 py-1 text-xs border transition-colors ${
-            isDark ? "bg-white/5 border-white/10 text-zinc-200" : "bg-slate-100 border-slate-200 text-slate-800"
+          className={`flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs border shadow-xs transition-colors ${
+            isDark ? "bg-[#131620] border-white/15 text-zinc-200" : "bg-white border-slate-300 text-slate-800"
           }`}
         >
           <FileCode className="w-3.5 h-3.5 text-zinc-400" />
@@ -611,177 +873,365 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
             type="text"
             value={projectTitle}
             onChange={(e) => setProjectTitle(e.target.value)}
-            className="bg-transparent border-none focus:outline-none w-28 sm:w-40 font-medium truncate"
-            title="Click to rename project"
+            disabled={isReadOnlyViewer}
+            className="bg-transparent border-none focus:outline-none w-28 sm:w-36 font-semibold truncate disabled:opacity-80 disabled:cursor-not-allowed"
+            title={isReadOnlyViewer ? "Circuit Title (Read-Only)" : "Click to rename project"}
           />
           <span className={`font-mono text-[10px] px-1.5 py-0.5 rounded uppercase font-semibold border ${
-            isDark ? "bg-white/10 text-zinc-300 border-white/10" : "bg-slate-200 text-slate-700 border-slate-300"
+            isDark ? "bg-white/10 text-zinc-300 border-white/10" : "bg-slate-100 text-slate-700 border-slate-300"
           }`}>
             .{fileFormat}
           </span>
         </div>
       </div>
 
-      {/* Center: Simulation Controls (Desktop) */}
+      {/* Right Controls: Zoom, Language, Theme, Share & Export Popover, Storage Badge, and Login (Farthest Right) */}
       <div className="hidden md:flex items-center gap-2">
+        {/* 1. Zoom Controls (Solid Capsule) */}
         <div
-          className={`flex items-center p-1 rounded-xl border shadow-inner transition-colors ${
-            isDark ? "bg-[#151922] border-white/10" : "bg-slate-100 border-slate-200"
-          }`}
-        >
-          {isSimulating ? (
-            <button
-              onClick={stopSimulation}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
-                isDark 
-                  ? "bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border-zinc-600 shadow-sm" 
-                  : "bg-slate-200 hover:bg-slate-300 text-slate-800 border-slate-300"
-              }`}
-              title="Stop Simulation"
-            >
-              <Square className="w-3.5 h-3.5 fill-current text-zinc-300" />
-              <span>Stop</span>
-            </button>
-          ) : (
-            <button
-              onClick={startSimulation}
-              className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-white hover:bg-zinc-200 text-black text-xs font-semibold transition-all shadow-sm"
-              title="Run Simulation"
-            >
-              <Play className="w-3.5 h-3.5 fill-current text-black" />
-              <span>Simulate</span>
-            </button>
-          )}
-
-          <button
-            onClick={stepSimulation}
-            disabled={!isSimulating}
-            className={`p-1.5 rounded-lg transition-colors ml-1 disabled:opacity-30 ${
-              isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-white"
-            }`}
-            title="Step Next Tick"
-          >
-            <StepForward className="w-4 h-4" />
-          </button>
-
-          <button
-            onClick={stopSimulation}
-            className={`p-1.5 rounded-lg transition-colors ${
-              isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-white"
-            }`}
-            title="Reset Circuit"
-          >
-            <RotateCcw className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* Auto Layout Button */}
-        <button
-          onClick={autoLayout}
-          disabled={nodes.length === 0}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all ${
-            isDark
-              ? "bg-[#151922] border-white/10 text-zinc-300 hover:text-white hover:border-white/20 hover:bg-white/5"
-              : "bg-slate-100 border-slate-200 text-slate-700 hover:text-slate-900 hover:border-slate-300 hover:bg-slate-200"
-          } disabled:opacity-40 disabled:pointer-events-none`}
-          title="Auto Layout Circuit (Arrange into clean ladder diagram, Alt+L)"
-        >
-          <Sparkles className="w-3.5 h-3.5 text-zinc-400" />
-          <span className="hidden sm:inline">Auto Layout</span>
-        </button>
-
-        {/* Wire Routing Mode Toggle (Fast Access) */}
-        <div
-          className={`hidden sm:flex items-center p-1 rounded-xl border text-xs ${
-            isDark ? "bg-[#151922] border-white/10" : "bg-slate-100 border-slate-200"
-          }`}
-        >
-          <button
-            onClick={() => setWireRoutingMode("orthogonal")}
-            className={`px-2 py-1 rounded-lg transition-colors font-medium ${
-              wireRoutingMode === "orthogonal"
-                ? isDark ? "bg-white/15 text-white" : "bg-white text-slate-900 shadow-sm"
-                : isDark ? "text-zinc-400 hover:text-zinc-200" : "text-slate-500 hover:text-slate-800"
-            }`}
-            title="Orthogonal 90-degree industrial routing"
-          >
-            90° Ortho
-          </button>
-          <button
-            onClick={() => setWireRoutingMode("bezier")}
-            className={`px-2 py-1 rounded-lg transition-colors font-medium ${
-              wireRoutingMode === "bezier"
-                ? isDark ? "bg-white/15 text-white" : "bg-white text-slate-900 shadow-sm"
-                : isDark ? "text-zinc-400 hover:text-zinc-200" : "text-slate-500 hover:text-slate-800"
-            }`}
-            title="Smooth Curved Bezier routing"
-          >
-            Curved
-          </button>
-        </div>
-      </div>
-
-      {/* Right: Theme Switcher, Zoom, and Quick Export */}
-      <div className="hidden md:flex items-center gap-2">
-        {/* Light / Dark Mode Toggle Button */}
-        <button
-          onClick={toggleTheme}
-          className={`p-2 rounded-xl border transition-colors ${
-            isDark
-              ? "bg-[#151922] border-white/10 text-zinc-300 hover:text-white hover:bg-white/10"
-              : "bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200"
-          }`}
-          title={`Switch to ${isDark ? "Light" : "Dark"} Mode`}
-        >
-          {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-        </button>
-
-        {/* Zoom Controls */}
-        <div
-          className={`hidden md:flex items-center gap-1 p-1 rounded-xl border text-xs font-mono ${
-            isDark ? "bg-[#151922] border-white/10" : "bg-slate-100 border-slate-200"
+          className={`flex items-center gap-1 p-1 rounded-xl border text-xs font-mono shadow-xs ${
+            isDark ? "bg-[#131620] border-white/15" : "bg-white border-slate-300"
           }`}
         >
           <button
             onClick={onZoomOut}
             className={`p-1.5 rounded-lg transition-colors ${
-              isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-white"
+              isDark ? "text-zinc-300 hover:text-white hover:bg-white/10" : "text-slate-700 hover:text-slate-900 hover:bg-slate-100"
             }`}
             title="Zoom Out"
           >
-            <ZoomOut className="w-4 h-4" />
+            <ZoomOut className="w-3.5 h-3.5" />
           </button>
           <button
             onClick={onResetZoom}
-            className={`px-1.5 py-0.5 font-medium ${isDark ? "text-zinc-300 hover:text-white" : "text-slate-700 hover:text-slate-900"}`}
-            title="Reset to 100%"
+            className={`px-1.5 py-0.5 font-medium ${
+              isDark ? "text-zinc-200 hover:text-white" : "text-slate-800 hover:text-slate-900"
+            }`}
+            title="Reset Zoom"
           >
             {Math.round(zoomScale * 100)}%
           </button>
           <button
             onClick={onZoomIn}
             className={`p-1.5 rounded-lg transition-colors ${
-              isDark ? "text-zinc-400 hover:text-white hover:bg-white/5" : "text-slate-600 hover:text-slate-900 hover:bg-white"
+              isDark ? "text-zinc-300 hover:text-white hover:bg-white/10" : "text-slate-700 hover:text-slate-900 hover:bg-slate-100"
             }`}
             title="Zoom In"
           >
-            <ZoomIn className="w-4 h-4" />
+            <ZoomIn className="w-3.5 h-3.5" />
           </button>
         </div>
 
-        {/* Quick Export Button */}
+        {/* 2. Language Switcher (Icon-Only Solid Button) */}
         <button
-          onClick={handleExportRflow}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors border ${
+          onClick={toggleLocale}
+          className={`p-2 rounded-xl border transition-colors shadow-xs ${
             isDark
-              ? "bg-white text-black hover:bg-zinc-200 border-white shadow-xs"
-              : "bg-slate-900 text-white hover:bg-slate-800 border-slate-900"
+              ? "bg-[#131620] hover:bg-[#1c202e] border-white/15 text-zinc-200 hover:text-white"
+              : "bg-white hover:bg-slate-100 border-slate-300 text-slate-800"
           }`}
-          title="Quick export as .rflow"
+          title={locale === "id" ? "Switch to English" : "Ganti ke Bahasa Indonesia"}
         >
-          <Download className="w-3.5 h-3.5" />
-          <span className="hidden sm:inline">Export</span>
+          <Languages className="w-4 h-4" />
         </button>
+
+        {/* 3. Theme Toggle (Icon-Only Solid Button) */}
+        <button
+          onClick={toggleTheme}
+          className={`p-2 rounded-xl border transition-colors shadow-xs ${
+            isDark
+              ? "bg-[#131620] hover:bg-[#1c202e] border-white/15 text-zinc-200 hover:text-white"
+              : "bg-white hover:bg-slate-100 border-slate-300 text-slate-800"
+          }`}
+          title={`Switch to ${isDark ? "Light" : "Dark"} Mode`}
+        >
+          {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+        </button>
+
+        {/* 4. Save to Cloud Button */}
+        {!isReadOnlyViewer && (
+          <button
+            onClick={handleSaveProject}
+            disabled={isSaving}
+            className={`px-3 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer ${
+              justSaved
+                ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-400"
+                : isDark
+                ? "bg-[#131620] hover:bg-[#1c202e] border-white/15 text-zinc-200 hover:text-white"
+                : "bg-white hover:bg-slate-100 border-slate-300 text-slate-800"
+            }`}
+            title={`Save Project (${modKey}+S)`}
+          >
+            {isSaving ? (
+              <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-400" />
+            ) : justSaved ? (
+              <Check className="w-3.5 h-3.5 text-emerald-400" />
+            ) : (
+              <CloudUpload className="w-3.5 h-3.5 text-zinc-300" />
+            )}
+            <span>
+              {isSaving
+                ? "Saving..."
+                : justSaved
+                ? "Saved!"
+                : t.navbar.saveProject || "Save"}
+            </span>
+          </button>
+        )}
+
+        {/* 5. Unified Share & Export Popover (Icon-Only Solid Button) */}
+        <div className="relative" ref={exportMenuRef}>
+          <button
+            onClick={() => setExportMenuOpen((prev) => !prev)}
+            className={`p-2 rounded-xl border transition-colors shadow-xs ${
+              exportMenuOpen
+                ? isDark
+                  ? "bg-[#1c202e] border-white/30 text-white"
+                  : "bg-slate-100 border-slate-400 text-slate-900"
+                : isDark
+                ? "bg-[#131620] hover:bg-[#1c202e] border-white/15 text-zinc-200 hover:text-white"
+                : "bg-white hover:bg-slate-100 border-slate-300 text-slate-800"
+            }`}
+            title="Share & Export"
+          >
+            <Share2 className="w-4 h-4" />
+          </button>
+
+          {exportMenuOpen && (
+            <div
+              className={`absolute right-0 top-full mt-2 w-56 rounded-xl border p-1.5 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100 select-none ${
+                isDark
+                  ? "bg-[#131620] border-white/15 text-zinc-200 shadow-black/80"
+                  : "bg-white border-slate-300 text-slate-800 shadow-slate-900/15"
+              }`}
+            >
+              {/* Save Project Option */}
+              {!isReadOnlyViewer && (
+                <button
+                  onClick={() => {
+                    setExportMenuOpen(false);
+                    handleSaveProject();
+                  }}
+                  className={`w-full text-left px-3 py-2 rounded-lg flex items-center justify-between text-xs font-medium transition-colors ${
+                    isDark ? "hover:bg-white/10 text-zinc-200" : "hover:bg-slate-100 text-slate-800"
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <CloudUpload className="w-4 h-4 text-emerald-400" />
+                    <span>{t.navbar.saveProject}</span>
+                  </div>
+                  <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    {modKey}+S
+                  </span>
+                </button>
+              )}
+
+              {/* Share Circuit Link Option */}
+              <button
+                onClick={() => {
+                  setExportMenuOpen(false);
+                  handleOpenShare();
+                }}
+                className={`w-full text-left px-3 py-2 rounded-lg flex items-center justify-between text-xs font-medium transition-colors ${
+                  isDark ? "hover:bg-white/10 text-zinc-200" : "hover:bg-slate-100 text-slate-800"
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <Share2 className="w-4 h-4 text-blue-400" />
+                  <span>{t.share.title}</span>
+                </div>
+                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                  Link
+                </span>
+              </button>
+
+              <div className={`my-1 h-[1px] ${isDark ? "bg-white/10" : "bg-slate-200"}`} />
+
+              {/* Export .rflow */}
+              <button
+                onClick={() => {
+                  setExportMenuOpen(false);
+                  handleExportRflow();
+                }}
+                className={`w-full text-left px-3 py-2 rounded-lg flex items-center justify-between text-xs transition-colors ${
+                  isDark ? "hover:bg-white/10 text-zinc-200" : "hover:bg-slate-100 text-slate-800"
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <Download className="w-4 h-4 text-zinc-400" />
+                  <span>{t.navbar.saveRflow}</span>
+                </div>
+                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-white/10 text-zinc-300 border border-white/10">
+                  .rflow
+                </span>
+              </button>
+
+              {/* Export .smrl */}
+              <button
+                onClick={() => {
+                  setExportMenuOpen(false);
+                  handleExportSmrl();
+                }}
+                className={`w-full text-left px-3 py-2 rounded-lg flex items-center justify-between text-xs transition-colors ${
+                  isDark ? "hover:bg-white/10 text-zinc-200" : "hover:bg-slate-100 text-slate-800"
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <Download className="w-4 h-4 text-zinc-400" />
+                  <span>{t.navbar.exportSmrl}</span>
+                </div>
+                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-white/10 text-zinc-300 border border-white/10">
+                  .smrl
+                </span>
+              </button>
+
+              {/* Export BOM */}
+              <button
+                onClick={() => {
+                  setExportMenuOpen(false);
+                  handleExportBom();
+                }}
+                className={`w-full text-left px-3 py-2 rounded-lg flex items-center justify-between text-xs transition-colors ${
+                  isDark ? "hover:bg-white/10 text-zinc-200" : "hover:bg-slate-100 text-slate-800"
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <FileCode className="w-4 h-4 text-zinc-400" />
+                  <span>{t.navbar.exportBom}</span>
+                </div>
+                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-white/10 text-zinc-300 border border-white/10">
+                  BOM
+                </span>
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* 5. My Projects (Icon-Only Solid Button, if logged in) */}
+        {user && (
+          <button
+            onClick={() => setShowProjectsModal(true)}
+            className={`p-2 rounded-xl border transition-colors shadow-xs ${
+              isDark
+                ? "bg-[#131620] hover:bg-[#1c202e] border-white/15 text-zinc-200 hover:text-white"
+                : "bg-white hover:bg-slate-100 border-slate-300 text-slate-800"
+            }`}
+            title={t.cloudNavbar.myProjects}
+          >
+            <FolderOpen className="w-4 h-4 text-zinc-300" />
+          </button>
+        )}
+
+        {/* 6. Fork to Edit (Icon-Only Solid Button, if in Viewer Mode) */}
+        {isReadOnlyViewer && (
+          <button
+            onClick={handleForkToEdit}
+            className="p-2 rounded-xl border transition-all shadow-xs bg-blue-600 hover:bg-blue-500 text-white border-blue-500 flex items-center justify-center"
+            title={t.cloudNavbar.forkToEdit}
+          >
+            <GitFork className="w-4 h-4" />
+          </button>
+        )}
+
+        {/* 7. Storage Status Badge (Pindah ke Kanan, Solid CAD Pill) */}
+        {isReadOnlyViewer ? (
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-mono font-medium border shadow-xs bg-[#0b1c2e] text-sky-300 border-sky-500/40">
+            <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" />
+            <span>{t.cloudNavbar.viewerMode}</span>
+          </div>
+        ) : isCloudSynced ? (
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-mono font-medium border shadow-xs bg-[#0a1e16] text-emerald-300 border-emerald-500/40">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+            <span>{t.cloudNavbar.cloudSynced}</span>
+          </div>
+        ) : (
+          <div
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-mono font-medium border shadow-xs ${
+              isDark
+                ? "bg-[#131620] text-zinc-300 border-white/15"
+                : "bg-white text-slate-700 border-slate-300"
+            }`}
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
+            <span>{t.cloudNavbar.localStorage}</span>
+          </div>
+        )}
+
+        {/* 8. Login / User Profile (PALING KANAN) */}
+        {!user ? (
+          <button
+            onClick={() => {
+              setAuthCustomMessage(undefined);
+              setPendingAction(null);
+              setShowAuthModal(true);
+            }}
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border shadow-xs flex items-center gap-1.5 ${
+              isDark
+                ? "bg-white text-black hover:bg-zinc-200 border-white"
+                : "bg-slate-900 text-white hover:bg-slate-800 border-slate-900"
+            }`}
+            title={t.cloudNavbar.login}
+          >
+            <LogIn className="w-3.5 h-3.5" />
+            <span>{t.auth.signIn}</span>
+          </button>
+        ) : (
+          <div className="relative" ref={userMenuRef}>
+            <button
+              onClick={() => setUserMenuOpen((prev) => !prev)}
+              className={`p-1 rounded-xl border text-xs transition-colors shadow-xs flex items-center gap-1.5 ${
+                isDark
+                  ? "bg-[#131620] hover:bg-[#1c202e] border-white/15 text-zinc-200"
+                  : "bg-white hover:bg-slate-100 border-slate-300 text-slate-800"
+              }`}
+              title={user.email || "Account"}
+            >
+              <div className="w-6 h-6 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center text-[10px] font-bold text-white uppercase">
+                {user.email ? user.email[0] : "U"}
+              </div>
+              <ChevronDown className="w-3 h-3 text-zinc-400 pr-0.5" />
+            </button>
+
+            {userMenuOpen && (
+              <div
+                className={`absolute right-0 top-full mt-2 w-52 rounded-xl border p-1.5 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100 select-none ${
+                  isDark
+                    ? "bg-[#131620] border-white/15 text-zinc-200 shadow-black/80"
+                    : "bg-white border-slate-300 text-slate-800 shadow-slate-900/15"
+                }`}
+              >
+                <div className="px-3 py-2 border-b border-white/10 text-[11px]">
+                  <div className="font-semibold text-zinc-200 truncate">{user.user_metadata?.full_name || "Account"}</div>
+                  <div className="text-[10px] text-zinc-500 truncate">{user.email}</div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setShowProjectsModal(true);
+                    setUserMenuOpen(false);
+                  }}
+                  className={`w-full text-left px-3 py-1.5 rounded-lg flex items-center gap-2 text-xs transition-colors ${
+                    isDark ? "hover:bg-white/10 text-zinc-200" : "hover:bg-slate-100 text-slate-800"
+                  }`}
+                >
+                  <FolderOpen className="w-3.5 h-3.5 text-zinc-400" />
+                  <span>{t.cloudNavbar.myProjects}</span>
+                </button>
+
+                <button
+                  onClick={() => {
+                    signOut();
+                    setUserMenuOpen(false);
+                  }}
+                  className="w-full text-left px-3 py-1.5 rounded-lg flex items-center gap-2 text-xs text-red-400 hover:bg-red-500/10 transition-colors"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>{t.cloudNavbar.logout}</span>
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* MOBILE COMPACT HEADER (Visible only on screens < md) */}
@@ -814,12 +1264,12 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
               onClick={stopSimulation}
               className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
                 isDark 
-                  ? "bg-zinc-800 text-zinc-200 border-zinc-600" 
-                  : "bg-slate-200 text-slate-800 border-slate-300"
+                  ? "bg-red-600/90 hover:bg-red-500 text-white border-red-500" 
+                  : "bg-red-600 hover:bg-red-700 text-white border-red-600"
               }`}
               title="Stop Simulation"
             >
-              <Square className="w-3.5 h-3.5 fill-current" />
+              <Square className="w-3.5 h-3.5 fill-current text-white" />
               <span>Stop</span>
             </button>
           ) : (
@@ -958,7 +1408,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                 >
                   <div className="flex items-center gap-2">
                     <Sparkles className="w-4 h-4 text-zinc-400" />
-                    <span>Auto Layout Circuit</span>
+                    <span>{t.navbar.autoLayout}</span>
                   </div>
                   <span className="text-[10px] opacity-70">Clean Ladder</span>
                 </button>
@@ -971,7 +1421,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                     }`}
                   >
                     <Undo2 className="w-3.5 h-3.5" />
-                    <span>Undo</span>
+                    <span>{t.navbar.undoAction}</span>
                   </button>
                   <button
                     onClick={() => redo()}
@@ -981,15 +1431,100 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                     }`}
                   >
                     <Redo2 className="w-3.5 h-3.5" />
-                    <span>Redo</span>
+                    <span>{t.navbar.redoAction}</span>
                   </button>
                 </div>
               </div>
             </div>
 
+            {/* Cloud & Sharing Mobile Section */}
+            <div className="mb-4">
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-2">Cloud & Sharing</div>
+              <div className="space-y-1.5 text-xs">
+                {isReadOnlyViewer ? (
+                  <button
+                    onClick={() => { setMobileMenuOpen(false); handleForkToEdit(); }}
+                    className="w-full flex items-center justify-center gap-2 p-2 rounded-xl font-bold bg-blue-600 text-white"
+                  >
+                    <GitFork className="w-4 h-4" />
+                    <span>{t.cloudNavbar.forkToEdit}</span>
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      onClick={() => { setMobileMenuOpen(false); handleSaveProject(); }}
+                      className={`w-full flex items-center gap-2 p-2 rounded-xl border ${
+                        justSaved
+                          ? "bg-emerald-500/20 border-emerald-500 text-emerald-400"
+                          : isDark
+                          ? "bg-white/5 border-white/10 text-zinc-200"
+                          : "bg-slate-100 border-slate-200 text-slate-800"
+                      }`}
+                    >
+                      {isSaving ? (
+                        <Loader2 className="w-4 h-4 animate-spin text-zinc-400" />
+                      ) : justSaved ? (
+                        <Check className="w-4 h-4 text-emerald-400" />
+                      ) : (
+                        <CloudUpload className="w-4 h-4 text-emerald-400" />
+                      )}
+                      <span>
+                        {isSaving
+                          ? "Saving..."
+                          : justSaved
+                          ? "Saved to Cloud!"
+                          : t.navbar.saveProject || "Save Project"}
+                      </span>
+                    </button>
+
+                    <button
+                      onClick={() => { setMobileMenuOpen(false); handleOpenShare(); }}
+                      className={`w-full flex items-center gap-2 p-2 rounded-xl border ${
+                        isDark ? "bg-white/5 border-white/10" : "bg-slate-100 border-slate-200"
+                      }`}
+                    >
+                      <Share2 className="w-4 h-4 text-blue-400" />
+                      <span>{t.share.title}</span>
+                    </button>
+
+                    {!user ? (
+                      <button
+                        onClick={() => { setMobileMenuOpen(false); setAuthCustomMessage(undefined); setShowAuthModal(true); }}
+                        className={`w-full flex items-center gap-2 p-2 rounded-xl border font-semibold ${
+                          isDark ? "bg-white/10 border-white/15" : "bg-slate-900 text-white border-slate-900"
+                        }`}
+                      >
+                        <LogIn className="w-4 h-4" />
+                        <span>{t.cloudNavbar.login}</span>
+                      </button>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => { setMobileMenuOpen(false); setShowProjectsModal(true); }}
+                          className={`w-full flex items-center gap-2 p-2 rounded-xl border ${
+                            isDark ? "bg-white/5 border-white/10" : "bg-slate-100 border-slate-200"
+                          }`}
+                        >
+                          <FolderOpen className="w-4 h-4 text-zinc-400" />
+                          <span>{t.cloudNavbar.myProjects}</span>
+                        </button>
+                        <button
+                          onClick={() => { setMobileMenuOpen(false); signOut(); }}
+                          className="w-full flex items-center gap-2 p-2 rounded-xl text-red-400 border border-red-500/20 bg-red-500/5"
+                        >
+                          <LogOut className="w-4 h-4" />
+                          <span>{t.cloudNavbar.logout} ({user.email?.split("@")[0]})</span>
+                        </button>
+                      </>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
+
             {/* File Operations */}
             <div className="mb-4">
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-2">File & Export</div>
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-2">{t.navbar.file}</div>
               <div className="space-y-1 text-xs">
                 <button
                   onClick={handleNewCircuit}
@@ -998,7 +1533,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                   }`}
                 >
                   <FilePlus className="w-4 h-4 text-zinc-400" />
-                  <span>New Blank Circuit</span>
+                  <span>{t.navbar.newProject}</span>
                 </button>
                 <button
                   onClick={() => { fileInputRef.current?.click(); setMobileMenuOpen(false); }}
@@ -1007,7 +1542,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                   }`}
                 >
                   <FolderOpen className="w-4 h-4 text-zinc-400" />
-                  <span>Open File (.rflow / .smrl)</span>
+                  <span>{t.navbar.openProject}</span>
                 </button>
                 <button
                   onClick={() => { loadDolExample(); setMobileMenuOpen(false); }}
@@ -1016,7 +1551,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                   }`}
                 >
                   <Sparkles className="w-4 h-4 text-zinc-400" />
-                  <span>Load DOL Starter Example</span>
+                  <span>{t.navbar.loadDolExample}</span>
                 </button>
                 <button
                   onClick={() => { handleExportRflow(); setMobileMenuOpen(false); }}
@@ -1026,7 +1561,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                 >
                   <div className="flex items-center gap-2.5">
                     <Download className="w-4 h-4 text-zinc-400" />
-                    <span>Save as .rflow</span>
+                    <span>{t.navbar.saveRflow}</span>
                   </div>
                   <span className="text-[10px] font-mono bg-white/10 px-1.5 py-0.5 rounded">Native</span>
                 </button>
@@ -1038,7 +1573,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                 >
                   <div className="flex items-center gap-2.5">
                     <Download className="w-4 h-4 text-zinc-400" />
-                    <span>Export to .smrl</span>
+                    <span>{t.navbar.exportSmrl}</span>
                   </div>
                   <span className="text-[10px] font-mono bg-white/10 px-1.5 py-0.5 rounded">Simurelay</span>
                 </button>
@@ -1050,7 +1585,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                 >
                   <div className="flex items-center gap-2.5">
                     <FileCode className="w-4 h-4 text-zinc-400" />
-                    <span>Export BOM (CSV)</span>
+                    <span>{t.navbar.exportBom}</span>
                   </div>
                   <span className="text-[10px] font-mono bg-white/10 px-1.5 py-0.5 rounded">Parts List</span>
                 </button>
@@ -1059,8 +1594,21 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
 
             {/* View & Appearance Settings */}
             <div className="mb-4">
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-2">Display & Settings</div>
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-2">{t.navbar.view}</div>
               <div className="space-y-1.5 text-xs">
+                {/* Language Switcher Mobile */}
+                <button
+                  onClick={() => toggleLocale()}
+                  className={`w-full flex items-center justify-between p-2 rounded-xl border ${
+                    isDark ? "bg-white/5 border-white/10" : "bg-slate-100 border-slate-200"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Languages className="w-4 h-4 text-zinc-300" />
+                    <span>{t.common.language}</span>
+                  </div>
+                  <span className="font-semibold uppercase">{locale}</span>
+                </button>
                 <button
                   onClick={() => toggleTheme()}
                   className={`w-full flex items-center justify-between p-2 rounded-xl border ${
@@ -1069,9 +1617,9 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                 >
                   <div className="flex items-center gap-2">
                     {isDark ? <Sun className="w-4 h-4 text-zinc-300" /> : <Moon className="w-4 h-4 text-zinc-600" />}
-                    <span>Theme</span>
+                    <span>{t.common.theme}</span>
                   </div>
-                  <span className="font-semibold">{isDark ? "Dark Mode" : "Light Mode"}</span>
+                  <span className="font-semibold">{isDark ? t.common.darkMode : t.common.lightMode}</span>
                 </button>
                 <button
                   onClick={() => toggleGrid()}
@@ -1081,21 +1629,9 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                 >
                   <div className="flex items-center gap-2">
                     <Grid className="w-4 h-4 text-zinc-400" />
-                    <span>Dotted CAD Grid</span>
+                    <span>{t.navbar.dottedGrid}</span>
                   </div>
                   {showGrid ? <Check className="w-4 h-4 text-zinc-200" /> : <span className="text-zinc-500">Off</span>}
-                </button>
-                <button
-                  onClick={() => setWireRoutingMode(wireRoutingMode === "orthogonal" ? "bezier" : "orthogonal")}
-                  className={`w-full flex items-center justify-between p-2 rounded-xl border ${
-                    isDark ? "bg-white/5 border-white/10" : "bg-slate-100 border-slate-200"
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <SlidersHorizontal className="w-4 h-4 text-zinc-400" />
-                    <span>Routing Mode</span>
-                  </div>
-                  <span className="font-semibold">{wireRoutingMode === "orthogonal" ? "90° Ortho" : "Curved"}</span>
                 </button>
               </div>
             </div>
@@ -1109,11 +1645,36 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                 }`}
               >
                 <HelpCircle className="w-4 h-4 text-zinc-400" />
-                <span>Shortcuts & Help</span>
+                <span>{t.navbar.keyboardShortcuts}</span>
               </button>
             </div>
           </div>
         </div>
+      )}
+
+      {/* Cloud & Auth Modals */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        customMessage={authCustomMessage}
+        onSuccess={handleAuthSuccess}
+      />
+
+      <ProjectsModal
+        isOpen={showProjectsModal}
+        onClose={() => setShowProjectsModal(false)}
+        onOpenProject={handleOpenCloudProject}
+        onShareProject={handleShareFromProjects}
+        onNewProject={handleNewBlankProject}
+      />
+
+      {showShareModal && (
+        <ShareModal
+          isOpen={showShareModal}
+          onClose={() => setShowShareModal(false)}
+          projectId={shareTargetProject?.id || currentProjectId || "demo"}
+          projectTitle={shareTargetProject?.title || projectTitle}
+        />
       )}
 
       {/* Keyboard Shortcuts Help Modal */}

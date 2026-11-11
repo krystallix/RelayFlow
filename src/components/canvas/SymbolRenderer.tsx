@@ -122,7 +122,7 @@ export const SymbolRenderer: React.FC<SymbolRendererProps> = ({
       <img
         src={svgPath}
         alt={name}
-        className={`w-full h-full object-contain pointer-events-none select-none transition-all duration-150 ${filterClass}`}
+        className={`w-full h-full object-contain pointer-events-none select-none transition-opacity duration-150 ${filterClass}`}
       />
     );
   }
@@ -143,7 +143,7 @@ export const SymbolRenderer: React.FC<SymbolRendererProps> = ({
 
     return (
       <div
-        className="w-full h-full flex items-center justify-center pointer-events-none select-none transition-all duration-150 [&>svg]:w-full [&>svg]:h-full [&>svg]:object-contain"
+        className="w-full h-full flex items-center justify-center pointer-events-none select-none [&>svg]:w-full [&>svg]:h-full [&>svg]:object-contain"
         dangerouslySetInnerHTML={{ __html: cleanSvg }}
       />
     );
@@ -153,7 +153,7 @@ export const SymbolRenderer: React.FC<SymbolRendererProps> = ({
 
   return (
     <div
-      className={`w-full h-full flex items-center justify-center pointer-events-none select-none transition-all duration-150 [&>svg]:w-full [&>svg]:h-full [&>svg]:object-contain ${filterClass}`}
+      className={`w-full h-full flex items-center justify-center pointer-events-none select-none transition-opacity duration-150 [&>svg]:w-full [&>svg]:h-full [&>svg]:object-contain ${filterClass}`}
       dangerouslySetInnerHTML={{ __html: processed }}
     />
   );

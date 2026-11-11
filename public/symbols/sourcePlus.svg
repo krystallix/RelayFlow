@@ -24,6 +24,6 @@
          </frame>
       </frames>
    </metadata>
-   <path id="mainPath" style="display:inline;fill:none;stroke:#ffffff;stroke-width:2;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke" d="M 30,79.5 V 0 m 20,99.5 c 0,11.04569 -8.954305,20 -20,20 -11.045695,0 -20,-8.95431 -20,-20 0,-11.045695 8.954305,-20 20,-20 11.045695,0 20,8.954305 20,20 z" sodipodi:nodetypes="ccsssss" />
+   <path id="mainPath" style="display:inline;fill:none;stroke:#ffffff;stroke-width:2;stroke-linejoin:bevel;stroke-dasharray:none;stroke-opacity:1;paint-order:markers fill stroke" d="M 50,99.5 c 0,11.04569 -8.954305,20 -20,20 -11.045695,0 -20,-8.95431 -20,-20 0,-11.045695 8.954305,-20 20,-20 11.045695,0 20,8.954305 20,20 z" sodipodi:nodetypes="sssss" />
    <path style="font-weight:bold;font-size:24px;line-height:0px;font-family:Arial;-inkscape-font-specification:'Arial Bold';text-align:center;text-anchor:middle;fill:#ffffff;stroke-width:2.7" d="m 28.494141,105.50586 v -4.46485 h -4.5 v -3.08203 h 4.5 v -4.464843 h 3 v 4.464843 h 4.511718 v 3.08203 h -4.511718 v 4.46485 z" id="textPath1" aria-label="+" inkscape:label="textPath1" />
 </svg>

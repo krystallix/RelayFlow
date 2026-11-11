@@ -54,6 +54,7 @@ export interface CircuitWire {
   isHot?: boolean;
   toWireId?: string | number;
   tapPoint?: Point;
+  label?: string | null;
 }
 
 export interface RelayFlowProject {

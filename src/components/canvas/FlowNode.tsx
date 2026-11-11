@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import { Clock } from "lucide-react";
 import { CircuitNode } from "@/engine/types";
 import { useCircuitStore } from "@/store/useCircuitStore";
@@ -13,6 +13,10 @@ const catalog = catalogData as Record<string, any>;
 interface FlowNodeProps {
   node: CircuitNode;
   isSelected: boolean;
+  isEditingComment?: boolean;
+  initialCommentChar?: string | null;
+  onStartEditComment?: () => void;
+  onEndEditComment?: () => void;
   onPortMouseDown: (portId: number, portPos: { x: number; y: number }, e: React.MouseEvent | React.TouchEvent) => void;
   onNodeMouseDown: (nodeId: string | number, e: React.MouseEvent) => void;
   onNodeTouchStart?: (nodeId: string | number, e: React.TouchEvent) => void;
@@ -24,6 +28,10 @@ interface FlowNodeProps {
 export const FlowNode: React.FC<FlowNodeProps> = ({
   node,
   isSelected,
+  isEditingComment = false,
+  initialCommentChar = null,
+  onStartEditComment,
+  onEndEditComment,
   onPortMouseDown,
   onNodeMouseDown,
   onNodeTouchStart,
@@ -31,8 +39,47 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
   onPortHover,
   onPortLeave,
 }) => {
-  const { theme, isSimulating, toggleComponentState, setComponentPressed, nodes: allNodes, wireDraft } = useCircuitStore();
+  const {
+    theme,
+    isSimulating,
+    isReadOnlyViewer,
+    toggleComponentState,
+    setComponentPressed,
+    nodes: allNodes,
+    wireDraft,
+    wires,
+    updateNodeData,
+  } = useCircuitStore();
   const isDark = theme === "dark";
+  const [commentEditValue, setCommentEditValue] = useState(node.comment || "");
+  const commentInputRef = useRef<HTMLInputElement>(null);
+  const prevIsEditingRef = useRef(false);
+
+  useEffect(() => {
+    if (isEditingComment && !prevIsEditingRef.current) {
+      if (initialCommentChar) {
+        setCommentEditValue((node.comment || "") + initialCommentChar);
+      } else {
+        setCommentEditValue(node.comment || "");
+      }
+    } else if (!isEditingComment) {
+      setCommentEditValue(node.comment || "");
+    }
+    prevIsEditingRef.current = Boolean(isEditingComment);
+  }, [isEditingComment, initialCommentChar, node.comment]);
+
+  useEffect(() => {
+    if (isEditingComment) {
+      const timer = setTimeout(() => {
+        if (commentInputRef.current) {
+          commentInputRef.current.focus();
+          const len = commentInputRef.current.value.length;
+          commentInputRef.current.setSelectionRange(len, len);
+        }
+      }, 10);
+      return () => clearTimeout(timer);
+    }
+  }, [isEditingComment]);
 
   if (node.componentId === "junctionDot") {
     return (
@@ -65,9 +112,9 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
         title="Junction Dot (Click to select & delete)"
       >
         <div
-          className={`w-3.5 h-3.5 rounded-full border-2 transition-all duration-150 ${
+          className={`w-3.5 h-3.5 rounded-full border-2 transition-colors duration-150 ${
             node.isEnergized
-              ? "bg-red-500 border-red-300 shadow-[0_0_10px_rgba(239,68,68,0.9)] scale-110"
+              ? "bg-red-500 border-red-300 shadow-[0_0_10px_rgba(239,68,68,0.9)]"
               : isDark
               ? "bg-zinc-200 border-zinc-500 shadow-sm"
               : "bg-slate-800 border-slate-600 shadow-sm"
@@ -125,8 +172,8 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
   const isHorizontal = node.rotation === 1 || node.rotation === 3;
   const isTagVisible = node.tagVisibility !== false;
   const showTag = isTagVisible && Boolean(node.tag);
-  const showComment = Boolean(node.comment);
-  const hasLabel = showTag || showComment || isTimer;
+  const showComment = Boolean(node.comment) || Boolean(isEditingComment);
+  const hasLabel = showTag || showComment || isTimer || Boolean(isEditingComment);
 
   // Smart CAD label placement:
   // - For vertical symbols (rotation 0°/180°), ports are top & bottom. Place label on RIGHT (or LEFT if right ports).
@@ -167,6 +214,16 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
     ? allNodes.filter((n) => n.tag === node.tag && n.id !== node.id)
     : [];
 
+  const connectedPortIds = useMemo(() => {
+    const set = new Set<number>();
+    if (!wires) return set;
+    for (const wire of wires) {
+      if (wire.fromNodeId === node.id) set.add(wire.fromPortId);
+      if (wire.toNodeId === node.id) set.add(wire.toPortId);
+    }
+    return set;
+  }, [wires, node.id]);
+
   // Show _on.svg for activated switches/contacts (frameIndex === 1) or energized lamps
   const shouldShowOnVariant =
     (isSwitchOrContact && node.frameIndex === 1) ||
@@ -179,6 +236,9 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
       e.stopPropagation();
       return;
     }
+    if (isReadOnlyViewer) {
+      return;
+    }
     onNodeMouseDown(node.id, e);
   };
 
@@ -188,6 +248,9 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
       if (isSpring) {
         setComponentPressed(node.id, true);
       }
+      return;
+    }
+    if (isReadOnlyViewer) {
       return;
     }
     onNodeTouchStart?.(node.id, e);
@@ -228,25 +291,33 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();
+        if (isReadOnlyViewer) return;
         onContextMenu?.(node, e);
       }}
       className={`absolute select-none group ${
         isInteractive
           ? "cursor-pointer"
-          : isSimulating
+          : isSimulating || isReadOnlyViewer
           ? "cursor-default"
           : "cursor-grab active:cursor-grabbing"
-      } ${
-        isSelected
-          ? "border border-dashed border-amber-400/80 bg-amber-500/[0.04]"
-          : "hover:border hover:border-dashed hover:border-amber-400/40"
       }`}
     >
+      {/* Selection & Hover highlight box (zero layout shift, no jitter/shake) */}
+      {!isReadOnlyViewer && (
+        <div
+          className={`absolute inset-0 pointer-events-none rounded-sm transition-colors duration-100 ${
+            isSelected
+              ? "border border-dashed border-amber-400/80 bg-amber-500/[0.04]"
+              : "group-hover:border group-hover:border-dashed group-hover:border-amber-400/40"
+          }`}
+        />
+      )}
+
       {/* Schematic Annotation Label (Tag & Comment & Timer - Simurelay CAD Style) */}
       {hasLabel && (
         <div
           style={labelStyle}
-          className={`absolute flex flex-col gap-0.5 pointer-events-none select-none text-xs font-mono whitespace-nowrap z-20 px-1.5 py-0.5 rounded-md transition-all ${
+          className={`absolute flex flex-col gap-0.5 pointer-events-none select-none text-xs font-mono whitespace-nowrap z-20 px-1.5 py-0.5 rounded-md transition-colors ${
             isDark
               ? "bg-[#090b10]/40 border border-white/5 shadow-xs"
               : "bg-white/45 border border-slate-200/50 shadow-xs"
@@ -276,11 +347,48 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
           )}
 
           {/* Comment description row */}
-          {showComment && (
-            <span className={`text-[10px] font-normal leading-tight ${isDark ? "text-zinc-400" : "text-slate-500"}`}>
+          {isEditingComment ? (
+            <input
+              ref={commentInputRef}
+              type="text"
+              value={commentEditValue}
+              onChange={(e) => setCommentEditValue(e.target.value)}
+              onKeyDown={(e) => {
+                e.stopPropagation();
+                if (e.key === "Enter") {
+                  commentInputRef.current?.blur();
+                } else if (e.key === "Escape") {
+                  setCommentEditValue(node.comment || "");
+                  onEndEditComment?.();
+                }
+              }}
+              onBlur={() => {
+                updateNodeData(node.id, { comment: commentEditValue.trim() || null });
+                onEndEditComment?.();
+              }}
+              onClick={(e) => e.stopPropagation()}
+              onMouseDown={(e) => e.stopPropagation()}
+              className={`text-[10px] font-normal leading-tight px-1 py-0.5 rounded outline-none border pointer-events-auto min-w-[70px] max-w-[180px] ${
+                isDark
+                  ? "bg-zinc-900 text-zinc-100 border-amber-400 shadow-xs"
+                  : "bg-white text-slate-900 border-amber-500 shadow-xs"
+              }`}
+              placeholder="Comment..."
+            />
+          ) : showComment ? (
+            <span
+              onDoubleClick={(e) => {
+                e.stopPropagation();
+                if (!isSimulating && onStartEditComment) {
+                  onStartEditComment();
+                }
+              }}
+              className={`text-[10px] font-normal leading-tight pointer-events-auto cursor-text ${isDark ? "text-zinc-400" : "text-slate-500"}`}
+              title="Double-click to edit comment"
+            >
               {node.comment}
             </span>
-          )}
+          ) : null}
 
           {/* Live Timer Countdown Badge */}
           {isTimer && (
@@ -317,9 +425,9 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
         >
           {node.componentId === "junctionDot" ? (
             <div
-              className={`w-3.5 h-3.5 rounded-full border-2 transition-all duration-150 ${
+              className={`w-3.5 h-3.5 rounded-full border-2 transition-colors duration-150 ${
                 node.isEnergized
-                  ? "bg-red-500 border-red-300 shadow-[0_0_10px_rgba(239,68,68,0.9)] scale-110"
+                  ? "bg-red-500 border-red-300 shadow-[0_0_10px_rgba(239,68,68,0.9)]"
                   : isDark
                   ? "bg-zinc-200 border-zinc-500 shadow-sm"
                   : "bg-slate-800 border-slate-600 shadow-sm"
@@ -403,6 +511,7 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
             }}
             onMouseDown={(e) => {
               e.stopPropagation();
+              if (isReadOnlyViewer) return;
               onPortMouseDown(
                 transformed.id,
                 {
@@ -414,6 +523,7 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
             }}
             onTouchStart={(e) => {
               e.stopPropagation();
+              if (isReadOnlyViewer) return;
               onPortMouseDown(
                 transformed.id,
                 {
@@ -425,23 +535,27 @@ export const FlowNode: React.FC<FlowNodeProps> = ({
             }}
             onMouseEnter={(e) => onPortHover?.(node, transformed.id, e)}
             onMouseLeave={() => onPortLeave?.()}
-            className="absolute -translate-x-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center group/port cursor-crosshair z-30"
+            className={`absolute -translate-x-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center group/port z-30 ${
+              isReadOnlyViewer ? "cursor-default" : "cursor-crosshair"
+            }`}
             title={`Terminal ${transformed.tag || transformed.id} (${transformed.type})`}
           >
-            {/* Magnetic Glow Ring: visible & pulsing on mobile or when drafting/selected, glows on hover */}
-            <div
-              className={`w-3.5 h-3.5 rounded-full flex items-center justify-center transition-all duration-150 ${
-                wireDraft || isSelected
-                  ? "opacity-95 scale-110 shadow-[0_0_10px_rgba(251,191,36,0.9)] animate-pulse"
-                  : "opacity-40 md:opacity-0 group-hover:opacity-100 group-hover/port:scale-125"
-              } ${
-                isDark
-                  ? "bg-black/90 border border-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.7)]"
-                  : "bg-white border border-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]"
-              }`}
-            >
-              <div className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-            </div>
+            {/* Magnetic Glow Ring: visible when drafting/selected or hovered (zero shifting/scaling animation) */}
+            {!isReadOnlyViewer && (
+              <div
+                className={`w-3.5 h-3.5 rounded-full flex items-center justify-center transition-opacity duration-100 ${
+                  wireDraft || isSelected
+                    ? "opacity-95 shadow-[0_0_8px_rgba(251,191,36,0.8)]"
+                    : "opacity-0 group-hover:opacity-100 group-hover/port:opacity-100"
+                } ${
+                  isDark
+                    ? "bg-black/90 border border-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.7)]"
+                    : "bg-white border border-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]"
+                }`}
+              >
+                <div className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+              </div>
+            )}
 
             {/* Terminal Tag Tooltip on Direct Port Hover: points OUTWARD away from symbol */}
             <span

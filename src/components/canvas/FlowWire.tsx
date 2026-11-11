@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import { CircuitNode, CircuitWire, Point } from "@/engine/types";
 import { ManhattanRouter } from "@/engine/router/ManhattanRouter";
+import { WireNetResolver } from "@/engine/router/WireNetResolver";
+import { WireLabel } from "./WireLabel";
 import { SimulationEngine } from "@/engine/SimulationEngine";
 import catalogData from "@/constants/components-catalog.json";
 import { useCircuitStore } from "@/store/useCircuitStore";
@@ -11,6 +13,8 @@ const catalog = catalogData as Record<string, any>;
 
 interface FlowWireProps {
   wire: CircuitWire;
+  label?: string | null;
+  showLabel?: boolean;
   fromNode?: CircuitNode;
   toNode?: CircuitNode;
   isSelected: boolean;
@@ -21,47 +25,22 @@ interface FlowWireProps {
   onWireHover?: (wire: CircuitWire, e: React.MouseEvent) => void;
   onWireLeave?: () => void;
   onStartDragSegment?: (wire: CircuitWire, orientation: "horizontal" | "vertical", defaultMid: number) => void;
-}
-
-function getNearestPointOnSegments(mouse: Point, points: Point[]): { point: Point; dist: number } {
-  let bestDist = Infinity;
-  let bestPoint = points[0] || mouse;
-
-  for (let i = 0; i < points.length - 1; i++) {
-    const a = points[i];
-    const b = points[i + 1];
-
-    let projX = mouse.x;
-    let projY = mouse.y;
-
-    if (Math.abs(a.x - b.x) < 0.1) {
-      projX = a.x;
-      const minY = Math.min(a.y, b.y);
-      const maxY = Math.max(a.y, b.y);
-      let snappedY = Math.round(mouse.y / 30) * 30;
-      snappedY = Math.max(minY, Math.min(maxY, snappedY));
-      projY = snappedY;
-    } else {
-      projY = a.y;
-      const minX = Math.min(a.x, b.x);
-      const maxX = Math.max(a.x, b.x);
-      let snappedX = Math.round(mouse.x / 30) * 30;
-      snappedX = Math.max(minX, Math.min(maxX, snappedX));
-      projX = snappedX;
-    }
-
-    const dist = Math.hypot(mouse.x - projX, mouse.y - projY);
-    if (dist < bestDist) {
-      bestDist = dist;
-      bestPoint = { x: projX, y: projY };
-    }
-  }
-
-  return { point: bestPoint, dist: bestDist };
+  onStartDragCorner?: (
+    wire: CircuitWire,
+    cornerIndex: number,
+    cornerPoint: Point,
+    points: Point[],
+    dir1: number,
+    dir2: number,
+    e: React.MouseEvent
+  ) => void;
+  onStartDragTapPoint?: (wire: CircuitWire, tapPoint: Point, e: React.MouseEvent) => void;
 }
 
 export const FlowWire: React.FC<FlowWireProps> = ({
   wire,
+  label,
+  showLabel = true,
   fromNode,
   toNode,
   isSelected,
@@ -72,65 +51,39 @@ export const FlowWire: React.FC<FlowWireProps> = ({
   onWireHover,
   onWireLeave,
   onStartDragSegment,
+  onStartDragCorner,
+  onStartDragTapPoint,
 }) => {
-  const { selectWire, isSimulating, wireDraft, connectWireToWire, theme } = useCircuitStore();
+  const {
+    selectWire,
+    isSimulating,
+    wireDraft,
+    connectWireToWire,
+    theme,
+    nodes: allNodes,
+    wires: allWires,
+  } = useCircuitStore();
   const isDark = theme === "dark";
 
   const [hoverPos, setHoverPos] = useState<Point | null>(null);
   const [isHovered, setIsHovered] = useState(false);
 
-  if (!fromNode) return null;
+  const nodeMap = React.useMemo(() => new Map(allNodes.map((n) => [n.id, n])), [allNodes]);
+  const wireMap = React.useMemo(() => new Map(allWires.map((w) => [w.id, w])), [allWires]);
 
-  const compFrom = catalog[fromNode.componentId];
-  const portFrom = compFrom?.nodes?.find((n: any) => n.id === wire.fromPortId);
-  if (!portFrom) return null;
+  const endpoints = ManhattanRouter.resolveWireEndpoints(wire, nodeMap, wireMap);
+  if (!endpoints) return null;
 
-  const pFromTransformed = SimulationEngine.getTransformedPort(
-    fromNode.position,
-    portFrom.dx,
-    portFrom.dy,
-    portFrom.direction,
-    fromNode.rotation
-  );
-
-  const p1: Point = { x: pFromTransformed.x, y: pFromTransformed.y };
-
-  const isTapWire = Boolean(wire.toWireId && wire.tapPoint);
-  let p2: Point;
-  let dir2: number;
-
-  if (isTapWire && wire.tapPoint) {
-    p2 = wire.tapPoint;
-    if (Math.abs(p1.y - p2.y) >= Math.abs(p1.x - p2.x)) {
-      dir2 = p1.y <= p2.y ? 0 : 2;
-    } else {
-      dir2 = p1.x <= p2.x ? 3 : 1;
-    }
-  } else {
-    if (!toNode) return null;
-    const compTo = catalog[toNode.componentId];
-    const portTo = compTo?.nodes?.find((n: any) => n.id === wire.toPortId);
-    if (!portTo) return null;
-
-    const pToTransformed = SimulationEngine.getTransformedPort(
-      toNode.position,
-      portTo.dx,
-      portTo.dy,
-      portTo.direction,
-      toNode.rotation
-    );
-    p2 = { x: pToTransformed.x, y: pToTransformed.y };
-    dir2 = pToTransformed.direction;
-  }
+  const { p1, dir1, p2, dir2, isTapWire } = endpoints;
 
   const effectiveMargins = isTapWire ? { ...wire.margins, end: -30 } : wire.margins;
 
   const routed =
     routingMode === "bezier"
-      ? ManhattanRouter.routeBezier(p1, pFromTransformed.direction, p2, dir2)
+      ? ManhattanRouter.routeBezier(p1, dir1, p2, dir2)
       : ManhattanRouter.routeOrthogonal(
           p1,
-          pFromTransformed.direction,
+          dir1,
           p2,
           dir2,
           effectiveMargins,
@@ -168,9 +121,27 @@ export const FlowWire: React.FC<FlowWireProps> = ({
     }
   }
 
+  // Wire number label placement (Dual Ferrule on long wire, Single Midpoint on short wire)
+  const effectiveLabel = label || wire.label;
+  const labelPlacements =
+    routingMode === "orthogonal"
+      ? WireNetResolver.getOptimalLabelPositions(routed.points)
+      : Math.sqrt((p2.x - p1.x) ** 2 + (p2.y - p1.y) ** 2) >= 80
+      ? [
+          { x: p1.x + (p2.x - p1.x) * 0.2, y: p1.y + (p2.y - p1.y) * 0.2, orientation: "horizontal" as const },
+          { x: p1.x + (p2.x - p1.x) * 0.8, y: p1.y + (p2.y - p1.y) * 0.8, orientation: "horizontal" as const },
+        ]
+      : [
+          {
+            x: (p1.x + p2.x) / 2,
+            y: (p1.y + p2.y) / 2,
+            orientation: "horizontal" as const,
+          },
+        ];
+
   const handleMouseMove = (e: React.MouseEvent) => {
     const world = screenToWorld(e.clientX, e.clientY);
-    const { point, dist } = getNearestPointOnSegments(world, routed.points);
+    const { point, dist } = ManhattanRouter.getNearestPointOnSegments(world, routed.points);
     if (dist < 30) {
       setHoverPos(point);
     } else {
@@ -185,7 +156,7 @@ export const FlowWire: React.FC<FlowWireProps> = ({
     if (wireDraft) {
       e.preventDefault();
       const world = screenToWorld(e.clientX, e.clientY);
-      const { point } = getNearestPointOnSegments(world, routed.points);
+      const { point } = ManhattanRouter.getNearestPointOnSegments(world, routed.points);
       connectWireToWire(wire.id, point);
       return;
     }
@@ -206,7 +177,7 @@ export const FlowWire: React.FC<FlowWireProps> = ({
     if (wireDraft) {
       e.preventDefault();
       const world = screenToWorld(e.clientX, e.clientY);
-      const { point } = getNearestPointOnSegments(world, routed.points);
+      const { point } = ManhattanRouter.getNearestPointOnSegments(world, routed.points);
       connectWireToWire(wire.id, point);
       return;
     }
@@ -214,6 +185,42 @@ export const FlowWire: React.FC<FlowWireProps> = ({
     if (isSimulating || !midHandle) return;
     e.preventDefault();
     onStartDragSegment?.(wire, segmentOrientation, defaultMid);
+  };
+
+  // Extract all corners (sudut garis)
+  const cornerPoints: Array<{ index: number; point: Point }> = [];
+  if (routingMode === "orthogonal" && routed.points && routed.points.length >= 3) {
+    for (let i = 1; i < routed.points.length - 1; i++) {
+      cornerPoints.push({ index: i, point: routed.points[i] });
+    }
+  } else if (routingMode === "orthogonal" && routed.points && routed.points.length === 2) {
+    // For a straight line, offer a midpoint handle so the user can easily pull out a corner
+    const midX = (routed.points[0].x + routed.points[1].x) / 2;
+    const midY = (routed.points[0].y + routed.points[1].y) / 2;
+    cornerPoints.push({ index: 1, point: { x: midX, y: midY } });
+  }
+
+  const handleStartDragCorner = (
+    cornerIndex: number,
+    cornerPoint: Point,
+    e: React.MouseEvent
+  ) => {
+    e.stopPropagation();
+    e.preventDefault();
+    if (wireDraft) {
+      connectWireToWire(wire.id, cornerPoint);
+      return;
+    }
+    if (isSimulating) return;
+    onStartDragCorner?.(
+      wire,
+      cornerIndex,
+      cornerPoint,
+      routed.points,
+      dir1,
+      dir2,
+      e
+    );
   };
 
   // Uniform Wire color (clean CAD standard, amber highlight for selection)
@@ -260,7 +267,7 @@ export const FlowWire: React.FC<FlowWireProps> = ({
             const touch = e.touches[0];
             if (touch) {
               const world = screenToWorld(touch.clientX, touch.clientY);
-              const { point } = getNearestPointOnSegments(world, routed.points);
+              const { point } = ManhattanRouter.getNearestPointOnSegments(world, routed.points);
               connectWireToWire(wire.id, point);
             }
             return;
@@ -332,34 +339,117 @@ export const FlowWire: React.FC<FlowWireProps> = ({
         cy={p1.y}
         r={isSelected ? 3.5 : 2.5}
         fill={wireColor}
-        className="transition-all"
+        className="transition-colors"
       />
       {isTapWire ? (
-        <circle
-          cx={p2.x}
-          cy={p2.y}
-          r={4.5}
-          fill={wireColor}
-          stroke={isDark ? "#090b10" : "#ffffff"}
-          strokeWidth={1.5}
-          className="transition-all"
-        />
+        <g
+          className="cursor-move pointer-events-auto group/tap-handle"
+          onMouseDown={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            if (isSimulating || wireDraft) return;
+            onStartDragTapPoint?.(wire, p2, e);
+          }}
+          onClick={(e) => {
+            e.stopPropagation();
+            selectWire(wire.id, e.shiftKey);
+          }}
+        >
+          {/* Generous 30px invisible hit target for easy click & drag */}
+          <circle cx={p2.x} cy={p2.y} r={15} fill="transparent" />
+
+          {/* Interactive guide ring on hover or selection */}
+          {(isHovered || isSelected) && !isSimulating && (
+            <circle
+              cx={p2.x}
+              cy={p2.y}
+              r={7.5}
+              fill="none"
+              stroke="#f59e0b"
+              strokeWidth={1.5}
+              className="pointer-events-none transition-colors"
+            />
+          )}
+
+          {/* Solid junction dot */}
+          <circle
+            cx={p2.x}
+            cy={p2.y}
+            r={isHovered || isSelected ? 5 : 4}
+            fill={isHovered ? "#f59e0b" : wireColor}
+            stroke={isDark ? "#090b10" : "#ffffff"}
+            strokeWidth={1.5}
+            className="transition-colors drop-shadow-sm"
+          />
+        </g>
       ) : (
         <circle
           cx={p2.x}
           cy={p2.y}
           r={isSelected ? 3.5 : 2.5}
           fill={wireColor}
-          className="transition-all"
+          className="transition-colors"
         />
       )}
 
-      {/* 7. Magnetic snap target indicator when connecting wire from component terminal */}
+      {/* 7. Interactive Corner Handles (Sudut Garis) - appear immediately on hover or selection */}
+      {(isHovered || isSelected) && !isSimulating && !wireDraft && (
+        <g className="corner-handles">
+          {cornerPoints.map((corner, idx) => (
+            <g
+              key={`${wire.id}-corner-${corner.index}-${idx}`}
+              transform={`translate(${corner.point.x}, ${corner.point.y})`}
+              className="cursor-move pointer-events-auto group/handle"
+              onMouseDown={(e) => handleStartDragCorner(corner.index, corner.point, e)}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Invisible touch/mouse hit area (generous 30px target) */}
+              <circle r={15} fill="transparent" />
+
+              {/* Outer ring */}
+              <circle
+                r={6}
+                fill={isDark ? "#111827" : "#ffffff"}
+                stroke="#f59e0b"
+                strokeWidth={2}
+                className="drop-shadow-sm transition-colors group-hover/handle:stroke-amber-300"
+              />
+
+              {/* Solid inner accent dot */}
+              <circle
+                r={2.5}
+                fill="#f59e0b"
+                className="transition-colors group-hover/handle:fill-amber-300"
+              />
+            </g>
+          ))}
+        </g>
+      )}
+
+      {/* 8. Magnetic snap target indicator when connecting wire from component terminal */}
       {wireDraft && hoverPos && !isSimulating && (
         <g transform={`translate(${hoverPos.x}, ${hoverPos.y})`} className="pointer-events-none">
           <circle r={11} fill="none" stroke="#f59e0b" strokeWidth={2.5} strokeDasharray="3 3" />
           <circle r={5} fill="#f59e0b" stroke="#ffffff" strokeWidth={1.5} />
         </g>
+      )}
+
+      {/* 8. Wire Number Label (CAD Equipotential Net Badge) */}
+      {showLabel && effectiveLabel && labelPlacements.length > 0 && (
+        <>
+          {labelPlacements.map((pos, idx) => (
+            <WireLabel
+              key={`${wire.id}-label-${idx}`}
+              wireId={wire.id}
+              label={effectiveLabel}
+              x={pos.x}
+              y={pos.y}
+              orientation={pos.orientation}
+              isHot={isHot}
+              isSelected={isSelected}
+            />
+          ))}
+        </>
       )}
     </g>
   );

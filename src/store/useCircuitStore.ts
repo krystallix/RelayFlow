@@ -5,22 +5,58 @@ import { FileAdapter } from "../engine/serializer/FileAdapter";
 import { AutoLayoutEngine } from "../engine/layout/AutoLayoutEngine";
 import catalogData from "../constants/components-catalog.json";
 import { DEFAULT_SIMPLE_LAMP_PROJECT } from "../constants/default-circuit";
+import { WireNetResolver } from "../engine/router/WireNetResolver";
+import { ManhattanRouter } from "../engine/router/ManhattanRouter";
 
 const catalog = catalogData as Record<string, any>;
 
 const LOCAL_STORAGE_KEY = "relayflow_saved_project";
 const LOCAL_STORAGE_THEME_KEY = "relayflow_saved_theme";
+const LOCAL_STORAGE_LOCALE_KEY = "relayflow_saved_locale";
+
+function syncDocumentTheme(theme: "dark" | "light") {
+  if (typeof document === "undefined") return;
+  if (theme === "dark") {
+    document.documentElement.classList.add("dark");
+    document.documentElement.classList.remove("light");
+    document.documentElement.style.backgroundColor = "#090b10";
+    document.documentElement.style.colorScheme = "dark";
+  } else {
+    document.documentElement.classList.remove("dark");
+    document.documentElement.classList.add("light");
+    document.documentElement.style.backgroundColor = "#f8fafc";
+    document.documentElement.style.colorScheme = "light";
+  }
+}
 
 // Initial state is deterministic across both SSR and first client render
 function getInitialState(): {
   projectTitle: string;
   theme: "dark" | "light";
+  locale: "en" | "id";
   nodes: CircuitNode[];
   wires: CircuitWire[];
 } {
+  let theme: "dark" | "light" = "dark";
+  let locale: "en" | "id" = "en";
+
+  if (typeof window !== "undefined") {
+    try {
+      const savedTheme = localStorage.getItem(LOCAL_STORAGE_THEME_KEY);
+      if (savedTheme === "light" || savedTheme === "dark") {
+        theme = savedTheme;
+      }
+      const savedLocale = localStorage.getItem(LOCAL_STORAGE_LOCALE_KEY);
+      if (savedLocale === "en" || savedLocale === "id") {
+        locale = savedLocale;
+      }
+    } catch (e) {}
+  }
+
   return {
     projectTitle: "Simple Switch & Lamp Circuit",
-    theme: "dark",
+    theme,
+    locale,
     nodes: DEFAULT_SIMPLE_LAMP_PROJECT.nodes.map((n) => ({ ...n })),
     wires: DEFAULT_SIMPLE_LAMP_PROJECT.wires.map((w) => ({ ...w })),
   };
@@ -28,26 +64,56 @@ function getInitialState(): {
 
 // Debounced autosave to localStorage
 let autosaveTimeout: any = null;
-function saveToLocalStorage(state: { projectTitle: string; nodes: CircuitNode[]; wires: CircuitWire[] }) {
+let getStoreState: (() => any) | null = null;
+function saveToLocalStorage(
+  partial?: {
+    projectTitle?: string;
+    nodes?: CircuitNode[];
+    wires?: CircuitWire[];
+    currentProjectId?: string | null;
+  },
+  immediate = false
+) {
   if (typeof window === "undefined") return;
-  if (autosaveTimeout) clearTimeout(autosaveTimeout);
-  autosaveTimeout = setTimeout(() => {
+  if (autosaveTimeout) {
+    clearTimeout(autosaveTimeout);
+    autosaveTimeout = null;
+  }
+
+  const persist = () => {
     try {
+      const fullState = getStoreState ? getStoreState() : null;
+      const title = partial?.projectTitle ?? fullState?.projectTitle ?? "My Circuit";
+      const nodes = partial?.nodes ?? fullState?.nodes ?? [];
+      const wires = partial?.wires ?? fullState?.wires ?? [];
+      const currentProjectId =
+        partial?.currentProjectId !== undefined
+          ? partial.currentProjectId
+          : fullState?.currentProjectId ?? null;
+
       const dataToSave = {
         format: "relayflow",
         version: "1.0.0",
         metadata: {
-          title: state.projectTitle,
+          id: currentProjectId || undefined,
+          title,
           updatedAt: new Date().toISOString(),
         },
-        nodes: state.nodes,
-        wires: state.wires,
+        currentProjectId: currentProjectId || null,
+        nodes,
+        wires,
       };
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
     } catch (e) {
       console.error("Failed to autosave project to localStorage", e);
     }
-  }, 500);
+  };
+
+  if (immediate) {
+    persist();
+  } else {
+    autosaveTimeout = setTimeout(persist, 500);
+  }
 }
 
 function getNextTag(tag: string | null, existingNodes: CircuitNode[]): string | null {
@@ -82,7 +148,9 @@ interface CircuitStoreState {
   selectedWireIds: Set<string | number>;
   wireRoutingMode: "orthogonal" | "bezier";
   theme: "dark" | "light";
+  locale: "en" | "id";
   showGrid: boolean;
+  showWireLabels: boolean;
 
   // Simulation state
   isSimulating: boolean;
@@ -110,12 +178,22 @@ interface CircuitStoreState {
   // Recent symbols used
   recentComponentIds: string[];
 
+  // Cloud & Sharing state
+  currentProjectId: string | null;
+  isCloudSynced: boolean;
+  isReadOnlyViewer: boolean;
+
   // Actions
   hydrateFromLocalStorage: () => void;
+  setCloudProjectId: (id: string | null) => void;
+  setIsCloudSynced: (synced: boolean) => void;
+  setIsReadOnlyViewer: (viewer: boolean) => void;
   setProjectTitle: (title: string) => void;
   setWireRoutingMode: (mode: "orthogonal" | "bezier") => void;
   setTheme: (theme: "dark" | "light") => void;
   toggleTheme: () => void;
+  setLocale: (locale: "en" | "id") => void;
+  toggleLocale: () => void;
   toggleGrid: () => void;
   loadProject: (project: RelayFlowProject, format?: "rflow" | "smrl") => void;
   resetCanvas: () => void;
@@ -158,6 +236,10 @@ interface CircuitStoreState {
   splitWireAtJunction: (wireId: string | number, clickPoint: { x: number; y: number }, startDraft?: boolean) => void;
   connectWireToWire: (targetWireId: string | number, tapPoint: { x: number; y: number }) => void;
   updateWireMargins: (wireId: string | number, margins: WireMargins, commit?: boolean) => void;
+  updateWireTapPoint: (wireId: string | number, tapPoint: { x: number; y: number }, commit?: boolean) => void;
+  updateWireLabel: (wireId: string | number, label: string | null) => void;
+  toggleWireLabels: () => void;
+  renumberWires: () => void;
 
   // Simulation controls
   startSimulation: () => void;
@@ -170,6 +252,7 @@ interface CircuitStoreState {
 }
 
 export const useCircuitStore = create<CircuitStoreState>((set, get) => {
+  getStoreState = get;
   const initial = getInitialState();
 
   const pushHistory = (state: CircuitStoreState): { undoStack: HistorySnapshot[]; redoStack: HistorySnapshot[] } => {
@@ -190,7 +273,9 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
     selectedWireIds: new Set(),
     wireRoutingMode: "orthogonal",
     theme: initial.theme,
+    locale: initial.locale,
     showGrid: true,
+    showWireLabels: true,
     isSimulating: false,
     shortCircuit: false,
     shortCircuitMessage: null,
@@ -199,6 +284,17 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
     clipboard: null,
     wireDraft: null,
     recentComponentIds: ["switchNO", "coil", "lamp", "motor3ph", "breaker3p", "sourcePlus", "sourceNegative"],
+
+    currentProjectId: null,
+    isCloudSynced: false,
+    isReadOnlyViewer: false,
+
+    setCloudProjectId: (id) => {
+      set({ currentProjectId: id });
+      saveToLocalStorage({ currentProjectId: id }, true);
+    },
+    setIsCloudSynced: (synced) => set({ isCloudSynced: synced }),
+    setIsReadOnlyViewer: (viewer) => set({ isReadOnlyViewer: viewer }),
 
     hydrateFromLocalStorage: () => {
       if (typeof window === "undefined") return;
@@ -211,7 +307,20 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
         }
       } catch (e) {}
 
-      let projectData: { projectTitle?: string; nodes?: CircuitNode[]; wires?: CircuitWire[] } = {};
+      let locale: "en" | "id" | undefined;
+      try {
+        const savedLocale = localStorage.getItem(LOCAL_STORAGE_LOCALE_KEY);
+        if (savedLocale === "en" || savedLocale === "id") {
+          locale = savedLocale;
+        }
+      } catch (e) {}
+
+      let projectData: {
+        projectTitle?: string;
+        currentProjectId?: string | null;
+        nodes?: CircuitNode[];
+        wires?: CircuitWire[];
+      } = {};
       try {
         const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
         if (raw) {
@@ -219,6 +328,7 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
           if (parsed && Array.isArray(parsed.nodes) && Array.isArray(parsed.wires)) {
             projectData = {
               projectTitle: parsed.metadata?.title || "My Circuit",
+              currentProjectId: parsed.currentProjectId || parsed.metadata?.id || null,
               nodes: parsed.nodes,
               wires: parsed.wires,
             };
@@ -227,11 +337,19 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
       } catch (e) {}
 
       const updates: Partial<CircuitStoreState> = {};
-      if (theme) updates.theme = theme;
+      if (theme) {
+        updates.theme = theme;
+        syncDocumentTheme(theme);
+      }
+      if (locale) updates.locale = locale;
       if (projectData.nodes && projectData.wires) {
         updates.nodes = projectData.nodes;
         updates.wires = projectData.wires;
         if (projectData.projectTitle) updates.projectTitle = projectData.projectTitle;
+        if (projectData.currentProjectId) {
+          updates.currentProjectId = projectData.currentProjectId;
+          updates.isCloudSynced = true;
+        }
       }
 
       if (Object.keys(updates).length > 0) {
@@ -248,6 +366,7 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
       try {
         localStorage.setItem(LOCAL_STORAGE_THEME_KEY, theme);
       } catch (e) {}
+      syncDocumentTheme(theme);
       set({ theme });
     },
     toggleTheme: () =>
@@ -256,13 +375,62 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
         try {
           localStorage.setItem(LOCAL_STORAGE_THEME_KEY, next);
         } catch (e) {}
+        syncDocumentTheme(next);
         return { theme: next };
       }),
+    setLocale: (locale) => {
+      try {
+        localStorage.setItem(LOCAL_STORAGE_LOCALE_KEY, locale);
+      } catch (e) {}
+      set({ locale });
+    },
+    toggleLocale: () =>
+      set((state) => {
+        const next = state.locale === "en" ? "id" : "en";
+        try {
+          localStorage.setItem(LOCAL_STORAGE_LOCALE_KEY, next);
+        } catch (e) {}
+        return { locale: next };
+      }),
     toggleGrid: () => set((state) => ({ showGrid: !state.showGrid })),
+    toggleWireLabels: () => set((state) => ({ showWireLabels: !state.showWireLabels })),
+
+    renumberWires: () => {
+      set((state) => {
+        const history = pushHistory(state);
+        const renumbered = WireNetResolver.renumberAll(state.wires, state.nodes);
+        saveToLocalStorage({ projectTitle: state.projectTitle, nodes: state.nodes, wires: renumbered });
+        return {
+          wires: renumbered,
+          ...history,
+        };
+      });
+    },
+
+    updateWireLabel: (wireId, label) => {
+      set((state) => {
+        const wireIndex = state.wires.findIndex((w) => w.id === wireId);
+        if (wireIndex === -1) return {};
+        const history = pushHistory(state);
+        const nextWires = [...state.wires];
+        nextWires[wireIndex] = {
+          ...nextWires[wireIndex],
+          label: label && label.trim() ? label.trim() : null,
+        };
+        saveToLocalStorage({ projectTitle: state.projectTitle, nodes: state.nodes, wires: nextWires });
+        return {
+          wires: nextWires,
+          ...history,
+        };
+      });
+    },
 
     loadProject: (project, format = "rflow") => {
+      const resolvedProjectId = (project.metadata as any)?.id || null;
       set({
         projectTitle: project.metadata.title,
+        currentProjectId: resolvedProjectId,
+        isCloudSynced: Boolean(resolvedProjectId),
         fileFormat: format,
         nodes: project.nodes,
         wires: project.wires,
@@ -274,11 +442,19 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
         shortCircuit: false,
         shortCircuitMessage: null,
       });
-      saveToLocalStorage(get());
+      saveToLocalStorage({
+        projectTitle: project.metadata.title,
+        nodes: project.nodes,
+        wires: project.wires,
+        currentProjectId: resolvedProjectId,
+      }, true);
     },
 
     resetCanvas: () => {
       set({
+        projectTitle: "My Circuit",
+        currentProjectId: null,
+        isCloudSynced: false,
         nodes: [],
         wires: [],
         selectedNodeIds: new Set(),
@@ -288,7 +464,7 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
         isSimulating: false,
         shortCircuit: false,
       });
-      saveToLocalStorage(get());
+      saveToLocalStorage({ projectTitle: "My Circuit", nodes: [], wires: [], currentProjectId: null }, true);
     },
 
     autoLayout: () => {
@@ -452,7 +628,24 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
             },
           };
         });
-        return { nodes: updatedNodes, ...history };
+
+        if (commitToHistory) {
+          saveToLocalStorage({ projectTitle: state.projectTitle, nodes: updatedNodes, wires: state.wires });
+        }
+
+        if (state.isSimulating) {
+          const simRes = SimulationEngine.step(updatedNodes, state.wires);
+          return {
+            nodes: updatedNodes,
+            wires: simRes.wires,
+            isSimulating: !simRes.shortCircuit,
+            shortCircuit: simRes.shortCircuit,
+            shortCircuitMessage: simRes.shortCircuitMessage || null,
+            ...history,
+          };
+        }
+
+        return { nodes: updatedNodes, wires: state.wires, ...history };
       });
     },
 
@@ -835,7 +1028,7 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
         }
 
         const history = pushHistory(state);
-        const newWire: CircuitWire = {
+        let newWire: CircuitWire = {
           id: Date.now() + Math.floor(Math.random() * 1000),
           fromNodeId: state.wireDraft.fromNodeId,
           fromPortId: state.wireDraft.fromPortId,
@@ -844,8 +1037,19 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
           margins: { start: 0, center: 0, end: 0 },
         };
 
+        // Auto-assign net number using Mazhab 2 Gap Recycling
+        const candidateWires = [...state.wires, newWire];
+        const nets = WireNetResolver.resolveWireNets(candidateWires, state.nodes);
+        const assignedNet = nets.get(newWire.id);
+        if (assignedNet) {
+          newWire = { ...newWire, label: assignedNet.label };
+        }
+
+        const nextWires = [...state.wires, newWire];
+        saveToLocalStorage({ projectTitle: state.projectTitle, nodes: state.nodes, wires: nextWires });
+
         return {
-          wires: [...state.wires, newWire],
+          wires: nextWires,
           wireDraft: null,
           ...history,
         };
@@ -1147,7 +1351,7 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
         const snappedX = Math.round(tapPoint.x / 30) * 30;
         const snappedY = Math.round(tapPoint.y / 30) * 30;
 
-        const branchWire: CircuitWire = {
+        let branchWire: CircuitWire = {
           id: Date.now() + Math.floor(Math.random() * 1000),
           fromNodeId,
           fromPortId,
@@ -1157,6 +1361,14 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
           tapPoint: { x: snappedX, y: snappedY },
           margins: { start: 0, center: 0, end: 0 },
         };
+
+        // Branch wires inherit the net label of the tapped wire or resolved net
+        const candidateWires = [...state.wires, branchWire];
+        const nets = WireNetResolver.resolveWireNets(candidateWires, state.nodes);
+        const assignedNet = nets.get(branchWire.id);
+        if (assignedNet) {
+          branchWire = { ...branchWire, label: assignedNet.label };
+        }
 
         const newWires = [...state.wires, branchWire];
         saveToLocalStorage({ projectTitle: state.projectTitle, nodes: state.nodes, wires: newWires });
@@ -1199,6 +1411,48 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
 
         if (commit) {
           saveToLocalStorage({ projectTitle: state.projectTitle, nodes: state.nodes, wires: nextWires });
+        }
+
+        return {
+          wires: nextWires,
+          ...history,
+        };
+      });
+    },
+
+    updateWireTapPoint: (wireId, tapPoint, commit = true) => {
+      set((state) => {
+        const wireIndex = state.wires.findIndex((w) => w.id === wireId);
+        if (wireIndex === -1) return {};
+
+        let history = {};
+        if (commit) {
+          history = pushHistory(state);
+        }
+
+        const nextWires = [...state.wires];
+        nextWires[wireIndex] = {
+          ...nextWires[wireIndex],
+          tapPoint: {
+            x: Math.round(tapPoint.x / 30) * 30,
+            y: Math.round(tapPoint.y / 30) * 30,
+          },
+        };
+
+        if (commit) {
+          saveToLocalStorage({ projectTitle: state.projectTitle, nodes: state.nodes, wires: nextWires });
+        }
+
+        if (state.isSimulating) {
+          const simRes = SimulationEngine.step(state.nodes, nextWires);
+          return {
+            nodes: simRes.nodes,
+            wires: simRes.wires,
+            isSimulating: !simRes.shortCircuit,
+            shortCircuit: simRes.shortCircuit,
+            shortCircuitMessage: simRes.shortCircuitMessage || null,
+            ...history,
+          };
         }
 
         return {

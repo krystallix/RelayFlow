@@ -2,13 +2,21 @@
 
 @layer base {
   html, body {
-    background-color: #090b10;
-    color: #f8fafc;
     overflow: hidden;
     user-select: none;
     -webkit-user-select: none;
     -webkit-touch-callout: none;
     overscroll-behavior: none;
+  }
+
+  html.dark, html.dark body {
+    background-color: #090b10;
+    color: #f8fafc;
+  }
+
+  html.light, html.light body, html:not(.dark), html:not(.dark) body {
+    background-color: #f8fafc;
+    color: #0f172a;
   }
 }
 

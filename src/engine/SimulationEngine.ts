@@ -136,11 +136,45 @@ export class SimulationEngine {
         iteration++;
 
         // A. Propagate through wires
+        const wireMap = new Map<string | number, CircuitWire>(wires.map((w) => [w.id, w]));
         for (const wire of wires) {
           const keyFrom = `${wire.fromNodeId}:${wire.fromPortId}`;
-          const keyTo = `${wire.toNodeId}:${wire.toPortId}`;
-
           const potFrom = portPotentials.get(keyFrom);
+
+          // A.1. Wire-to-wire branch connection (tap wire)
+          if (wire.toWireId) {
+            const target = wireMap.get(wire.toWireId);
+            if (target) {
+              const potTarget = target.potential;
+
+              if (potFrom && potTarget && isConflict(potFrom, potTarget)) {
+                shortCircuit = true;
+                shortCircuitMessage = `Short circuit detected between branch ${potFrom} and main ${potTarget}!`;
+                shortNodes.push(wire.fromNodeId, target.fromNodeId, target.toNodeId);
+                break;
+              }
+
+              if (potFrom && !potTarget) {
+                target.potential = potFrom;
+                target.isHot = true;
+                wire.potential = potFrom;
+                wire.isHot = true;
+                portPotentials.set(`${target.fromNodeId}:${target.fromPortId}`, potFrom);
+                portPotentials.set(`${target.toNodeId}:${target.toPortId}`, potFrom);
+                changed = true;
+              } else if (!potFrom && potTarget) {
+                portPotentials.set(keyFrom, potTarget);
+                wire.potential = potTarget;
+                wire.isHot = true;
+                changed = true;
+              } else if (potFrom && potTarget && potFrom === potTarget) {
+                wire.potential = potFrom;
+                wire.isHot = true;
+              }
+            }
+          }
+
+          const keyTo = `${wire.toNodeId}:${wire.toPortId}`;
           const potTo = portPotentials.get(keyTo);
 
           if (potFrom && potTo && isConflict(potFrom, potTo)) {
@@ -427,11 +461,50 @@ export class SimulationEngine {
       nodes.filter((n) => n.isEnergized).map((n) => n.id)
     );
 
+    // Build return wire adjacency graph to trace return currents back to source
+    const returnPotentials = new Set(["-24V", "N", "PE", "-V"]);
+    const hotReturnWires = new Set<string | number>();
+    const returnQueue: CircuitWire[] = [];
+
     for (const wire of wires) {
-      if (wire.potential === "-24V" || wire.potential === "N" || wire.potential === "PE") {
-        const fromEnergized = energizedNodeIds.has(wire.fromNodeId);
-        const toEnergized = energizedNodeIds.has(wire.toNodeId);
-        wire.isHot = Boolean(fromEnergized || toEnergized);
+      if (wire.potential && returnPotentials.has(wire.potential)) {
+        if (energizedNodeIds.has(wire.fromNodeId) || energizedNodeIds.has(wire.toNodeId)) {
+          hotReturnWires.add(wire.id);
+          returnQueue.push(wire);
+        }
+      }
+    }
+
+    // Traverse all wires connected directly, via endpoints, or via toWireId taps
+    while (returnQueue.length > 0) {
+      const curr = returnQueue.shift()!;
+      const currFromKey = `${curr.fromNodeId}:${curr.fromPortId}`;
+      const currToKey = `${curr.toNodeId}:${curr.toPortId}`;
+
+      for (const other of wires) {
+        if (!hotReturnWires.has(other.id) && other.potential === curr.potential) {
+          // Connected via tap wire
+          const isTapped = other.toWireId === curr.id || curr.toWireId === other.id;
+          // Or connected via shared node terminals
+          const otherFromKey = `${other.fromNodeId}:${other.fromPortId}`;
+          const otherToKey = `${other.toNodeId}:${other.toPortId}`;
+          const sharesPort =
+            otherFromKey === currFromKey ||
+            otherFromKey === currToKey ||
+            otherToKey === currFromKey ||
+            otherToKey === currToKey;
+
+          if (isTapped || sharesPort) {
+            hotReturnWires.add(other.id);
+            returnQueue.push(other);
+          }
+        }
+      }
+    }
+
+    for (const wire of wires) {
+      if (wire.potential && returnPotentials.has(wire.potential)) {
+        wire.isHot = hotReturnWires.has(wire.id);
       }
     }
 
