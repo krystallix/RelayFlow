@@ -20,12 +20,21 @@
   }
 }
 
-@keyframes flow {
+@keyframes flow-forward {
   from {
     stroke-dashoffset: 24;
   }
   to {
     stroke-dashoffset: 0;
+  }
+}
+
+@keyframes flow-reverse {
+  from {
+    stroke-dashoffset: 0;
+  }
+  to {
+    stroke-dashoffset: 24;
   }
 }
 

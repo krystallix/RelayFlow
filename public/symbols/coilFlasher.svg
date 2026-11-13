@@ -24,6 +24,6 @@
          </frame>
       </frames>
    </metadata>
-   <path d="m 35.999999,47.999992 h 48.000004 v 24 H 35.999999 Z m 24,0 m 0,24" style="fill:#aa0000;stroke:none;stroke-width:2;stroke-dasharray:none" id="mainFill1" inkscape:label="mainFill1" />
+   <path d="m 35.999999,47.999992 h 48.000004 v 24 H 35.999999 Z m 24,0 m 0,24" style="display:none;fill:#2563eb;stroke:none;stroke-width:2;stroke-dasharray:none" id="mainFill1" inkscape:label="mainFill1" />
    <path id="mainPath1" style="fill:none;stroke:#ffffff;stroke-width:2" d="m 50.9002,62.999999 h -4 v -6 h -7 v 6 H 36 m 14.999999,8.999993 v -24 M 36,48 l 47.999999,-8e-6 v 24 L 36,72 Z m 23.999999,-8e-6 V -2e-6 m 0,71.999994 V 120" inkscape:label="mainPath1" />
 </svg>

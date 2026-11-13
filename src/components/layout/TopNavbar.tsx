@@ -20,6 +20,7 @@ import {
   Moon,
   HelpCircle,
   Grid,
+  Grid2x2,
   Check,
   ChevronDown,
   Trash2,
@@ -40,6 +41,7 @@ import {
   CloudUpload,
   Loader2,
   Save,
+  Cpu,
 } from "lucide-react";
 import { useCircuitStore } from "@/store/useCircuitStore";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -59,6 +61,28 @@ interface TopNavbarProps {
   isPaletteOpen?: boolean;
   onTogglePalette?: () => void;
 }
+
+const CloudCheckIcon: React.FC<{ className?: string }> = ({ className = "w-4 h-4" }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path
+      d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 0 1 4.5 4.5c0 .35-.04.7-.12 1.03"
+      stroke="currentColor"
+    />
+    <polyline
+      points="14 16.5 17 19.5 22 13.5"
+      className="text-emerald-500 stroke-[2.8]"
+      stroke="currentColor"
+    />
+  </svg>
+);
 
 export const TopNavbar: React.FC<TopNavbarProps> = ({
   onZoomIn,
@@ -108,6 +132,8 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
     toggleTheme,
     toggleLocale,
     toggleGrid,
+    pageViewEnabled,
+    togglePageView,
     startSimulation,
     stopSimulation,
     stepSimulation,
@@ -124,6 +150,9 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
     currentProjectId,
     isCloudSynced,
     isReadOnlyViewer,
+    isHardwareSheetOpen,
+    toggleHardwareSheet,
+    setIsHardwareSheetOpen,
     setCloudProjectId,
     setIsCloudSynced,
     setIsReadOnlyViewer,
@@ -151,13 +180,22 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
     return () => window.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleSaveProject = async () => {
+  const saveErrorCooldownRef = useRef(false);
+
+  // Reset save error cooldown whenever the circuit actually changes
+  useEffect(() => {
+    saveErrorCooldownRef.current = false;
+  }, [nodes, wires, projectTitle]);
+
+  const handleSaveProject = async (silent = false) => {
     if (isReadOnlyViewer) return;
 
     if (!user) {
-      setAuthCustomMessage(t.auth.loginSubtitle || "Log in to save your projects and share them with others");
-      setPendingAction("save");
-      setShowAuthModal(true);
+      if (!silent) {
+        setAuthCustomMessage(t.auth.loginSubtitle || "Log in to save your projects and share them with others");
+        setPendingAction("save");
+        setShowAuthModal(true);
+      }
       return;
     }
 
@@ -180,13 +218,28 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
       setIsCloudSynced(true);
       setIsSaving(false);
       setJustSaved(true);
+      saveErrorCooldownRef.current = false;
       setTimeout(() => setJustSaved(false), 2500);
     } catch (e: any) {
       setIsSaving(false);
+      saveErrorCooldownRef.current = true;
       console.error("Save error:", e);
-      alert("Failed to save project: " + (e?.message || "Unknown error"));
+      if (!silent) {
+        alert("Failed to save project: " + (e?.message || "Unknown error"));
+      }
     }
   };
+
+  // Autosave to cloud every 3 seconds after changes (debounced with error cooldown)
+  useEffect(() => {
+    if (!user || isReadOnlyViewer || isCloudSynced || isSaving || saveErrorCooldownRef.current) return;
+
+    const timer = setTimeout(() => {
+      handleSaveProject(true);
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [user, isReadOnlyViewer, isCloudSynced, isSaving, nodes, wires, projectTitle]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -491,7 +544,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
       <div className="hidden md:flex items-center gap-3">
         {/* Branding Logo */}
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-200 font-bold shadow-sm">
+          <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-200 font-bold">
             <Zap className="w-4 h-4 fill-current text-zinc-300" />
           </div>
           <span className={`font-bold tracking-tight text-base hidden sm:inline ${isDark ? "text-white" : "text-slate-900"}`}>
@@ -791,6 +844,20 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                 </button>
 
                 <button
+                  onClick={() => { togglePageView(); setActiveMenu(null); }}
+                  className={`w-full text-left px-3 py-2 rounded-lg flex items-center justify-between text-xs transition-colors ${
+                    isDark ? "hover:bg-white/10" : "hover:bg-slate-100 text-slate-800"
+                  }`}
+                  title="Toggle Draw.io-style A4 Page Sheets"
+                >
+                  <div className="flex items-center gap-2">
+                    <Grid2x2 className="w-4 h-4 text-zinc-400" />
+                    <span>{t.navbar.pageView}</span>
+                  </div>
+                  {pageViewEnabled && <Check className="w-3.5 h-3.5 text-zinc-400" />}
+                </button>
+
+                <button
                   onClick={() => { toggleWireLabels(); setActiveMenu(null); }}
                   className={`w-full text-left px-3 py-2 rounded-lg flex items-center justify-between text-xs transition-colors ${
                     isDark ? "hover:bg-white/10" : "hover:bg-slate-100 text-slate-800"
@@ -864,11 +931,13 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
 
         {/* Project Name Pill */}
         <div
-          className={`flex items-center gap-2 rounded-xl px-3 py-1.5 text-xs border shadow-xs transition-colors ${
-            isDark ? "bg-[#131620] border-white/15 text-zinc-200" : "bg-white border-slate-300 text-slate-800"
+          className={`flex items-center gap-2 rounded-lg border px-2.5 py-1 text-xs shadow-xs transition-colors ${
+            isDark
+              ? "bg-[#131620] border-white/10 hover:border-white/20 focus-within:border-white/30 text-zinc-200"
+              : "bg-white border-slate-200 hover:border-slate-300 focus-within:border-slate-400 text-slate-800"
           }`}
         >
-          <FileCode className="w-3.5 h-3.5 text-zinc-400" />
+          <FileCode className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
           <input
             type="text"
             value={projectTitle}
@@ -877,25 +946,27 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
             className="bg-transparent border-none focus:outline-none w-28 sm:w-36 font-semibold truncate disabled:opacity-80 disabled:cursor-not-allowed"
             title={isReadOnlyViewer ? "Circuit Title (Read-Only)" : "Click to rename project"}
           />
-          <span className={`font-mono text-[10px] px-1.5 py-0.5 rounded uppercase font-semibold border ${
-            isDark ? "bg-white/10 text-zinc-300 border-white/10" : "bg-slate-100 text-slate-700 border-slate-300"
+          <span className={`font-mono text-[10px] px-1.5 py-0.5 rounded uppercase font-semibold shrink-0 ${
+            isDark ? "bg-white/10 text-zinc-300" : "bg-slate-100 text-slate-700"
           }`}>
             .{fileFormat}
           </span>
         </div>
       </div>
 
-      {/* Right Controls: Zoom, Language, Theme, Share & Export Popover, Storage Badge, and Login (Farthest Right) */}
+      {/* Right Controls: Zoom, Language, Theme, Cloud Autosave Indicator, Share & Export, and Login */}
       <div className="hidden md:flex items-center gap-2">
-        {/* 1. Zoom Controls (Solid Capsule) */}
+        {/* 1. Zoom Controls (Border Group) */}
         <div
-          className={`flex items-center gap-1 p-1 rounded-xl border text-xs font-mono shadow-xs ${
-            isDark ? "bg-[#131620] border-white/15" : "bg-white border-slate-300"
+          className={`flex items-center rounded-lg border shadow-xs text-xs font-mono overflow-hidden transition-colors ${
+            isDark
+              ? "bg-[#131620] border-white/10 text-zinc-200"
+              : "bg-white border-slate-200 text-slate-800"
           }`}
         >
           <button
             onClick={onZoomOut}
-            className={`p-1.5 rounded-lg transition-colors ${
+            className={`p-1.5 transition-colors cursor-pointer ${
               isDark ? "text-zinc-300 hover:text-white hover:bg-white/10" : "text-slate-700 hover:text-slate-900 hover:bg-slate-100"
             }`}
             title="Zoom Out"
@@ -904,8 +975,10 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
           </button>
           <button
             onClick={onResetZoom}
-            className={`px-1.5 py-0.5 font-medium ${
-              isDark ? "text-zinc-200 hover:text-white" : "text-slate-800 hover:text-slate-900"
+            className={`px-2 py-1 font-medium cursor-pointer transition-colors ${
+              isDark
+                ? "text-zinc-200 hover:text-white hover:bg-white/5"
+                : "text-slate-800 hover:text-slate-900 hover:bg-slate-50"
             }`}
             title="Reset Zoom"
           >
@@ -913,7 +986,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
           </button>
           <button
             onClick={onZoomIn}
-            className={`p-1.5 rounded-lg transition-colors ${
+            className={`p-1.5 transition-colors cursor-pointer ${
               isDark ? "text-zinc-300 hover:text-white hover:bg-white/10" : "text-slate-700 hover:text-slate-900 hover:bg-slate-100"
             }`}
             title="Zoom In"
@@ -922,75 +995,91 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
           </button>
         </div>
 
-        {/* 2. Language Switcher (Icon-Only Solid Button) */}
+        {/* 2. Language Switcher (Icon-Only, Borderless, Shadowless) */}
         <button
           onClick={toggleLocale}
-          className={`p-2 rounded-xl border transition-colors shadow-xs ${
+          className={`p-2 rounded-xl transition-colors cursor-pointer ${
             isDark
-              ? "bg-[#131620] hover:bg-[#1c202e] border-white/15 text-zinc-200 hover:text-white"
-              : "bg-white hover:bg-slate-100 border-slate-300 text-slate-800"
+              ? "bg-[#131620] hover:bg-[#1c202e] text-zinc-200 hover:text-white"
+              : "bg-white hover:bg-slate-100 text-slate-800"
           }`}
           title={locale === "id" ? "Switch to English" : "Ganti ke Bahasa Indonesia"}
         >
           <Languages className="w-4 h-4" />
         </button>
 
-        {/* 3. Theme Toggle (Icon-Only Solid Button) */}
+        {/* 3. Theme Toggle (Icon-Only, Borderless, Shadowless) */}
         <button
           onClick={toggleTheme}
-          className={`p-2 rounded-xl border transition-colors shadow-xs ${
+          className={`p-2 rounded-xl transition-colors cursor-pointer ${
             isDark
-              ? "bg-[#131620] hover:bg-[#1c202e] border-white/15 text-zinc-200 hover:text-white"
-              : "bg-white hover:bg-slate-100 border-slate-300 text-slate-800"
+              ? "bg-[#131620] hover:bg-[#1c202e] text-zinc-200 hover:text-white"
+              : "bg-white hover:bg-slate-100 text-slate-800"
           }`}
           title={`Switch to ${isDark ? "Light" : "Dark"} Mode`}
         >
           {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
         </button>
 
-        {/* 4. Save to Cloud Button */}
+        {/* Hardware Inspector & BOM Side Sheet Toggle Button */}
+        <button
+          onClick={toggleHardwareSheet}
+          className={`p-2 rounded-xl transition-colors cursor-pointer ${
+            isHardwareSheetOpen
+              ? isDark
+                ? "bg-white text-black"
+                : "bg-slate-900 text-white"
+              : isDark
+              ? "bg-[#131620] hover:bg-[#1c202e] text-zinc-200 hover:text-white"
+              : "bg-white hover:bg-slate-100 text-slate-800"
+          }`}
+          title={locale === "id" ? "Inspeksi Perangkat & BOM" : "Hardware Inspector & BOM"}
+        >
+          <Cpu className="w-4 h-4" />
+        </button>
+
+        {/* 4. Cloud Autosave & Sync Indicator Button (Icon-Only, Borderless, Shadowless) */}
         {!isReadOnlyViewer && (
           <button
-            onClick={handleSaveProject}
+            onClick={() => handleSaveProject(false)}
             disabled={isSaving}
-            className={`px-3 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition-all shadow-xs cursor-pointer ${
-              justSaved
-                ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-400"
-                : isDark
-                ? "bg-[#131620] hover:bg-[#1c202e] border-white/15 text-zinc-200 hover:text-white"
-                : "bg-white hover:bg-slate-100 border-slate-300 text-slate-800"
+            className={`p-2 rounded-xl transition-all cursor-pointer flex items-center justify-center ${
+              isDark
+                ? "bg-[#131620] hover:bg-[#1c202e] text-zinc-200 hover:text-white"
+                : "bg-white hover:bg-slate-100 text-slate-800"
             }`}
-            title={`Save Project (${modKey}+S)`}
+            title={
+              !user
+                ? t.auth.loginSubtitle || "Sign in to sync with Cloud"
+                : isSaving
+                ? "Saving to Cloud..."
+                : isCloudSynced
+                ? "Cloud Synced (All changes saved)"
+                : `Unsaved changes • Click to save now (${modKey}+S)`
+            }
           >
             {isSaving ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-400" />
-            ) : justSaved ? (
-              <Check className="w-3.5 h-3.5 text-emerald-400" />
+              <Loader2 className="w-4 h-4 animate-spin text-zinc-400" />
+            ) : isCloudSynced ? (
+              <CloudCheckIcon className="w-4 h-4" />
             ) : (
-              <CloudUpload className="w-3.5 h-3.5 text-zinc-300" />
+              <CloudUpload className="w-4 h-4" />
             )}
-            <span>
-              {isSaving
-                ? "Saving..."
-                : justSaved
-                ? "Saved!"
-                : t.navbar.saveProject || "Save"}
-            </span>
           </button>
         )}
 
-        {/* 5. Unified Share & Export Popover (Icon-Only Solid Button) */}
+        {/* 5. Unified Share & Export Popover (Icon-Only Solid Button, Borderless, Shadowless) */}
         <div className="relative" ref={exportMenuRef}>
           <button
             onClick={() => setExportMenuOpen((prev) => !prev)}
-            className={`p-2 rounded-xl border transition-colors shadow-xs ${
+            className={`p-2 rounded-xl transition-colors cursor-pointer ${
               exportMenuOpen
                 ? isDark
-                  ? "bg-[#1c202e] border-white/30 text-white"
-                  : "bg-slate-100 border-slate-400 text-slate-900"
+                  ? "bg-[#1c202e] text-white"
+                  : "bg-slate-100 text-slate-900"
                 : isDark
-                ? "bg-[#131620] hover:bg-[#1c202e] border-white/15 text-zinc-200 hover:text-white"
-                : "bg-white hover:bg-slate-100 border-slate-300 text-slate-800"
+                ? "bg-[#131620] hover:bg-[#1c202e] text-zinc-200 hover:text-white"
+                : "bg-white hover:bg-slate-100 text-slate-800"
             }`}
             title="Share & Export"
           >
@@ -1107,57 +1196,41 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
           )}
         </div>
 
-        {/* 5. My Projects (Icon-Only Solid Button, if logged in) */}
+        {/* 6. My Projects (Icon-Only Solid Button, Borderless, Shadowless) */}
         {user && (
           <button
             onClick={() => setShowProjectsModal(true)}
-            className={`p-2 rounded-xl border transition-colors shadow-xs ${
+            className={`p-2 rounded-xl transition-colors cursor-pointer ${
               isDark
-                ? "bg-[#131620] hover:bg-[#1c202e] border-white/15 text-zinc-200 hover:text-white"
-                : "bg-white hover:bg-slate-100 border-slate-300 text-slate-800"
+                ? "bg-[#131620] hover:bg-[#1c202e] text-zinc-200 hover:text-white"
+                : "bg-white hover:bg-slate-100 text-slate-800"
             }`}
             title={t.cloudNavbar.myProjects}
           >
-            <FolderOpen className="w-4 h-4 text-zinc-300" />
+            <FolderOpen className="w-4 h-4" />
           </button>
         )}
 
-        {/* 6. Fork to Edit (Icon-Only Solid Button, if in Viewer Mode) */}
+        {/* 7. Fork to Edit (Icon-Only Solid Button, Borderless, Shadowless, if in Viewer Mode) */}
         {isReadOnlyViewer && (
           <button
             onClick={handleForkToEdit}
-            className="p-2 rounded-xl border transition-all shadow-xs bg-blue-600 hover:bg-blue-500 text-white border-blue-500 flex items-center justify-center"
+            className="p-2 rounded-xl transition-all bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center cursor-pointer"
             title={t.cloudNavbar.forkToEdit}
           >
             <GitFork className="w-4 h-4" />
           </button>
         )}
 
-        {/* 7. Storage Status Badge (Pindah ke Kanan, Solid CAD Pill) */}
-        {isReadOnlyViewer ? (
-          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-mono font-medium border shadow-xs bg-[#0b1c2e] text-sky-300 border-sky-500/40">
+        {/* Viewer Mode Pill (if in Viewer Mode) */}
+        {isReadOnlyViewer && (
+          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-mono font-medium bg-[#0b1c2e] text-sky-300">
             <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" />
             <span>{t.cloudNavbar.viewerMode}</span>
           </div>
-        ) : isCloudSynced ? (
-          <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-mono font-medium border shadow-xs bg-[#0a1e16] text-emerald-300 border-emerald-500/40">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-            <span>{t.cloudNavbar.cloudSynced}</span>
-          </div>
-        ) : (
-          <div
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-mono font-medium border shadow-xs ${
-              isDark
-                ? "bg-[#131620] text-zinc-300 border-white/15"
-                : "bg-white text-slate-700 border-slate-300"
-            }`}
-          >
-            <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
-            <span>{t.cloudNavbar.localStorage}</span>
-          </div>
         )}
 
-        {/* 8. Login / User Profile (PALING KANAN) */}
+        {/* 8. Login / User Profile (Borderless, Shadowless, Paling Kanan) */}
         {!user ? (
           <button
             onClick={() => {
@@ -1165,10 +1238,10 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
               setPendingAction(null);
               setShowAuthModal(true);
             }}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border shadow-xs flex items-center gap-1.5 ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center gap-1.5 ${
               isDark
-                ? "bg-white text-black hover:bg-zinc-200 border-white"
-                : "bg-slate-900 text-white hover:bg-slate-800 border-slate-900"
+                ? "bg-white text-black hover:bg-zinc-200"
+                : "bg-slate-900 text-white hover:bg-slate-800"
             }`}
             title={t.cloudNavbar.login}
           >
@@ -1179,14 +1252,14 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
           <div className="relative" ref={userMenuRef}>
             <button
               onClick={() => setUserMenuOpen((prev) => !prev)}
-              className={`p-1 rounded-xl border text-xs transition-colors shadow-xs flex items-center gap-1.5 ${
+              className={`p-1 rounded-xl text-xs transition-colors cursor-pointer flex items-center gap-1.5 ${
                 isDark
-                  ? "bg-[#131620] hover:bg-[#1c202e] border-white/15 text-zinc-200"
-                  : "bg-white hover:bg-slate-100 border-slate-300 text-slate-800"
+                  ? "bg-[#131620] hover:bg-[#1c202e] text-zinc-200"
+                  : "bg-white hover:bg-slate-100 text-slate-800"
               }`}
               title={user.email || "Account"}
             >
-              <div className="w-6 h-6 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center text-[10px] font-bold text-white uppercase">
+              <div className="w-6 h-6 rounded-lg bg-zinc-800 flex items-center justify-center text-[10px] font-bold text-white uppercase">
                 {user.email ? user.email[0] : "U"}
               </div>
               <ChevronDown className="w-3 h-3 text-zinc-400 pr-0.5" />
@@ -1241,7 +1314,13 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
           <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-200 font-bold shrink-0">
             <Zap className="w-4 h-4 fill-current text-zinc-300" />
           </div>
-          <div className="min-w-0 flex items-center gap-1.5">
+          <div
+            className={`min-w-0 flex items-center gap-1.5 px-2 py-1 rounded-lg border text-xs shadow-xs transition-colors ${
+              isDark
+                ? "bg-[#131620] border-white/10 hover:border-white/20 focus-within:border-white/30 text-zinc-200"
+                : "bg-white border-slate-200 hover:border-slate-300 focus-within:border-slate-400 text-slate-800"
+            }`}
+          >
             <input
               type="text"
               value={projectTitle}
@@ -1262,10 +1341,10 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
           {isSimulating ? (
             <button
               onClick={stopSimulation}
-              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-colors ${
+              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer ${
                 isDark 
-                  ? "bg-red-600/90 hover:bg-red-500 text-white border-red-500" 
-                  : "bg-red-600 hover:bg-red-700 text-white border-red-600"
+                  ? "bg-red-600/90 hover:bg-red-500 text-white" 
+                  : "bg-red-600 hover:bg-red-700 text-white"
               }`}
               title="Stop Simulation"
             >
@@ -1275,7 +1354,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
           ) : (
             <button
               onClick={startSimulation}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white text-black text-xs font-bold shadow-sm"
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white text-black text-xs font-bold cursor-pointer"
               title="Run Simulation"
             >
               <Play className="w-3.5 h-3.5 fill-current" />
@@ -1283,15 +1362,30 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
             </button>
           )}
 
+          {/* Mobile Hardware Inspector Button */}
+          <button
+            onClick={toggleHardwareSheet}
+            className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+              isHardwareSheetOpen
+                ? isDark ? "bg-white text-black" : "bg-slate-900 text-white"
+                : isDark
+                ? "bg-[#151922] text-zinc-300"
+                : "bg-slate-100 text-slate-700"
+            }`}
+            title="Toggle Hardware Inspector & BOM"
+          >
+            <Cpu className="w-4 h-4" />
+          </button>
+
           {/* Mobile Add Component Palette Button */}
           <button
             onClick={onTogglePalette}
-            className={`p-1.5 rounded-lg border transition-colors ${
+            className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
               isPaletteOpen
-                ? isDark ? "bg-white text-black border-white" : "bg-slate-900 text-white border-slate-900"
+                ? isDark ? "bg-white text-black" : "bg-slate-900 text-white"
                 : isDark
-                ? "bg-[#151922] border-white/10 text-zinc-300"
-                : "bg-slate-100 border-slate-200 text-slate-700"
+                ? "bg-[#151922] text-zinc-300"
+                : "bg-slate-100 text-slate-700"
             }`}
             title="Toggle Components Palette"
           >
@@ -1301,10 +1395,10 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
           {/* Mobile Menu Hamburger Button */}
           <button
             onClick={() => setMobileMenuOpen(true)}
-            className={`p-1.5 rounded-lg border transition-colors ${
+            className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
               isDark
-                ? "bg-[#151922] border-white/10 text-zinc-300"
-                : "bg-slate-100 border-slate-200 text-slate-700"
+                ? "bg-[#151922] text-zinc-300"
+                : "bg-slate-100 text-slate-700"
             }`}
             title="Open Menu"
           >
@@ -1365,7 +1459,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                 ) : (
                   <button
                     onClick={() => { startSimulation(); setMobileMenuOpen(false); }}
-                    className="col-span-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-white text-black font-bold text-xs shadow-sm"
+                    className="col-span-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-white text-black font-bold text-xs"
                   >
                     <Play className="w-3.5 h-3.5 fill-current" />
                     <span>Simulate</span>

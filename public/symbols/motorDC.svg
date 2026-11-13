@@ -200,7 +200,7 @@
   </metadata>
   <path
      id="fillPath1"
-     style="fill:#d4aa00;stroke-width:2"
+     style="display:none;fill:#2563eb;stroke-width:2"
      d="M 105,89.999996 A 45.000004,45.000002 0 0 1 60,135 45.000004,45.000002 0 0 1 14.999999,89.999996 45.000004,45.000002 0 0 1 60,44.999999 45.000004,45.000002 0 0 1 105,89.999996 Z"
      inkscape:label="fillPath1" />
   <path

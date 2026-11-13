@@ -45,5 +45,5 @@
       </frames>
    </metadata>
    <path d="M 42,71.999999 H 30 V 120 M 30,-3e-7 v 23.9999993 24 h 12 m 0,33.6 c 11.9664,0 24,-9.6336 24,-21.6 0,-11.9664 -12.0336,-21.6 -24,-21.6 z" style="fill:none;stroke:#ffffff;stroke-width:2;stroke-dasharray:none" id="mainPath1" inkscape:label="mainPath1" sodipodi:nodetypes="ccccccccscc" />
-   <path d="m 42,71.999999 m 0,-24.000001 m 0,33.600001 c 11.9664,0 24,-9.633601 24,-21.600001 0,-11.966399 -12.0336,-21.6 -24,-21.6 z" style="fill:#ffff00;stroke:none;stroke-width:2;stroke-dasharray:none" id="mainFill1" inkscape:label="mainFill1" />
+   <path d="m 42,71.999999 m 0,-24.000001 m 0,33.600001 c 11.9664,0 24,-9.633601 24,-21.600001 0,-11.966399 -12.0336,-21.6 -24,-21.6 z" style="display:none;fill:#2563eb;stroke:none;stroke-width:2;stroke-dasharray:none" id="mainFill1" inkscape:label="mainFill1" />
 </svg>

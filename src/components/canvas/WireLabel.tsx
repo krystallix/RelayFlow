@@ -13,7 +13,7 @@ interface WireLabelProps {
   isSelected?: boolean;
 }
 
-export const WireLabel: React.FC<WireLabelProps> = ({
+export const WireLabel: React.FC<WireLabelProps> = React.memo(({
   wireId,
   label,
   x,
@@ -22,7 +22,11 @@ export const WireLabel: React.FC<WireLabelProps> = ({
   isHot = false,
   isSelected = false,
 }) => {
-  const { theme, updateWireLabel, isSimulating } = useCircuitStore();
+  const theme = useCircuitStore((s) => s.theme);
+  const updateWireLabel = useCircuitStore((s) => s.updateWireLabel);
+  const isSimulating = useCircuitStore((s) => s.isSimulating);
+  const wireNumberSize = useCircuitStore((s) => s.canvasPreferences.wireNumberSize);
+  const highContrastBadges = useCircuitStore((s) => s.canvasPreferences.highContrastBadges);
   const isDark = theme === "dark";
 
   const [isEditing, setIsEditing] = useState(false);
@@ -68,7 +72,13 @@ export const WireLabel: React.FC<WireLabelProps> = ({
   const offsetX = orientation === "horizontal" ? 0 : 7;
   const offsetY = orientation === "horizontal" ? -8 : 0;
 
-  const badgeBg = isDark
+  const effectiveFontSize = typeof wireNumberSize === "number" ? wireNumberSize : 9;
+
+  const badgeBg = !highContrastBadges
+    ? isDark
+      ? "bg-transparent text-amber-300 border-transparent"
+      : "bg-transparent text-slate-900 border-transparent font-extrabold"
+    : isDark
     ? isHot
       ? "bg-amber-950/95 text-amber-300 border-amber-500/80 shadow-[0_0_8px_rgba(245,158,11,0.5)]"
       : isSelected
@@ -82,10 +92,10 @@ export const WireLabel: React.FC<WireLabelProps> = ({
 
   return (
     <foreignObject
-      x={x + offsetX - 20}
-      y={y + offsetY - 8}
-      width={40}
-      height={16}
+      x={x + offsetX - 30}
+      y={y + offsetY - 12}
+      width={60}
+      height={24}
       className="overflow-visible pointer-events-auto select-none"
     >
       <div className="w-full h-full flex items-center justify-center">
@@ -97,13 +107,15 @@ export const WireLabel: React.FC<WireLabelProps> = ({
             onChange={(e) => setEditValue(e.target.value)}
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
-            className="w-10 h-3.5 px-1 text-[9px] font-mono font-bold text-center rounded border bg-black text-amber-300 border-amber-400 focus:outline-none"
+            style={{ fontSize: `${effectiveFontSize}px` }}
+            className="w-14 h-4 px-1 font-mono font-bold text-center rounded border bg-black text-amber-300 border-amber-400 focus:outline-none"
           />
         ) : (
           <div
             onDoubleClick={handleDoubleClick}
             title={`Wire Net #${label} (Double-click to rename)`}
-            className={`cursor-pointer px-1 py-0 rounded text-[9px] font-mono font-bold border transition-all duration-150 leading-tight ${badgeBg}`}
+            style={{ fontSize: `${effectiveFontSize}px` }}
+            className={`cursor-pointer px-1.5 py-0.5 rounded font-mono font-bold border transition-all duration-150 leading-tight ${badgeBg}`}
           >
             {label}
           </div>
@@ -111,4 +123,4 @@ export const WireLabel: React.FC<WireLabelProps> = ({
       </div>
     </foreignObject>
   );
-};
+});

@@ -15,6 +15,8 @@ import {
   Play,
   Square,
   Sparkles,
+  BringToFront,
+  SendToBack,
 } from "lucide-react";
 import { CircuitNode, CircuitWire } from "@/engine/types";
 import { useIsMac, useModifierKey } from "@/utils/platform";
@@ -37,6 +39,8 @@ interface ContextMenuProps {
   onDeleteNode?: (nodeId: string | number) => void;
   onDeleteWire?: (wireId: string | number) => void;
   onInsertJunction?: (wireId: string | number, pos: { x: number; y: number }) => void;
+  onBringToFront?: (id: string | number) => void;
+  onSendToBack?: (id: string | number) => void;
   onEditNode?: (node: CircuitNode) => void;
   onToggleNodeState?: (nodeId: string | number) => void;
   onOpenSearch?: () => void;
@@ -60,6 +64,8 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
   onDeleteNode,
   onDeleteWire,
   onInsertJunction,
+  onBringToFront,
+  onSendToBack,
   onEditNode,
   onToggleNodeState,
   onOpenSearch,
@@ -196,6 +202,42 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
             <div className="my-1 border-t border-white/5" />
 
             <button
+              type="button"
+              onClick={() => {
+                onBringToFront?.(target.node.id);
+                onClose();
+              }}
+              className={`w-full px-2.5 py-1.5 rounded-lg flex items-center justify-between text-xs text-left font-medium transition-colors cursor-pointer ${
+                isDark ? "hover:bg-white/10" : "hover:bg-slate-100"
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <BringToFront className="w-3.5 h-3.5 text-zinc-400" />
+                <span>Bring to Front</span>
+              </div>
+              <span className="text-[10px] text-zinc-500 font-mono">{modKey}+]</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                onSendToBack?.(target.node.id);
+                onClose();
+              }}
+              className={`w-full px-2.5 py-1.5 rounded-lg flex items-center justify-between text-xs text-left font-medium transition-colors cursor-pointer ${
+                isDark ? "hover:bg-white/10" : "hover:bg-slate-100"
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <SendToBack className="w-3.5 h-3.5 text-zinc-400" />
+                <span>Send to Back</span>
+              </div>
+              <span className="text-[10px] text-zinc-500 font-mono">{modKey}+[</span>
+            </button>
+
+            <div className="my-1 border-t border-white/5" />
+
+            <button
               onClick={() => {
                 onDeleteNode?.(target.node.id);
                 onClose();
@@ -241,6 +283,42 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
             >
               <GitBranch className="w-3.5 h-3.5 text-zinc-400" />
               <span>Insert Junction Dot (Splice)</span>
+            </button>
+
+            <div className="my-1 border-t border-white/5" />
+
+            <button
+              type="button"
+              onClick={() => {
+                onBringToFront?.(target.wire.id);
+                onClose();
+              }}
+              className={`w-full px-2.5 py-1.5 rounded-lg flex items-center justify-between text-xs text-left font-medium transition-colors cursor-pointer ${
+                isDark ? "hover:bg-white/10" : "hover:bg-slate-100"
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <BringToFront className="w-3.5 h-3.5 text-zinc-400" />
+                <span>Bring to Front</span>
+              </div>
+              <span className="text-[10px] text-zinc-500 font-mono">{modKey}+]</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                onSendToBack?.(target.wire.id);
+                onClose();
+              }}
+              className={`w-full px-2.5 py-1.5 rounded-lg flex items-center justify-between text-xs text-left font-medium transition-colors cursor-pointer ${
+                isDark ? "hover:bg-white/10" : "hover:bg-slate-100"
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <SendToBack className="w-3.5 h-3.5 text-zinc-400" />
+                <span>Send to Back</span>
+              </div>
+              <span className="text-[10px] text-zinc-500 font-mono">{modKey}+[</span>
             </button>
 
             <div className="my-1 border-t border-white/5" />

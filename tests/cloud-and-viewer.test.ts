@@ -172,4 +172,20 @@ describe("Viewer Mode State & Forking (useCircuitStore)", () => {
     expect(useCircuitStore.getState().currentProjectId).toBeNull();
     expect(useCircuitStore.getState().isCloudSynced).toBe(false);
   });
+
+  it("marks isCloudSynced as false when node mutations or project renaming occurs", () => {
+    const store = useCircuitStore.getState();
+    store.setIsCloudSynced(true);
+    expect(useCircuitStore.getState().isCloudSynced).toBe(true);
+
+    // 1. Adding a node sets isCloudSynced to false
+    store.addNode("lamp", { x: 100, y: 100 });
+    expect(useCircuitStore.getState().isCloudSynced).toBe(false);
+
+    // 2. Renaming project sets isCloudSynced to false
+    store.setIsCloudSynced(true);
+    expect(useCircuitStore.getState().isCloudSynced).toBe(true);
+    store.setProjectTitle("New Title");
+    expect(useCircuitStore.getState().isCloudSynced).toBe(false);
+  });
 });

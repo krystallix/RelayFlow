@@ -26,7 +26,7 @@
          </frame>
       </frames>
    </metadata>
-   <path d="m 35.999999,47.999992 h 48.000004 v 24 H 35.999999 Z" style="fill:#aa0000;stroke:none;stroke-width:2;stroke-dasharray:none" id="mainFill1" inkscape:label="mainFill1" sodipodi:nodetypes="ccccc" />
+   <path d="m 35.999999,47.999992 h 48.000004 v 24 H 35.999999 Z" style="display:none;fill:#2563eb;stroke:none;stroke-width:2;stroke-dasharray:none" id="mainFill1" inkscape:label="mainFill1" sodipodi:nodetypes="ccccc" />
    <path id="mainPath1" style="fill:none;stroke:#ffffff;stroke-width:2;stroke-dasharray:none" d="m 35.999999,47.999992 h 48 v 24 h -48 z m 24,0 V -2e-6 m 0,71.999994 V 120" sodipodi:nodetypes="ccccccccc" />
    <path d="m 35.999999,47.999992 h 15 v 24 h -15 z" style="fill:#ffffff;stroke:none;stroke-width:2;stroke-dasharray:none" id="mainFill2" inkscape:label="mainFill2" sodipodi:nodetypes="ccccc" />
 </svg>

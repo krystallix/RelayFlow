@@ -44,6 +44,6 @@
          </frame>
       </frames>
    </metadata>
-   <path style="fill:#ffff00;stroke:none;stroke-width:2" d="m 42,38.399999 24,21.6 -24,21.6 z" id="mainFill1" inkscape:label="mainFill1" />
+   <path style="display:none;fill:#2563eb;stroke:none;stroke-width:2" d="m 42,38.399999 24,21.6 -24,21.6 z" id="mainFill1" inkscape:label="mainFill1" />
    <path id="mainPath1" style="fill:none;stroke:#ffffff;stroke-width:2;stroke-dasharray:none" inkscape:label="mainPath1" d="M 42,71.999999 H 30 V 120 M 30,-3e-7 v 23.9999993 24 h 12 m 0,-9.6 24,21.6 -24,21.6 z" />
 </svg>

@@ -5,6 +5,8 @@ import { TopNavbar } from "@/components/layout/TopNavbar";
 import { SubToolbar } from "@/components/layout/SubToolbar";
 import { NodePalette } from "@/components/sidebar/NodePalette";
 import { FlowCanvas } from "@/components/canvas/FlowCanvas";
+import { HardwareSheet } from "@/components/layout/HardwareSheet";
+import { PreferencesSheet } from "@/components/layout/PreferencesSheet";
 import { useCircuitStore } from "@/store/useCircuitStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { ProjectsService } from "@/lib/projectsService";
@@ -83,7 +85,6 @@ export const CircuitEditor: React.FC<CircuitEditorProps> = ({ viewerProjectId })
     setIsCloudSynced,
     setIsReadOnlyViewer,
     setProjectTitle,
-    theme,
   ]);
 
   const handleZoomIn = () => {
@@ -98,6 +99,21 @@ export const CircuitEditor: React.FC<CircuitEditorProps> = ({ viewerProjectId })
     setZoomScale(1);
     setPanOffset({ x: 100, y: 100 });
   };
+
+  const handleLocateNode = React.useCallback((nodeId: string | number) => {
+    const node = useCircuitStore.getState().nodes.find((n) => n.id === nodeId);
+    if (!node) return;
+    useCircuitStore.getState().selectNode(nodeId);
+    if (typeof window !== "undefined") {
+      const screenW = window.innerWidth;
+      const screenH = window.innerHeight;
+      // Center canvas view around target node
+      setPanOffset({
+        x: screenW / 2 - node.position.x * zoomScale,
+        y: screenH / 2 - node.position.y * zoomScale,
+      });
+    }
+  }, [zoomScale, setPanOffset]);
 
   if (loadingViewerProject) {
     return (
@@ -184,6 +200,12 @@ export const CircuitEditor: React.FC<CircuitEditorProps> = ({ viewerProjectId })
             onOpenPalette={() => setIsPaletteOpen(true)}
           />
         </div>
+
+        {/* Hardware Inspector & BOM Side Sheet Drawer */}
+        <HardwareSheet onLocateNode={handleLocateNode} />
+
+        {/* View Preferences Side Sheet Drawer */}
+        <PreferencesSheet />
       </div>
     </div>
   );

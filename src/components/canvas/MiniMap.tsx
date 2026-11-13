@@ -18,9 +18,10 @@ interface MiniMapProps {
   onPanChange: (newPan: { x: number; y: number }) => void;
   containerRef: React.RefObject<HTMLDivElement | null>;
   isDark: boolean;
+  wireRoutesMap?: Map<string | number, { points: Point[]; svgPath: string }>;
 }
 
-export const MiniMap: React.FC<MiniMapProps> = ({
+export const MiniMap: React.FC<MiniMapProps> = React.memo(({
   nodes,
   wires,
   panOffset,
@@ -28,6 +29,7 @@ export const MiniMap: React.FC<MiniMapProps> = ({
   onPanChange,
   containerRef,
   isDark,
+  wireRoutesMap,
 }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [isDragging, setIsDragging] = useState(false);
@@ -59,7 +61,7 @@ export const MiniMap: React.FC<MiniMapProps> = ({
     });
   }, [nodes]);
 
-  // Compute 1:1 true CAD routed wire paths matching the canvas exactly
+  // Compute 1:1 true CAD routed wire paths matching the canvas exactly (using precomputed routes if available)
   const routedWires = useMemo(() => {
     const list: Array<{
       id: string | number;
@@ -71,6 +73,18 @@ export const MiniMap: React.FC<MiniMapProps> = ({
     const wireMap = new Map(wires.map((w) => [w.id, w]));
 
     for (const wire of wires) {
+      // Fast path: reuse precomputed route from Canvas
+      const precomputed = wireRoutesMap?.get(wire.id);
+      if (precomputed?.svgPath) {
+        list.push({
+          id: wire.id,
+          path: precomputed.svgPath,
+          isHot: wire.isHot,
+          tapPoint: wire.tapPoint,
+        });
+        continue;
+      }
+
       const endpoints = ManhattanRouter.resolveWireEndpoints(wire, nodeMap, wireMap);
       if (!endpoints) continue;
 
@@ -102,7 +116,7 @@ export const MiniMap: React.FC<MiniMapProps> = ({
     }
 
     return list;
-  }, [wires, nodeMap, obstacles, wireRoutingMode]);
+  }, [wires, nodeMap, obstacles, wireRoutingMode, wireRoutesMap]);
 
   // Calculate circuit bounding box in world coordinates
   const bounds = useMemo(() => {
@@ -423,4 +437,4 @@ export const MiniMap: React.FC<MiniMapProps> = ({
       )}
     </div>
   );
-};
+});

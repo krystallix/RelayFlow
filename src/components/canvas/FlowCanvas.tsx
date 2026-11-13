@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useCircuitStore } from "@/store/useCircuitStore";
 import { FlowNode } from "./FlowNode";
 import { FlowWire } from "./FlowWire";
 import { WireNetResolver } from "@/engine/router/WireNetResolver";
+import { WireIntersectionResolver } from "@/engine/router/WireIntersectionResolver";
 import { NodePopover } from "./NodePopover";
 import { MultiNodePopover } from "./MultiNodePopover";
 import { MiniMap } from "./MiniMap";
@@ -20,12 +21,15 @@ import {
   Gauge,
   Map as MapIcon,
   Crosshair,
+  Grid2x2,
   Play,
   Square,
   Plus,
   Undo2,
   Redo2,
   Sparkles,
+  Boxes,
+  X,
 } from "lucide-react";
 import { ManhattanRouter } from "@/engine/router/ManhattanRouter";
 import { Point, WireMargins, CircuitNode, CircuitWire } from "@/engine/types";
@@ -63,8 +67,18 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   // Direct Node Dragging state
   const [draggingNodeState, setDraggingNodeState] = useState<DraggingNodeState | null>(null);
 
-  // Marquee selection
-  const [marquee, setMarquee] = useState<{ startX: number; startY: number; currentX: number; currentY: number } | null>(null);
+  // Marquee selection state (Track both screen coords for pixel-exact cursor alignment and world coords for circuit node queries)
+  interface MarqueeSelectionState {
+    startScreenX: number;
+    startScreenY: number;
+    currentScreenX: number;
+    currentScreenY: number;
+    startWorldX: number;
+    startWorldY: number;
+    currentWorldX: number;
+    currentWorldY: number;
+  }
+  const [marquee, setMarquee] = useState<MarqueeSelectionState | null>(null);
 
   // Quick Spotlight Symbol Search (Tab / Space on Canvas)
   const [showQuickSearch, setShowQuickSearch] = useState(false);
@@ -131,55 +145,60 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     hasMoved: false,
   });
 
-  const {
-    nodes,
-    wires,
-    selectedNodeIds,
-    selectedWireIds,
-    wireRoutingMode,
-    wireDraft,
-    theme,
-    showGrid,
-    showWireLabels,
-    isSimulating,
-    isReadOnlyViewer,
-    shortCircuit,
-    shortCircuitMessage,
-    clipboard,
-    addNode,
-    rotateSelectedNodes,
-    rotateNode,
-    deleteSelection,
-    deleteNode,
-    deleteWire,
-    duplicateSelection,
-    copySelection,
-    pasteSelection,
-    clearSelection,
-    selectAll,
-    selectNode,
-    selectWire,
-    toggleComponentState,
-    setComponentPressed,
-    updateNodesPositions,
-    startSimulation,
-    stopSimulation,
-    tickTimerSimulation,
-    splitWireAtJunction,
-    updateWireMargins,
-    updateWireTapPoint,
-    undo,
-    redo,
-    undoStack,
-    redoStack,
-    autoLayout,
-    recentComponentIds,
-    startWireDraft,
-    updateWireDraft,
-    completeWireDraft,
-    cancelWireDraft,
-    updateNodeData,
-  } = useCircuitStore();
+  // Granular store subscriptions (prevents re-rendering FlowCanvas when HardwareSheet, modals, or unrelated store properties update)
+  const nodes = useCircuitStore((s) => s.nodes);
+  const wires = useCircuitStore((s) => s.wires);
+  const selectedNodeIds = useCircuitStore((s) => s.selectedNodeIds);
+  const selectedWireIds = useCircuitStore((s) => s.selectedWireIds);
+  const wireRoutingMode = useCircuitStore((s) => s.wireRoutingMode);
+  const wireDraft = useCircuitStore((s) => s.wireDraft);
+  const theme = useCircuitStore((s) => s.theme);
+  const showGrid = useCircuitStore((s) => s.showGrid);
+  const showWireLabels = useCircuitStore((s) => s.showWireLabels);
+  const pageViewEnabled = useCircuitStore((s) => s.pageViewEnabled);
+  const isSimulating = useCircuitStore((s) => s.isSimulating);
+  const isReadOnlyViewer = useCircuitStore((s) => s.isReadOnlyViewer);
+  const shortCircuit = useCircuitStore((s) => s.shortCircuit);
+  const shortCircuitMessage = useCircuitStore((s) => s.shortCircuitMessage);
+  const clipboard = useCircuitStore((s) => s.clipboard);
+  const undoStack = useCircuitStore((s) => s.undoStack);
+  const redoStack = useCircuitStore((s) => s.redoStack);
+  const recentComponentIds = useCircuitStore((s) => s.recentComponentIds);
+
+  // Actions (reference-stable, won't trigger re-renders)
+  const togglePageView = useCircuitStore((s) => s.togglePageView);
+  const addNode = useCircuitStore((s) => s.addNode);
+  const rotateSelectedNodes = useCircuitStore((s) => s.rotateSelectedNodes);
+  const rotateNode = useCircuitStore((s) => s.rotateNode);
+  const deleteSelection = useCircuitStore((s) => s.deleteSelection);
+  const deleteNode = useCircuitStore((s) => s.deleteNode);
+  const deleteWire = useCircuitStore((s) => s.deleteWire);
+  const bringToFront = useCircuitStore((s) => s.bringToFront);
+  const sendToBack = useCircuitStore((s) => s.sendToBack);
+  const duplicateSelection = useCircuitStore((s) => s.duplicateSelection);
+  const copySelection = useCircuitStore((s) => s.copySelection);
+  const pasteSelection = useCircuitStore((s) => s.pasteSelection);
+  const clearSelection = useCircuitStore((s) => s.clearSelection);
+  const selectAll = useCircuitStore((s) => s.selectAll);
+  const selectNode = useCircuitStore((s) => s.selectNode);
+  const selectWire = useCircuitStore((s) => s.selectWire);
+  const toggleComponentState = useCircuitStore((s) => s.toggleComponentState);
+  const setComponentPressed = useCircuitStore((s) => s.setComponentPressed);
+  const updateNodesPositions = useCircuitStore((s) => s.updateNodesPositions);
+  const startSimulation = useCircuitStore((s) => s.startSimulation);
+  const stopSimulation = useCircuitStore((s) => s.stopSimulation);
+  const tickTimerSimulation = useCircuitStore((s) => s.tickTimerSimulation);
+  const splitWireAtJunction = useCircuitStore((s) => s.splitWireAtJunction);
+  const updateWireMargins = useCircuitStore((s) => s.updateWireMargins);
+  const updateWireTapPoint = useCircuitStore((s) => s.updateWireTapPoint);
+  const undo = useCircuitStore((s) => s.undo);
+  const redo = useCircuitStore((s) => s.redo);
+  const autoLayout = useCircuitStore((s) => s.autoLayout);
+  const startWireDraft = useCircuitStore((s) => s.startWireDraft);
+  const updateWireDraft = useCircuitStore((s) => s.updateWireDraft);
+  const completeWireDraft = useCircuitStore((s) => s.completeWireDraft);
+  const cancelWireDraft = useCircuitStore((s) => s.cancelWireDraft);
+  const updateNodeData = useCircuitStore((s) => s.updateNodeData);
 
   const [isSpacePressed, setIsSpacePressed] = useState(false);
   const [editingCommentNodeId, setEditingCommentNodeId] = useState<string | number | null>(null);
@@ -224,9 +243,21 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     };
     window.addEventListener("resize", handleResize);
     window.addEventListener("scroll", handleResize, { passive: true });
+
+    let observer: ResizeObserver | null = null;
+    if (containerRef.current && typeof ResizeObserver !== "undefined") {
+      observer = new ResizeObserver(() => {
+        if (containerRef.current) {
+          cachedRectRef.current = containerRef.current.getBoundingClientRect();
+        }
+      });
+      observer.observe(containerRef.current);
+    }
+
     return () => {
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("scroll", handleResize);
+      if (observer) observer.disconnect();
     };
   }, []);
 
@@ -245,6 +276,17 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   // Zoom to Fit (Fits all circuit nodes neatly inside viewport)
   const handleZoomToFit = useCallback(() => {
     if (!containerRef.current || nodes.length === 0) {
+      if (pageViewEnabled && containerRef.current) {
+        const cW = containerRef.current.clientWidth;
+        const cH = containerRef.current.clientHeight;
+        const fitScale = Math.min(Math.max(0.3, Math.min(cW / 1300, cH / 1000)), 1);
+        setZoomScale(fitScale);
+        setPanOffset({
+          x: cW / 2 - 600 * fitScale,
+          y: cH / 2 - 450 * fitScale,
+        });
+        return;
+      }
       setZoomScale(1);
       setPanOffset({ x: 100, y: 50 });
       return;
@@ -409,8 +451,23 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
 
     // Left Click on empty canvas: Start Marquee Selection (CAD Box Selection)
     if (e.button === 0) {
+      if (containerRef.current) {
+        cachedRectRef.current = containerRef.current.getBoundingClientRect();
+      }
+      const rect = cachedRectRef.current || { left: 0, top: 0 };
+      const screenX = e.clientX - rect.left;
+      const screenY = e.clientY - rect.top;
       const worldPos = screenToWorld(e.clientX, e.clientY);
-      setMarquee({ startX: worldPos.x, startY: worldPos.y, currentX: worldPos.x, currentY: worldPos.y });
+      setMarquee({
+        startScreenX: screenX,
+        startScreenY: screenY,
+        currentScreenX: screenX,
+        currentScreenY: screenY,
+        startWorldX: worldPos.x,
+        startWorldY: worldPos.y,
+        currentWorldX: worldPos.x,
+        currentWorldY: worldPos.y,
+      });
       if (!e.shiftKey) clearSelection();
     }
   };
@@ -769,7 +826,20 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
 
     // 4. Marquee selection
     if (marquee) {
-      setMarquee((prev) => (prev ? { ...prev, currentX: worldPos.x, currentY: worldPos.y } : null));
+      const rect = cachedRectRef.current || containerRef.current?.getBoundingClientRect() || { left: 0, top: 0 };
+      const screenX = e.clientX - rect.left;
+      const screenY = e.clientY - rect.top;
+      setMarquee((prev) =>
+        prev
+          ? {
+              ...prev,
+              currentScreenX: screenX,
+              currentScreenY: screenY,
+              currentWorldX: worldPos.x,
+              currentWorldY: worldPos.y,
+            }
+          : null
+      );
     }
   };
 
@@ -810,10 +880,10 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
 
     // Process Marquee Selection
     if (marquee) {
-      const minX = Math.min(marquee.startX, marquee.currentX);
-      const maxX = Math.max(marquee.startX, marquee.currentX);
-      const minY = Math.min(marquee.startY, marquee.currentY);
-      const maxY = Math.max(marquee.startY, marquee.currentY);
+      const minX = Math.min(marquee.startWorldX, marquee.currentWorldX);
+      const maxX = Math.max(marquee.startWorldX, marquee.currentWorldX);
+      const minY = Math.min(marquee.startWorldY, marquee.currentWorldY);
+      const maxY = Math.max(marquee.startWorldY, marquee.currentWorldY);
 
       if (maxX - minX > 5 || maxY - minY > 5) {
         const newlySelected = new Set(e.shiftKey ? selectedNodeIds : []);
@@ -1178,6 +1248,12 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       } else if ((e.ctrlKey || e.metaKey) && e.key === "d") {
         e.preventDefault();
         duplicateSelection();
+      } else if ((e.ctrlKey || e.metaKey) && e.key === "]") {
+        e.preventDefault();
+        bringToFront();
+      } else if ((e.ctrlKey || e.metaKey) && e.key === "[") {
+        e.preventDefault();
+        sendToBack();
       } else if ((e.ctrlKey || e.metaKey) && e.key === "a") {
         e.preventDefault();
         selectAll();
@@ -1289,9 +1365,10 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     editingCommentNodeId,
   ]);
 
-  // Global mouse release for spring (momentary) buttons
+  // Global mouse release for spring (momentary) buttons and marquee safety
   useEffect(() => {
     const handleGlobalRelease = () => {
+      setMarquee(null);
       if (isSimulating) {
         const anyPressed = nodes.some((n) => n.isPressed);
         if (anyPressed) {
@@ -1308,16 +1385,28 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     return () => window.removeEventListener("mouseup", handleGlobalRelease);
   }, [isSimulating, nodes, setComponentPressed]);
 
-  // Real-time Timer Tick Loop (100ms interval for countdown and motor timing)
+  // Check if circuit contains any timer coils requiring real-time clock ticking
+  const hasTimerCoils = useMemo(() => {
+    return nodes.some((n) => {
+      const comp = catalog[n.componentId];
+      return (
+        n.componentId.includes("Delay") ||
+        comp?.tagType === "timerCoils" ||
+        comp?.timerType !== undefined
+      );
+    });
+  }, [nodes]);
+
+  // Real-time Timer Tick Loop (only runs when simulating AND when timer coils actually exist)
   useEffect(() => {
-    if (!isSimulating) return;
+    if (!isSimulating || !hasTimerCoils) return;
 
     const interval = setInterval(() => {
       tickTimerSimulation(0.1);
     }, 100);
 
     return () => clearInterval(interval);
-  }, [isSimulating, tickTimerSimulation]);
+  }, [isSimulating, hasTimerCoils, tickTimerSimulation]);
 
   const nodeMap = React.useMemo(() => new Map(nodes.map((n) => [n.id, n])), [nodes]);
   const wireMap = React.useMemo(() => new Map(wires.map((w) => [w.id, w])), [wires]);
@@ -1344,6 +1433,47 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     if (!showWireLabels) return null;
     return WireNetResolver.resolveWireNets(wires, nodes);
   }, [showWireLabels, wires, nodes]);
+
+  // Precompute orthogonal routes for all wires (1x single computation for Canvas, Wires, and Minimap)
+  const wireRoutesMap = React.useMemo(() => {
+    const routesMap = new Map<string | number, { points: Point[]; svgPath: string }>();
+    if (wireRoutingMode !== "orthogonal") return routesMap;
+
+    for (const wire of wires) {
+      const endpoints = ManhattanRouter.resolveWireEndpoints(wire, nodeMap, wireMap);
+      if (!endpoints) continue;
+      const { p1, dir1, p2, dir2, isTapWire } = endpoints;
+      const effectiveMargins = isTapWire ? { ...wire.margins, end: -30 } : wire.margins;
+      const ignoreObstacleIds = wire.toWireId ? [wire.fromNodeId] : [wire.fromNodeId, wire.toNodeId];
+      const routed = ManhattanRouter.routeOrthogonal(
+        p1,
+        dir1,
+        p2,
+        dir2,
+        effectiveMargins,
+        nodeObstacles,
+        ignoreObstacleIds
+      );
+      routesMap.set(wire.id, routed);
+    }
+    return routesMap;
+  }, [wires, nodeMap, wireMap, nodeObstacles, wireRoutingMode]);
+
+  // Precompute wire crossings and arc jump points based on layer z-order
+  const wireCrossingsMap = React.useMemo(() => {
+    if (wireRoutingMode !== "orthogonal" || wires.length < 2) {
+      return new Map<string | number, Point[]>();
+    }
+
+    const wirePointsMap = new Map<string | number, Point[]>();
+    for (const [id, route] of wireRoutesMap.entries()) {
+      if (route.points && route.points.length >= 2) {
+        wirePointsMap.set(id, route.points);
+      }
+    }
+
+    return WireIntersectionResolver.resolveAllCrossings(wires, wirePointsMap);
+  }, [wires, wireRoutesMap, wireRoutingMode]);
 
   // Precompute port connectivity map: Map<nodeId, Set<portId>>
   const nodeConnectedPortsMap = React.useMemo(() => {
@@ -1376,6 +1506,57 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     }
     return map;
   }, [nodes]);
+
+  // Draw.io Style Page Sheets Calculation (1200x900 per sheet, auto-expanding seamlessly on boundary crossing)
+  const PAGE_WIDTH = 1200;
+  const PAGE_HEIGHT = 900;
+  const pageBounds = React.useMemo(() => {
+    if (!pageViewEnabled) return null;
+
+    let minCol = 0;
+    let maxCol = 0;
+    let minRow = 0;
+    let maxRow = 0;
+
+    for (const node of nodes) {
+      const c = catalog[node.componentId];
+      const hw = (c?.width || 120) / 2;
+      const hh = (c?.height || 120) / 2;
+
+      const left = node.position.x - hw;
+      const right = node.position.x + hw;
+      const top = node.position.y - hh;
+      const bottom = node.position.y + hh;
+
+      minCol = Math.min(minCol, Math.floor(left / PAGE_WIDTH));
+      maxCol = Math.max(maxCol, Math.floor(right / PAGE_WIDTH));
+      minRow = Math.min(minRow, Math.floor(top / PAGE_HEIGHT));
+      maxRow = Math.max(maxRow, Math.floor(bottom / PAGE_HEIGHT));
+    }
+
+    for (const wire of wires) {
+      if (wire.tapPoint) {
+        minCol = Math.min(minCol, Math.floor(wire.tapPoint.x / PAGE_WIDTH));
+        maxCol = Math.max(maxCol, Math.floor(wire.tapPoint.x / PAGE_WIDTH));
+        minRow = Math.min(minRow, Math.floor(wire.tapPoint.y / PAGE_HEIGHT));
+        maxRow = Math.max(maxRow, Math.floor(wire.tapPoint.y / PAGE_HEIGHT));
+      }
+    }
+
+    const x = minCol * PAGE_WIDTH;
+    const y = minRow * PAGE_HEIGHT;
+    const width = (maxCol - minCol + 1) * PAGE_WIDTH;
+    const height = (maxRow - minRow + 1) * PAGE_HEIGHT;
+    const totalSheets = (maxCol - minCol + 1) * (maxRow - minRow + 1);
+
+    return {
+      x,
+      y,
+      width,
+      height,
+      totalSheets,
+    };
+  }, [pageViewEnabled, nodes, wires]);
 
   const handleStartDragSegment = useCallback((targetWire: CircuitWire, orientation: "horizontal" | "vertical", defaultMid: number) => {
     if (useCircuitStore.getState().isReadOnlyViewer) return;
@@ -1527,7 +1708,13 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
         });
       }}
       className={`flex-1 h-[calc(100vh-3.5rem)] relative overflow-hidden select-none transition-colors duration-150 ${
-        isDark ? "bg-[#090b10]" : "bg-[#f8fafc]"
+        pageViewEnabled
+          ? isDark
+            ? "bg-[#141824]"
+            : "bg-[#eaedf3]"
+          : isDark
+          ? "bg-[#090b10]"
+          : "bg-[#f8fafc]"
       } ${
         draggingTapPointState || draggingCornerState
           ? "cursor-move"
@@ -1547,8 +1734,8 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       }`}
       style={{
         touchAction: "none",
-        // Continuous fine mesh grid lines with low opacity (Engineering CAD style)
-        backgroundImage: showGrid
+        // Continuous fine mesh grid lines with low opacity (Engineering CAD style) - only shown in infinite canvas mode
+        backgroundImage: !pageViewEnabled && showGrid
           ? isDark
             ? `linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px)`
             : `linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px)`
@@ -1587,9 +1774,58 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
         }}
         className="w-full h-full absolute inset-0 pointer-events-none"
       >
+        {/* Draw.io Style Page Sheet Layer (Seamless sheet without dividing lines between pages) */}
+        {pageViewEnabled && pageBounds && (
+          <div
+            style={{
+              left: `${pageBounds.x}px`,
+              top: `${pageBounds.y}px`,
+              width: `${pageBounds.width}px`,
+              height: `${pageBounds.height}px`,
+            }}
+            className={`absolute rounded-[2px] overflow-hidden transition-all duration-200 pointer-events-none ${
+              isDark
+                ? "bg-[#0b0e17] border border-white/10 shadow-[0_12px_40px_rgba(0,0,0,0.85)] ring-1 ring-white/5"
+                : "bg-white border border-slate-300 shadow-[0_10px_30px_rgba(0,0,0,0.12)]"
+            }`}
+          >
+            {/* SVG Crisp Non-Scaling Grid Pattern (Always visible even when deeply zoomed out) */}
+            {showGrid && (
+              <svg className="absolute inset-0 w-full h-full pointer-events-none">
+                <defs>
+                  <pattern
+                    id="page-sheet-grid"
+                    width="30"
+                    height="30"
+                    patternUnits="userSpaceOnUse"
+                  >
+                    <path
+                      d="M 30 0 L 0 0 0 30"
+                      fill="none"
+                      stroke={isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.08)"}
+                      strokeWidth={1}
+                      vectorEffect="non-scaling-stroke"
+                    />
+                  </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#page-sheet-grid)" />
+              </svg>
+            )}
+
+            {/* Sheet Dimension Watermark */}
+            <div
+              className={`absolute bottom-3 right-4 select-none font-mono text-[10px] font-bold tracking-widest uppercase opacity-40 pointer-events-none ${
+                isDark ? "text-zinc-500" : "text-slate-400"
+              }`}
+            >
+              Canvas Sheet {pageBounds.totalSheets > 1 ? `(${pageBounds.totalSheets} Pages • ${pageBounds.width}×${pageBounds.height})` : `(${pageBounds.width}×${pageBounds.height})`}
+            </div>
+          </div>
+        )}
+
         {/* SVG Layer for Wires & Smart Guidelines */}
-        <svg className="w-[10000px] h-[10000px] absolute -top-[5000px] -left-[5000px] pointer-events-none overflow-visible">
-          <g transform="translate(5000, 5000)">
+        <svg className="w-full h-full absolute inset-0 pointer-events-none overflow-visible">
+          <g>
             {/* Smart Alignment Guidelines */}
             {smartGuidelines.map((guide, idx) => (
               <g key={`guide-${idx}`} className="pointer-events-none">
@@ -1635,6 +1871,8 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
                 toNode={nodeMap.get(wire.toNodeId)}
                 nodeMap={nodeMap}
                 wireMap={wireMap}
+                crossings={wireCrossingsMap.get(wire.id)}
+                precomputedRoute={wireRoutesMap.get(wire.id)}
                 isSelected={selectedWireIds.has(wire.id)}
                 routingMode={wireRoutingMode}
                 obstacles={nodeObstacles}
@@ -1712,20 +1950,20 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
             />
           ))}
         </div>
-
-        {/* Marquee Selection Rectangle (Amber CAD Selection) */}
-        {marquee && (
-          <div
-            style={{
-              left: `${Math.min(marquee.startX, marquee.currentX)}px`,
-              top: `${Math.min(marquee.startY, marquee.currentY)}px`,
-              width: `${Math.abs(marquee.currentX - marquee.startX)}px`,
-              height: `${Math.abs(marquee.currentY - marquee.startY)}px`,
-            }}
-            className="absolute border border-dashed border-amber-400 bg-amber-500/15 backdrop-blur-[0.5px] rounded-xs pointer-events-none shadow-[0_0_12px_rgba(251,191,36,0.25)] z-30"
-          />
-        )}
       </div>
+
+      {/* Marquee Selection Rectangle (Amber CAD Selection) - Screen Space Rendered for 100% exact cursor alignment */}
+      {marquee && (
+        <div
+          style={{
+            left: `${Math.min(marquee.startScreenX, marquee.currentScreenX)}px`,
+            top: `${Math.min(marquee.startScreenY, marquee.currentScreenY)}px`,
+            width: `${Math.abs(marquee.currentScreenX - marquee.startScreenX)}px`,
+            height: `${Math.abs(marquee.currentScreenY - marquee.startScreenY)}px`,
+          }}
+          className="absolute border border-dashed border-amber-400 bg-amber-500/15 backdrop-blur-[0.5px] rounded-xs pointer-events-none shadow-[0_0_12px_rgba(251,191,36,0.25)] z-30"
+        />
+      )}
 
       {/* Node Action Popover (when 1 symbol is selected) */}
       {!isReadOnlyViewer && selectedNode && !draggingNodeState?.hasMoved && (
@@ -1808,38 +2046,42 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
               : "bg-white/90 border-slate-200 text-slate-700 shadow-slate-200"
           }`}
         >
-          {/* Zoom Out */}
-          <button
-            onClick={handleZoomOut}
-            title="Zoom Out"
-            className={`p-1.5 rounded-xl transition-colors cursor-pointer ${
-              isDark ? "hover:bg-white/10 text-zinc-400 hover:text-white" : "hover:bg-slate-100 text-slate-600 hover:text-slate-900"
+          {/* Zoom Controls Border Group (without inner separator) */}
+          <div
+            className={`flex items-center rounded-lg border shadow-xs text-xs font-mono overflow-hidden transition-colors ${
+              isDark
+                ? "bg-[#131620] border-white/10 text-zinc-200"
+                : "bg-white border-slate-200 text-slate-800"
             }`}
           >
-            <ZoomOut className="w-3.5 h-3.5" />
-          </button>
-
-          {/* Reset Zoom to 100% */}
-          <button
-            onClick={handleResetZoom}
-            title="Reset Zoom (100%)"
-            className={`px-2 py-1 rounded-xl font-mono text-[11px] font-semibold transition-colors cursor-pointer ${
-              isDark ? "hover:bg-white/10 text-zinc-300" : "hover:bg-slate-100 text-slate-700"
-            }`}
-          >
-            {Math.round(zoomScale * 100)}%
-          </button>
-
-          {/* Zoom In */}
-          <button
-            onClick={handleZoomIn}
-            title="Zoom In"
-            className={`p-1.5 rounded-xl transition-colors cursor-pointer ${
-              isDark ? "hover:bg-white/10 text-zinc-400 hover:text-white" : "hover:bg-slate-100 text-slate-600 hover:text-slate-900"
-            }`}
-          >
-            <ZoomIn className="w-3.5 h-3.5" />
-          </button>
+            <button
+              onClick={handleZoomOut}
+              title="Zoom Out"
+              className={`p-1.5 transition-colors cursor-pointer ${
+                isDark ? "text-zinc-300 hover:text-white hover:bg-white/10" : "text-slate-700 hover:text-slate-900 hover:bg-slate-100"
+              }`}
+            >
+              <ZoomOut className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={handleResetZoom}
+              title="Reset Zoom (100%)"
+              className={`px-2 py-1 font-medium cursor-pointer transition-colors text-[11px] ${
+                isDark ? "text-zinc-200 hover:text-white hover:bg-white/5" : "text-slate-800 hover:text-slate-900 hover:bg-slate-50"
+              }`}
+            >
+              {Math.round(zoomScale * 100)}%
+            </button>
+            <button
+              onClick={handleZoomIn}
+              title="Zoom In"
+              className={`p-1.5 transition-colors cursor-pointer ${
+                isDark ? "text-zinc-300 hover:text-white hover:bg-white/10" : "text-slate-700 hover:text-slate-900 hover:bg-slate-100"
+              }`}
+            >
+              <ZoomIn className="w-3.5 h-3.5" />
+            </button>
+          </div>
 
           {/* Zoom to Fit Circuit */}
           <button
@@ -1855,22 +2097,38 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
 
           <span className={`h-4 w-px mx-0.5 ${isDark ? "bg-white/10" : "bg-slate-200"}`} />
 
+          {/* Page View Toggle (Draw.io style tiled sheets) */}
+          <button
+            onClick={togglePageView}
+            title={pageViewEnabled ? "Switch to Infinite Canvas" : "Switch to Page View (Draw.io style)"}
+            className={`p-1.5 rounded-xl transition-colors cursor-pointer ${
+              pageViewEnabled
+                ? isDark
+                  ? "bg-white/10 text-zinc-200 border border-white/20"
+                  : "bg-slate-200 text-slate-900 border border-slate-300"
+                : isDark
+                ? "hover:bg-white/10 text-zinc-400 hover:text-white"
+                : "hover:bg-slate-100 text-slate-600 hover:text-slate-900"
+            }`}
+          >
+            <Grid2x2 className="w-3.5 h-3.5 text-zinc-400" />
+          </button>
+
           {/* Virtual Multimeter Probe Tool Toggle */}
           <button
             onClick={() => setProbeActive((prev) => !prev)}
             title="Virtual Multimeter / Voltage Probe HUD"
-            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[11px] font-semibold transition-all cursor-pointer ${
+            className={`p-1.5 rounded-xl transition-colors cursor-pointer ${
               probeActive
                 ? isDark
                   ? "bg-white/10 text-zinc-200 border border-white/20"
                   : "bg-slate-200 text-slate-900 border border-slate-300"
                 : isDark
-                ? "hover:bg-white/10 text-zinc-400 hover:text-zinc-200"
+                ? "hover:bg-white/10 text-zinc-400 hover:text-white"
                 : "hover:bg-slate-100 text-slate-600 hover:text-slate-900"
             }`}
           >
             <Gauge className="w-3.5 h-3.5 text-zinc-400" />
-            <span>Probe {probeActive ? "ON" : "OFF"}</span>
           </button>
 
           <span className={`h-4 w-px mx-0.5 ${isDark ? "bg-white/10" : "bg-slate-200"}`} />
@@ -1996,6 +2254,23 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
             <Maximize2 className="w-4 h-4" />
           </button>
 
+          {/* Page View Toggle */}
+          <button
+            onClick={togglePageView}
+            className={`p-2 rounded-xl transition-all active:scale-95 ${
+              pageViewEnabled
+                ? isDark
+                  ? "bg-white/15 text-white border border-white/20"
+                  : "bg-slate-200 text-slate-900 border border-slate-300"
+                : isDark
+                ? "hover:bg-white/10 text-zinc-400"
+                : "hover:bg-slate-100 text-slate-600"
+            }`}
+            title="Toggle Page View"
+          >
+            <Grid2x2 className="w-4 h-4" />
+          </button>
+
           {/* Voltage Probe HUD Toggle */}
           <button
             onClick={() => setProbeActive((prev) => !prev)}
@@ -2042,6 +2317,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
           onPanChange={setPanOffset}
           containerRef={containerRef}
           isDark={isDark}
+          wireRoutesMap={wireRoutesMap}
         />
       )}
 
@@ -2068,6 +2344,8 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
           onDuplicate={() => duplicateSelection()}
           onDeleteNode={(id) => deleteNode(id)}
           onDeleteWire={(id) => deleteWire(id)}
+          onBringToFront={(id) => bringToFront(id)}
+          onSendToBack={(id) => sendToBack(id)}
           onInsertJunction={(wireId, pos) => splitWireAtJunction(wireId, pos)}
           onEditNode={(node) => {
             selectNode(node.id, false);

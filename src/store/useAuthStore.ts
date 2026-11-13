@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import { UserPreferencesService } from "@/lib/userPreferencesService";
+import { useCircuitStore } from "./useCircuitStore";
 
 export interface CloudProjectMeta {
   id: string;
@@ -32,6 +34,8 @@ interface AuthState {
 
 const LOCAL_STORAGE_MOCK_USER = "relayflow_mock_user";
 
+let isAuthInitialized = false;
+
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   session: null,
@@ -40,6 +44,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   error: null,
 
   initAuth: async () => {
+    if (isAuthInitialized) return;
+    isAuthInitialized = true;
     set({ isLoading: true, error: null });
 
     if (!supabase) {
@@ -62,18 +68,46 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const { data, error } = await supabase.auth.getSession();
       if (error) throw error;
 
+      const initialUser = data.session?.user ?? null;
       set({
         session: data.session,
-        user: data.session?.user ?? null,
+        user: initialUser,
         isLoading: false,
       });
 
+      if (initialUser?.id) {
+        UserPreferencesService.loadPreferences(initialUser.id).then((saved) => {
+          if (saved) {
+            if (saved.canvasPreferences) {
+              useCircuitStore.getState().updateCanvasPreferences(saved.canvasPreferences);
+            }
+            if (saved.theme) {
+              useCircuitStore.getState().setTheme(saved.theme);
+            }
+          }
+        });
+      }
+
       supabase.auth.onAuthStateChange((_event, session) => {
+        const nextUser = session?.user ?? null;
         set({
           session,
-          user: session?.user ?? null,
+          user: nextUser,
           isLoading: false,
         });
+
+        if (nextUser?.id) {
+          UserPreferencesService.loadPreferences(nextUser.id).then((saved) => {
+            if (saved) {
+              if (saved.canvasPreferences) {
+                useCircuitStore.getState().updateCanvasPreferences(saved.canvasPreferences);
+              }
+              if (saved.theme) {
+                useCircuitStore.getState().setTheme(saved.theme);
+              }
+            }
+          });
+        }
       });
     } catch (err: any) {
       set({ error: err.message || "Failed to initialize auth", isLoading: false });

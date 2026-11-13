@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="120" height="120" viewBox="0 0 120 120" version="1.1" id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+   <path d="m 20.999996,47.999992 h 78.00001 v 24 h -78.00001 z m 39.000002,0 m 0,24" style="display:inline;fill:#2563eb;stroke:none;stroke-width:2;stroke-dasharray:none" id="mainFill1" />
+   <path id="mainPath1" style="fill:none;stroke:#ffffff;stroke-width:2" d="M 50.99998,47.999993 V 71.999991 M 35.999988,47.999993 50.99998,71.999991 m -14.999992,0 14.999992,-23.999998 m -29.999984,-1e-6 h 78 v 24 h -78 z m 39.000003,0 V -2e-6 m 0,71.999994 V 120" />
+   <path d="M 20.999996,47.999993 H 35.999988 V 71.999991 H 20.999996 Z m 7.499999,0 m 0,23.999998" style="fill:#ffffff;stroke:none;stroke-width:2;stroke-dasharray:none" id="mainFill2" />
+</svg>

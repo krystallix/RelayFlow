@@ -7,12 +7,40 @@ import catalogData from "../constants/components-catalog.json";
 import { DEFAULT_SIMPLE_LAMP_PROJECT } from "../constants/default-circuit";
 import { WireNetResolver } from "../engine/router/WireNetResolver";
 import { ManhattanRouter } from "../engine/router/ManhattanRouter";
+import { UserPreferencesService } from "@/lib/userPreferencesService";
+import { useAuthStore } from "./useAuthStore";
 
 const catalog = catalogData as Record<string, any>;
 
 const LOCAL_STORAGE_KEY = "relayflow_saved_project";
 const LOCAL_STORAGE_THEME_KEY = "relayflow_saved_theme";
 const LOCAL_STORAGE_LOCALE_KEY = "relayflow_saved_locale";
+const LOCAL_STORAGE_PREFERENCES_KEY = "relayflow_canvas_preferences";
+
+export interface CanvasPreferences {
+  // Label & Typography (in px)
+  wireNumberSize: number; // default: 9 (range: 7 - 16)
+  componentTagSize: number; // default: 12 (range: 8 - 22)
+  commentTextSize: number; // default: 10 (range: 8 - 18)
+  wireThickness: number; // default: 2 (range: 1 - 5)
+  showCommentText: boolean;
+  highContrastBadges: boolean;
+
+  // Wires & Connections
+  showTerminalPinsAlways: boolean;
+  highlightCrossings: boolean;
+}
+
+export const DEFAULT_CANVAS_PREFERENCES: CanvasPreferences = {
+  wireNumberSize: 9,
+  componentTagSize: 12,
+  commentTextSize: 10,
+  wireThickness: 2,
+  showCommentText: true,
+  highContrastBadges: true,
+  showTerminalPinsAlways: false,
+  highlightCrossings: true,
+};
 
 function syncDocumentTheme(theme: "dark" | "light") {
   if (typeof document === "undefined") return;
@@ -151,6 +179,7 @@ interface CircuitStoreState {
   locale: "en" | "id";
   showGrid: boolean;
   showWireLabels: boolean;
+  pageViewEnabled: boolean;
 
   // Simulation state
   isSimulating: boolean;
@@ -182,12 +211,21 @@ interface CircuitStoreState {
   currentProjectId: string | null;
   isCloudSynced: boolean;
   isReadOnlyViewer: boolean;
+  isHardwareSheetOpen: boolean;
+  isPreferencesOpen: boolean;
+  canvasPreferences: CanvasPreferences;
 
   // Actions
   hydrateFromLocalStorage: () => void;
   setCloudProjectId: (id: string | null) => void;
   setIsCloudSynced: (synced: boolean) => void;
   setIsReadOnlyViewer: (viewer: boolean) => void;
+  setIsHardwareSheetOpen: (open: boolean) => void;
+  toggleHardwareSheet: () => void;
+  setIsPreferencesOpen: (open: boolean) => void;
+  togglePreferences: () => void;
+  updateCanvasPreferences: (patch: Partial<CanvasPreferences>) => void;
+  resetCanvasPreferences: () => void;
   setProjectTitle: (title: string) => void;
   setWireRoutingMode: (mode: "orthogonal" | "bezier") => void;
   setTheme: (theme: "dark" | "light") => void;
@@ -195,6 +233,8 @@ interface CircuitStoreState {
   setLocale: (locale: "en" | "id") => void;
   toggleLocale: () => void;
   toggleGrid: () => void;
+  togglePageView: () => void;
+  setPageViewEnabled: (enabled: boolean) => void;
   loadProject: (project: RelayFlowProject, format?: "rflow" | "smrl") => void;
   resetCanvas: () => void;
   autoLayout: () => void;
@@ -219,6 +259,8 @@ interface CircuitStoreState {
   deleteSelection: () => void;
   deleteNode: (nodeId: string | number) => void;
   deleteWire: (wireId: string | number) => void;
+  bringToFront: (targetId?: string | number) => void;
+  sendToBack: (targetId?: string | number) => void;
   duplicateSelection: () => void;
   copySelection: () => void;
   pasteSelection: (targetPos?: { x: number; y: number }) => void;
@@ -255,13 +297,13 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
   getStoreState = get;
   const initial = getInitialState();
 
-  const pushHistory = (state: CircuitStoreState): { undoStack: HistorySnapshot[]; redoStack: HistorySnapshot[] } => {
+  const pushHistory = (state: CircuitStoreState): { undoStack: HistorySnapshot[]; redoStack: HistorySnapshot[]; isCloudSynced: boolean } => {
     const currentSnapshot: HistorySnapshot = {
       nodes: state.nodes.map((n) => ({ ...n })),
       wires: state.wires.map((w) => ({ ...w })),
     };
     const newUndo = [...state.undoStack.slice(-49), currentSnapshot];
-    return { undoStack: newUndo, redoStack: [] };
+    return { undoStack: newUndo, redoStack: [], isCloudSynced: false };
   };
 
   return {
@@ -276,6 +318,7 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
     locale: initial.locale,
     showGrid: true,
     showWireLabels: true,
+    pageViewEnabled: false,
     isSimulating: false,
     shortCircuit: false,
     shortCircuitMessage: null,
@@ -288,6 +331,9 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
     currentProjectId: null,
     isCloudSynced: false,
     isReadOnlyViewer: false,
+    isHardwareSheetOpen: false,
+    isPreferencesOpen: false,
+    canvasPreferences: DEFAULT_CANVAS_PREFERENCES,
 
     setCloudProjectId: (id) => {
       set({ currentProjectId: id });
@@ -295,6 +341,62 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
     },
     setIsCloudSynced: (synced) => set({ isCloudSynced: synced }),
     setIsReadOnlyViewer: (viewer) => set({ isReadOnlyViewer: viewer }),
+    setIsHardwareSheetOpen: (open) =>
+      set({
+        isHardwareSheetOpen: open,
+        // Mutual exclusion: close preferences sheet if opening hardware sheet
+        ...(open ? { isPreferencesOpen: false } : {}),
+      }),
+    toggleHardwareSheet: () =>
+      set((state) => {
+        const next = !state.isHardwareSheetOpen;
+        return {
+          isHardwareSheetOpen: next,
+          ...(next ? { isPreferencesOpen: false } : {}),
+        };
+      }),
+    setIsPreferencesOpen: (open) =>
+      set({
+        isPreferencesOpen: open,
+        // Mutual exclusion: close hardware sheet if opening preferences sheet
+        ...(open ? { isHardwareSheetOpen: false } : {}),
+      }),
+    togglePreferences: () =>
+      set((state) => {
+        const next = !state.isPreferencesOpen;
+        return {
+          isPreferencesOpen: next,
+          ...(next ? { isHardwareSheetOpen: false } : {}),
+        };
+      }),
+    updateCanvasPreferences: (patch) => {
+      set((state) => {
+        const next = { ...state.canvasPreferences, ...patch };
+        try {
+          localStorage.setItem(LOCAL_STORAGE_PREFERENCES_KEY, JSON.stringify(next));
+        } catch (e) {}
+
+        // Auto-sync to Supabase if user is logged in
+        const currentUser = useAuthStore.getState().user;
+        if (currentUser?.id) {
+          UserPreferencesService.savePreferences(currentUser.id, next, state.theme);
+        }
+
+        return { canvasPreferences: next };
+      });
+    },
+    resetCanvasPreferences: () => {
+      try {
+        localStorage.removeItem(LOCAL_STORAGE_PREFERENCES_KEY);
+      } catch (e) {}
+
+      const currentUser = useAuthStore.getState().user;
+      if (currentUser?.id) {
+        UserPreferencesService.savePreferences(currentUser.id, DEFAULT_CANVAS_PREFERENCES, undefined, true);
+      }
+
+      set({ canvasPreferences: DEFAULT_CANVAS_PREFERENCES });
+    },
 
     hydrateFromLocalStorage: () => {
       if (typeof window === "undefined") return;
@@ -312,6 +414,14 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
         const savedLocale = localStorage.getItem(LOCAL_STORAGE_LOCALE_KEY);
         if (savedLocale === "en" || savedLocale === "id") {
           locale = savedLocale;
+        }
+      } catch (e) {}
+
+      let savedPreferences: Partial<CanvasPreferences> | undefined;
+      try {
+        const rawPrefs = localStorage.getItem(LOCAL_STORAGE_PREFERENCES_KEY);
+        if (rawPrefs) {
+          savedPreferences = JSON.parse(rawPrefs);
         }
       } catch (e) {}
 
@@ -342,6 +452,19 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
         syncDocumentTheme(theme);
       }
       if (locale) updates.locale = locale;
+      if (savedPreferences) {
+        // Sanitize numbers in case legacy string values existed in localStorage
+        const wireNumberSize = typeof savedPreferences.wireNumberSize === "number" ? savedPreferences.wireNumberSize : DEFAULT_CANVAS_PREFERENCES.wireNumberSize;
+        const componentTagSize = typeof savedPreferences.componentTagSize === "number" ? savedPreferences.componentTagSize : DEFAULT_CANVAS_PREFERENCES.componentTagSize;
+        const wireThickness = typeof savedPreferences.wireThickness === "number" ? savedPreferences.wireThickness : DEFAULT_CANVAS_PREFERENCES.wireThickness;
+        updates.canvasPreferences = {
+          ...DEFAULT_CANVAS_PREFERENCES,
+          ...savedPreferences,
+          wireNumberSize,
+          componentTagSize,
+          wireThickness,
+        };
+      }
       if (projectData.nodes && projectData.wires) {
         updates.nodes = projectData.nodes;
         updates.wires = projectData.wires;
@@ -358,7 +481,7 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
     },
 
     setProjectTitle: (title) => {
-      set({ projectTitle: title });
+      set({ projectTitle: title, isCloudSynced: false });
       saveToLocalStorage(get());
     },
     setWireRoutingMode: (mode) => set({ wireRoutingMode: mode }),
@@ -367,6 +490,12 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
         localStorage.setItem(LOCAL_STORAGE_THEME_KEY, theme);
       } catch (e) {}
       syncDocumentTheme(theme);
+
+      const currentUser = useAuthStore.getState().user;
+      if (currentUser?.id) {
+        UserPreferencesService.savePreferences(currentUser.id, get().canvasPreferences, theme);
+      }
+
       set({ theme });
     },
     toggleTheme: () =>
@@ -376,6 +505,12 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
           localStorage.setItem(LOCAL_STORAGE_THEME_KEY, next);
         } catch (e) {}
         syncDocumentTheme(next);
+
+        const currentUser = useAuthStore.getState().user;
+        if (currentUser?.id) {
+          UserPreferencesService.savePreferences(currentUser.id, state.canvasPreferences, next);
+        }
+
         return { theme: next };
       }),
     setLocale: (locale) => {
@@ -393,6 +528,8 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
         return { locale: next };
       }),
     toggleGrid: () => set((state) => ({ showGrid: !state.showGrid })),
+    togglePageView: () => set((state) => ({ pageViewEnabled: !state.pageViewEnabled })),
+    setPageViewEnabled: (enabled: boolean) => set({ pageViewEnabled: enabled }),
     toggleWireLabels: () => set((state) => ({ showWireLabels: !state.showWireLabels })),
 
     renumberWires: () => {
@@ -420,6 +557,120 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
         saveToLocalStorage({ projectTitle: state.projectTitle, nodes: state.nodes, wires: nextWires });
         return {
           wires: nextWires,
+          ...history,
+        };
+      });
+    },
+
+    bringToFront: (targetId) => {
+      set((state) => {
+        let changed = false;
+        let nextWires = state.wires;
+        let nextNodes = state.nodes;
+
+        if (targetId !== undefined) {
+          const wireIdx = state.wires.findIndex((w) => w.id === targetId);
+          if (wireIdx !== -1 && wireIdx !== state.wires.length - 1) {
+            nextWires = [
+              ...state.wires.slice(0, wireIdx),
+              ...state.wires.slice(wireIdx + 1),
+              state.wires[wireIdx],
+            ];
+            changed = true;
+          }
+
+          const nodeIdx = state.nodes.findIndex((n) => n.id === targetId);
+          if (nodeIdx !== -1 && nodeIdx !== state.nodes.length - 1) {
+            nextNodes = [
+              ...state.nodes.slice(0, nodeIdx),
+              ...state.nodes.slice(nodeIdx + 1),
+              state.nodes[nodeIdx],
+            ];
+            changed = true;
+          }
+        } else {
+          if (state.selectedWireIds.size > 0) {
+            const unselected = state.wires.filter((w) => !state.selectedWireIds.has(w.id));
+            const selected = state.wires.filter((w) => state.selectedWireIds.has(w.id));
+            if (selected.length > 0 && unselected.length > 0) {
+              nextWires = [...unselected, ...selected];
+              changed = true;
+            }
+          }
+          if (state.selectedNodeIds.size > 0) {
+            const unselected = state.nodes.filter((n) => !state.selectedNodeIds.has(n.id));
+            const selected = state.nodes.filter((n) => state.selectedNodeIds.has(n.id));
+            if (selected.length > 0 && unselected.length > 0) {
+              nextNodes = [...unselected, ...selected];
+              changed = true;
+            }
+          }
+        }
+
+        if (!changed) return {};
+
+        const history = pushHistory(state);
+        saveToLocalStorage({ projectTitle: state.projectTitle, nodes: nextNodes, wires: nextWires });
+        return {
+          wires: nextWires,
+          nodes: nextNodes,
+          ...history,
+        };
+      });
+    },
+
+    sendToBack: (targetId) => {
+      set((state) => {
+        let changed = false;
+        let nextWires = state.wires;
+        let nextNodes = state.nodes;
+
+        if (targetId !== undefined) {
+          const wireIdx = state.wires.findIndex((w) => w.id === targetId);
+          if (wireIdx > 0) {
+            nextWires = [
+              state.wires[wireIdx],
+              ...state.wires.slice(0, wireIdx),
+              ...state.wires.slice(wireIdx + 1),
+            ];
+            changed = true;
+          }
+
+          const nodeIdx = state.nodes.findIndex((n) => n.id === targetId);
+          if (nodeIdx > 0) {
+            nextNodes = [
+              state.nodes[nodeIdx],
+              ...state.nodes.slice(0, nodeIdx),
+              ...state.nodes.slice(nodeIdx + 1),
+            ];
+            changed = true;
+          }
+        } else {
+          if (state.selectedWireIds.size > 0) {
+            const unselected = state.wires.filter((w) => !state.selectedWireIds.has(w.id));
+            const selected = state.wires.filter((w) => state.selectedWireIds.has(w.id));
+            if (selected.length > 0 && unselected.length > 0) {
+              nextWires = [...selected, ...unselected];
+              changed = true;
+            }
+          }
+          if (state.selectedNodeIds.size > 0) {
+            const unselected = state.nodes.filter((n) => !state.selectedNodeIds.has(n.id));
+            const selected = state.nodes.filter((n) => state.selectedNodeIds.has(n.id));
+            if (selected.length > 0 && unselected.length > 0) {
+              nextNodes = [...selected, ...unselected];
+              changed = true;
+            }
+          }
+        }
+
+        if (!changed) return {};
+
+        const history = pushHistory(state);
+        saveToLocalStorage({ projectTitle: state.projectTitle, nodes: nextNodes, wires: nextWires });
+        return {
+          wires: nextWires,
+          nodes: nextNodes,
           ...history,
         };
       });
@@ -1498,6 +1749,7 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
           wires: previous.wires,
           undoStack: newUndo,
           redoStack: [currentSnapshot, ...state.redoStack],
+          isCloudSynced: false,
         };
       });
     },
@@ -1516,6 +1768,7 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
           wires: next.wires,
           undoStack: [...state.undoStack, currentSnapshot],
           redoStack: newRedo,
+          isCloudSynced: false,
         };
       });
     },

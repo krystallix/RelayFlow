@@ -52,6 +52,7 @@ export interface CircuitWire {
   margins: WireMargins;
   potential?: string | null;
   isHot?: boolean;
+  flowDirection?: "forward" | "reverse";
   toWireId?: string | number;
   tapPoint?: Point;
   label?: string | null;

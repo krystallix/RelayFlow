@@ -508,6 +508,90 @@ export class SimulationEngine {
       }
     }
 
+    // Assign realistic physical current flow direction:
+    // Flow always travels outward from Power Sources (+24V, L1/L2/L3) through loads, and down towards Neutral/GND/Return (-24V, N, PE).
+    const sourceNodeIds = new Set<string | number>();
+    const returnNodeIds = new Set<string | number>();
+
+    for (const node of nodes) {
+      const cid = node.componentId;
+      if (
+        cid === "sourceL1" ||
+        cid === "sourceL2" ||
+        cid === "sourceL3" ||
+        cid === "sourceL1L2L3" ||
+        cid === "sourceL1L2L3N" ||
+        cid === "sourcePlus" ||
+        (cid === "arrowDestination" && node.comment?.includes("+24"))
+      ) {
+        sourceNodeIds.add(node.id);
+      } else if (
+        cid === "sourceN" ||
+        cid === "sourceNegative" ||
+        cid === "sourceGnd" ||
+        cid === "sourcePE" ||
+        (cid === "arrowDestination" && node.comment?.includes("-24"))
+      ) {
+        returnNodeIds.add(node.id);
+      }
+    }
+
+    // Compute hop distances from sources (BFS)
+    const wireMap = new Map<string | number, CircuitWire>(wires.map((w) => [w.id, w]));
+    const nodeSourceDist = new Map<string | number, number>();
+    const sourceQueue: Array<{ nodeId: string | number; dist: number }> = [];
+
+    for (const sid of sourceNodeIds) {
+      nodeSourceDist.set(sid, 0);
+      sourceQueue.push({ nodeId: sid, dist: 0 });
+    }
+
+    while (sourceQueue.length > 0) {
+      const { nodeId, dist } = sourceQueue.shift()!;
+      for (const w of wires) {
+        if (!w.isHot) continue;
+        const targetNodeId = w.fromNodeId === nodeId ? w.toNodeId : w.toNodeId === nodeId ? w.fromNodeId : null;
+        if (targetNodeId && !nodeSourceDist.has(targetNodeId)) {
+          nodeSourceDist.set(targetNodeId, dist + 1);
+          sourceQueue.push({ nodeId: targetNodeId, dist: dist + 1 });
+        }
+      }
+    }
+
+    // Determine wire flowDirection
+    for (const wire of wires) {
+      if (!wire.isHot) {
+        wire.flowDirection = undefined;
+        continue;
+      }
+
+      // If wire carries return potential (N, -24V, PE), flow moves towards the return/neutral terminal
+      if (wire.potential && returnPotentials.has(wire.potential)) {
+        if (returnNodeIds.has(wire.toNodeId)) {
+          wire.flowDirection = "forward"; // from fromNode to toNode (to return node)
+        } else if (returnNodeIds.has(wire.fromNodeId)) {
+          wire.flowDirection = "reverse"; // from toNode to fromNode (to return node)
+        } else {
+          // Default to outward forward
+          wire.flowDirection = "forward";
+        }
+      } else {
+        // Positive / Phase line: flow moves away from source towards load/destination
+        const distFrom = nodeSourceDist.get(wire.fromNodeId) ?? Infinity;
+        const distTo = nodeSourceDist.get(wire.toNodeId) ?? Infinity;
+
+        if (sourceNodeIds.has(wire.fromNodeId)) {
+          wire.flowDirection = "forward";
+        } else if (sourceNodeIds.has(wire.toNodeId)) {
+          wire.flowDirection = "reverse";
+        } else if (distFrom !== Infinity && distTo !== Infinity) {
+          wire.flowDirection = distFrom <= distTo ? "forward" : "reverse";
+        } else {
+          wire.flowDirection = "forward";
+        }
+      }
+    }
+
     return {
       nodes,
       wires,

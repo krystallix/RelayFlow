@@ -419,4 +419,35 @@ describe("Wire Splice and Drag Features", () => {
     expect(newWire.toNodeId).toBe(motor.id);
     expect(newWire.toPortId).toBe(0);
   });
+
+  it("bringToFront and sendToBack should reorder wires and nodes in store and support undo", () => {
+    useCircuitStore.getState().loadProject(DEFAULT_SIMPLE_LAMP_PROJECT);
+
+    // Test wire layer reordering by ID
+    const initialWires = useCircuitStore.getState().wires;
+    expect(initialWires.length).toBeGreaterThanOrEqual(2);
+    const firstWireId = initialWires[0].id;
+    const lastWireId = initialWires[initialWires.length - 1].id;
+
+    // Bring first wire to front -> should become the last element
+    useCircuitStore.getState().bringToFront(firstWireId);
+    let wiresAfter = useCircuitStore.getState().wires;
+    expect(wiresAfter[wiresAfter.length - 1].id).toBe(firstWireId);
+
+    // Send it to back -> should become the first element again
+    useCircuitStore.getState().sendToBack(firstWireId);
+    wiresAfter = useCircuitStore.getState().wires;
+    expect(wiresAfter[0].id).toBe(firstWireId);
+
+    // Test selection-based reordering
+    useCircuitStore.getState().selectWire(lastWireId, false);
+    useCircuitStore.getState().sendToBack();
+    wiresAfter = useCircuitStore.getState().wires;
+    expect(wiresAfter[0].id).toBe(lastWireId);
+
+    // Undo should restore previous state
+    useCircuitStore.getState().undo();
+    wiresAfter = useCircuitStore.getState().wires;
+    expect(wiresAfter[0].id).toBe(firstWireId);
+  });
 });

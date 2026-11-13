@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { CircuitNode, CircuitWire, Point } from "@/engine/types";
 import { ManhattanRouter } from "@/engine/router/ManhattanRouter";
+import { WireIntersectionResolver } from "@/engine/router/WireIntersectionResolver";
 import { WireNetResolver } from "@/engine/router/WireNetResolver";
 import { WireLabel } from "./WireLabel";
 import { SimulationEngine } from "@/engine/SimulationEngine";
@@ -22,6 +23,8 @@ interface FlowWireProps {
   obstacles?: Array<{ x: number; y: number; width: number; height: number }>;
   nodeMap?: Map<string | number, CircuitNode>;
   wireMap?: Map<string | number, CircuitWire>;
+  crossings?: Point[];
+  precomputedRoute?: { points: Point[]; svgPath: string };
   screenToWorld: (clientX: number, clientY: number) => { x: number; y: number };
   onContextMenu?: (wire: CircuitWire, e: React.MouseEvent) => void;
   onWireHover?: (wire: CircuitWire, e: React.MouseEvent) => void;
@@ -42,6 +45,7 @@ interface FlowWireProps {
 function areWirePropsEqual(prev: FlowWireProps, next: FlowWireProps): boolean {
   if (prev.wire.id !== next.wire.id) return false;
   if (prev.wire.isHot !== next.wire.isHot) return false;
+  if (prev.wire.flowDirection !== next.wire.flowDirection) return false;
   if (prev.wire.potential !== next.wire.potential) return false;
   if (prev.isSelected !== next.isSelected) return false;
   if (prev.label !== next.label) return false;
@@ -105,6 +109,26 @@ function areWirePropsEqual(prev: FlowWireProps, next: FlowWireProps): boolean {
       return false;
   }
 
+  // Check crossings
+  if (prev.crossings !== next.crossings) {
+    if (!prev.crossings || !next.crossings) return false;
+    if (prev.crossings.length !== next.crossings.length) return false;
+    for (let i = 0; i < prev.crossings.length; i++) {
+      if (
+        prev.crossings[i].x !== next.crossings[i].x ||
+        prev.crossings[i].y !== next.crossings[i].y
+      ) {
+        return false;
+      }
+    }
+  }
+
+  // Check precomputedRoute
+  if (prev.precomputedRoute !== next.precomputedRoute) {
+    if (!prev.precomputedRoute || !next.precomputedRoute) return false;
+    if (prev.precomputedRoute.svgPath !== next.precomputedRoute.svgPath) return false;
+  }
+
   return true;
 }
 
@@ -119,6 +143,8 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
   obstacles = [],
   nodeMap,
   wireMap,
+  crossings,
+  precomputedRoute,
   screenToWorld,
   onContextMenu,
   onWireHover,
@@ -132,6 +158,8 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
   const hasWireDraft = useCircuitStore((s) => Boolean(s.wireDraft));
   const connectWireToWire = useCircuitStore((s) => s.connectWireToWire);
   const theme = useCircuitStore((s) => s.theme);
+  const wireThickness = useCircuitStore((s) => s.canvasPreferences.wireThickness);
+  const highlightCrossings = useCircuitStore((s) => s.canvasPreferences.highlightCrossings);
   const isDark = theme === "dark";
 
   const [hoverPos, setHoverPos] = useState<Point | null>(null);
@@ -159,8 +187,11 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
     [wire.fromNodeId, wire.toNodeId, wire.toWireId]
   );
 
-  const routed =
-    routingMode === "bezier"
+  const routed = React.useMemo(() => {
+    if (precomputedRoute && routingMode === "orthogonal") {
+      return precomputedRoute;
+    }
+    return routingMode === "bezier"
       ? ManhattanRouter.routeBezier(p1, dir1, p2, dir2)
       : ManhattanRouter.routeOrthogonal(
           p1,
@@ -171,6 +202,14 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
           obstacles,
           ignoreObstacleIds
         );
+  }, [precomputedRoute, routingMode, p1, dir1, p2, dir2, effectiveMargins, obstacles, ignoreObstacleIds]);
+
+  const displaySvgPath = React.useMemo(() => {
+    if (highlightCrossings && routingMode === "orthogonal" && crossings && crossings.length > 0 && routed.points) {
+      return WireIntersectionResolver.injectArcJumps(routed.points, crossings);
+    }
+    return routed.svgPath;
+  }, [highlightCrossings, routingMode, crossings, routed.points, routed.svgPath]);
 
   const isHot = wire.isHot;
 
@@ -222,11 +261,18 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
         ];
 
   const handleMouseMove = (e: React.MouseEvent) => {
+    // Only compute and update hover attachment indicator when actively drafting a wire
+    if (!hasWireDraft) {
+      if (hoverPos !== null) setHoverPos(null);
+      return;
+    }
     const world = screenToWorld(e.clientX, e.clientY);
     const { point, dist } = ManhattanRouter.getNearestPointOnSegments(world, routed.points);
     if (dist < 30) {
-      setHoverPos(point);
-    } else {
+      if (!hoverPos || hoverPos.x !== point.x || hoverPos.y !== point.y) {
+        setHoverPos(point);
+      }
+    } else if (hoverPos !== null) {
       setHoverPos(null);
     }
   };
@@ -340,7 +386,7 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
     >
       {/* 1. Broad Invisible Click / Hit Target */}
       <path
-        d={routed.svgPath}
+        d={displaySvgPath}
         fill="none"
         stroke="transparent"
         strokeWidth={28}
@@ -385,10 +431,16 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
       {/* 3. Glow Layer (when Hot, Selected, or Hovered) */}
       {(isHot || isSelected || isHovered) && (
         <path
-          d={routed.svgPath}
+          d={displaySvgPath}
           fill="none"
           stroke={wireColor}
-          strokeWidth={isSelected ? 4 : isHovered ? 3.5 : 2}
+          strokeWidth={
+            isSelected
+              ? (typeof wireThickness === "number" ? wireThickness : 2) + 2
+              : isHovered
+              ? (typeof wireThickness === "number" ? wireThickness : 2) + 1.5
+              : typeof wireThickness === "number" ? wireThickness : 2
+          }
           strokeOpacity={isSelected ? 0.35 : isHovered ? 0.25 : 1}
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -397,25 +449,33 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
 
       {/* 4. Core Wire Path */}
       <path
-        d={routed.svgPath}
+        d={displaySvgPath}
         fill="none"
         stroke={wireColor}
-        strokeWidth={isSelected ? 2.5 : 2}
+        strokeWidth={
+          isSelected
+            ? (typeof wireThickness === "number" ? wireThickness : 2) + 0.5
+            : typeof wireThickness === "number" ? wireThickness : 2
+        }
         strokeLinecap="round"
         strokeLinejoin="round"
         className="transition-colors group-hover:stroke-amber-400"
       />
 
-      {/* 5. Active Current Animation (Flowing Dashes) */}
+      {/* 5. Active Current Animation (Flowing Dashes from Source to Neutral/Load) */}
       {isHot && isSimulating && (
         <path
-          d={routed.svgPath}
+          d={displaySvgPath}
           fill="none"
           stroke="#ffffff"
-          strokeWidth={2}
+          strokeWidth={typeof wireThickness === "number" ? wireThickness : 2}
           strokeDasharray="4, 8"
           strokeLinecap="round"
-          className="animate-[flow_1s_linear_infinite]"
+          className={
+            wire.flowDirection === "reverse"
+              ? "animate-[flow-reverse_1s_linear_infinite]"
+              : "animate-[flow-forward_1s_linear_infinite]"
+          }
         />
       )}
 

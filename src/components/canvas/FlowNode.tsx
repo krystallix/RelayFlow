@@ -79,6 +79,11 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
   const setComponentPressed = useCircuitStore((s) => s.setComponentPressed);
   const hasWireDraft = useCircuitStore((s) => Boolean(s.wireDraft));
   const updateNodeData = useCircuitStore((s) => s.updateNodeData);
+  const componentTagSize = useCircuitStore((s) => s.canvasPreferences.componentTagSize);
+  const commentTextSize = useCircuitStore((s) => s.canvasPreferences.commentTextSize);
+  const highContrastBadges = useCircuitStore((s) => s.canvasPreferences.highContrastBadges);
+  const showCommentText = useCircuitStore((s) => s.canvasPreferences.showCommentText);
+  const showTerminalPinsAlways = useCircuitStore((s) => s.canvasPreferences.showTerminalPinsAlways);
   const isDark = theme === "dark";
   const [commentEditValue, setCommentEditValue] = useState(node.comment || "");
   const commentInputRef = useRef<HTMLInputElement>(null);
@@ -201,7 +206,7 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
   const isHorizontal = node.rotation === 1 || node.rotation === 3;
   const isTagVisible = node.tagVisibility !== false;
   const showTag = isTagVisible && Boolean(node.tag);
-  const showComment = Boolean(node.comment) || Boolean(isEditingComment);
+  const showComment = (Boolean(node.comment) && showCommentText) || Boolean(isEditingComment);
   const hasLabel = showTag || showComment || isTimer || Boolean(isEditingComment);
 
   // Smart CAD label placement:
@@ -257,10 +262,19 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
     return set;
   }, [connectedPortIds, node.id]);
 
-  // Show _on.svg for activated switches/contacts (frameIndex === 1) or energized lamps
+  // Show _on.svg for activated switches/contacts (frameIndex === 1) or energized loads
+  const isLoadWithOnVariant =
+    node.componentId.startsWith("coil") ||
+    (node.componentId.startsWith("motor") && !node.componentId.toLowerCase().includes("breaker")) ||
+    node.componentId === "buzzer" ||
+    node.componentId === "ring" ||
+    node.componentId === "siren" ||
+    node.componentId === "lamp" ||
+    node.componentId === "lampBlink";
+
   const shouldShowOnVariant =
     (isSwitchOrContact && node.frameIndex === 1) ||
-    (Boolean(node.isEnergized) && (node.componentId === "lamp" || node.componentId === "lampBlink"));
+    (Boolean(node.isEnergized) && isLoadWithOnVariant);
 
   const svgPath = shouldShowOnVariant ? `/symbols/${node.componentId}_on.svg` : comp?.svgPath;
 
@@ -351,23 +365,32 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
         <div
           style={labelStyle}
           className={`absolute flex flex-col gap-0.5 pointer-events-none select-none text-xs font-mono whitespace-nowrap z-20 px-1.5 py-0.5 rounded-md transition-colors ${
-            isDark
-              ? "bg-[#090b10]/40 border border-white/5 shadow-xs"
-              : "bg-white/45 border border-slate-200/50 shadow-xs"
+            !highContrastBadges
+              ? "bg-transparent border-transparent shadow-none"
+              : isDark
+              ? "bg-[#090b10]/95 border border-white/10 shadow-xs"
+              : "bg-white/95 border border-slate-200 shadow-xs"
           } ${labelContainerClass}`}
         >
           {/* Tag & Cross-reference row */}
           {(showTag || effectivePairedCount > 0) && (
             <div className="flex items-center gap-1.5">
               {showTag && (
-                <span className={`font-bold tracking-tight text-xs ${isDark ? "text-amber-400" : "text-amber-600"}`}>
+                <span
+                  style={{ fontSize: `${typeof componentTagSize === "number" ? componentTagSize : 12}px` }}
+                  className={`font-bold tracking-tight ${isDark ? "text-amber-400" : "text-amber-600"}`}
+                >
                   {node.tag}
                 </span>
               )}
               {effectivePairedCount > 0 && (
                 <span
                   className={`text-[9px] px-1 py-0.2 rounded font-sans font-semibold border ${
-                    isDark
+                    !highContrastBadges
+                      ? isDark
+                        ? "bg-transparent text-amber-400 border-amber-400/30"
+                        : "bg-transparent text-amber-700 border-amber-400/40"
+                      : isDark
                       ? "bg-amber-500/15 text-amber-300 border-amber-500/30"
                       : "bg-amber-100 text-amber-800 border-amber-300"
                   }`}
@@ -385,6 +408,7 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
               ref={commentInputRef}
               type="text"
               value={commentEditValue}
+              style={{ fontSize: `${typeof commentTextSize === "number" ? commentTextSize : 10}px` }}
               onChange={(e) => setCommentEditValue(e.target.value)}
               onKeyDown={(e) => {
                 e.stopPropagation();
@@ -401,7 +425,7 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
               }}
               onClick={(e) => e.stopPropagation()}
               onMouseDown={(e) => e.stopPropagation()}
-              className={`text-[10px] font-normal leading-tight px-1 py-0.5 rounded outline-none border pointer-events-auto min-w-[70px] max-w-[180px] ${
+              className={`font-normal leading-tight px-1 py-0.5 rounded outline-none border pointer-events-auto min-w-[70px] max-w-[180px] ${
                 isDark
                   ? "bg-zinc-900 text-zinc-100 border-amber-400 shadow-xs"
                   : "bg-white text-slate-900 border-amber-500 shadow-xs"
@@ -410,13 +434,14 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
             />
           ) : showComment ? (
             <span
+              style={{ fontSize: `${typeof commentTextSize === "number" ? commentTextSize : 10}px` }}
               onDoubleClick={(e) => {
                 e.stopPropagation();
                 if (!isSimulating && onStartEditComment) {
                   onStartEditComment(node.id);
                 }
               }}
-              className={`text-[10px] font-normal leading-tight pointer-events-auto cursor-text ${isDark ? "text-zinc-400" : "text-slate-500"}`}
+              className={`font-normal leading-tight pointer-events-auto cursor-text ${isDark ? "text-zinc-400" : "text-slate-500"}`}
               title="Double-click to edit comment"
             >
               {node.comment}
@@ -592,9 +617,9 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
               </div>
             )}
 
-            {/* Terminal Tag Tooltip on Direct Port Hover: points OUTWARD away from symbol */}
+            {/* Terminal Tag Tooltip on Direct Port Hover or Always visible */}
             <span
-              className={`absolute opacity-0 group-hover/port:opacity-100 text-[9px] font-mono px-1 py-0.5 rounded border whitespace-nowrap pointer-events-none transition-opacity z-30 ${
+              className={`absolute ${showTerminalPinsAlways ? "opacity-100" : "opacity-0 group-hover/port:opacity-100"} text-[9px] font-mono px-1 py-0.5 rounded border whitespace-nowrap pointer-events-none transition-opacity z-30 ${
                 transformed.y <= 15
                   ? "bottom-full mb-1.5 left-1/2 -translate-x-1/2"
                   : transformed.y >= height - 15

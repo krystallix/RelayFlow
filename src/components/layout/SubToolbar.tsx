@@ -11,6 +11,7 @@ import {
   Sparkles,
   GitCommit,
   Hash,
+  Sliders,
 } from "lucide-react";
 
 interface SubToolbarProps {
@@ -102,6 +103,8 @@ export const SubToolbar: React.FC<SubToolbarProps> = ({ onAutoLayout }) => {
     theme,
     locale,
     nodes,
+    isPreferencesOpen,
+    togglePreferences,
   } = useCircuitStore();
 
   const isDark = theme === "dark";
@@ -113,7 +116,7 @@ export const SubToolbar: React.FC<SubToolbarProps> = ({ onAutoLayout }) => {
   };
 
   return (
-    <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 pointer-events-auto select-none">
+    <div className="absolute top-4 left-4 z-30 pointer-events-auto select-none">
       {/* Floating Island / Capsule Container */}
       <div
         className={`flex items-center gap-1.5 px-2 py-1.5 rounded-2xl border shadow-2xl backdrop-blur-md transition-all duration-200 ${
@@ -217,6 +220,16 @@ export const SubToolbar: React.FC<SubToolbarProps> = ({ onAutoLayout }) => {
             <GitCommit className="w-4 h-4" />
           </TooltipButton>
         )}
+
+        {/* View Preferences Drawer Toggle */}
+        <TooltipButton
+          onClick={togglePreferences}
+          tooltip={locale === "id" ? "Preferensi Tampilan" : "View Preferences"}
+          active={isPreferencesOpen}
+          isDark={isDark}
+        >
+          <Sliders className="w-4 h-4" />
+        </TooltipButton>
       </div>
     </div>
   );
