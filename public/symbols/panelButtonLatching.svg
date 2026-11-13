@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60" fill="none">
+  <!-- Minimalist Clean CAD Bezel -->
+  <circle cx="30" cy="30" r="26" fill="none" stroke="#ffffff" stroke-width="2" />
+  <!-- Position marks 0 (left) and 1 (right) -->
+  <line x1="14" y1="14" x2="18" y2="18" stroke="#ffffff" stroke-width="2" stroke-linecap="round" />
+  <line x1="46" y1="14" x2="42" y2="18" stroke="#ffffff" stroke-width="2" stroke-linecap="round" />
+  <circle cx="46" cy="14" r="2.5" fill="#ffffff" />
+  <!-- Center Knob Body -->
+  <circle cx="30" cy="30" r="16" fill="none" stroke="#ffffff" stroke-width="1.5" />
+  <!-- Selector Jarum / Pointer Line (idle pointing to 0) -->
+  <line x1="30" y1="30" x2="20" y2="20" stroke="#ffffff" stroke-width="3" stroke-linecap="round" />
+  <circle cx="30" cy="30" r="3.5" fill="#ffffff" />
+</svg>

@@ -41,6 +41,9 @@ export interface CircuitNode {
   tagVisibility?: boolean;
   timerElapsed?: number; // current elapsed time in seconds during simulation
   motorDirection?: "cw" | "ccw" | "off"; // active motor rotation direction
+  lampColor?: "red" | "green" | "yellow" | "blue" | "white";
+  buttonColor?: "red" | "green" | "yellow" | "blue" | "white" | "black";
+  buttonType?: "momentary" | "latching";
 }
 
 export interface CircuitWire {

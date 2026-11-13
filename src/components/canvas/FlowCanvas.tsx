@@ -202,6 +202,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
 
   const [isSpacePressed, setIsSpacePressed] = useState(false);
   const [editingCommentNodeId, setEditingCommentNodeId] = useState<string | number | null>(null);
+  const [popoverEditingNodeId, setPopoverEditingNodeId] = useState<string | number | null>(null);
   const [initialCommentChar, setInitialCommentChar] = useState<string | null>(null);
   const [draggingWireSegment, setDraggingWireSegment] = useState<{
     wireId: string | number;
@@ -488,6 +489,8 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     if (state.isReadOnlyViewer) {
       return;
     }
+
+    setPopoverEditingNodeId(null);
 
     const worldPos = screenToWorld(clientX, clientY);
 
@@ -1301,6 +1304,10 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
           setPanOffset((prev) => ({ x: prev.x - dx, y: prev.y - dy }));
         }
       } else if (e.key === "Escape") {
+        if (popoverEditingNodeId) {
+          setPopoverEditingNodeId(null);
+          return;
+        }
         if (editingCommentNodeId) {
           setEditingCommentNodeId(null);
           setInitialCommentChar(null);
@@ -1384,6 +1391,13 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     window.addEventListener("mouseup", handleGlobalRelease);
     return () => window.removeEventListener("mouseup", handleGlobalRelease);
   }, [isSimulating, nodes, setComponentPressed]);
+
+  // Reset popover editing state whenever selection changes away from a single node
+  useEffect(() => {
+    if (selectedNodeIds.size !== 1) {
+      setPopoverEditingNodeId(null);
+    }
+  }, [selectedNodeIds]);
 
   // Check if circuit contains any timer coils requiring real-time clock ticking
   const hasTimerCoils = useMemo(() => {
@@ -1980,6 +1994,10 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
             isDark={isDark}
             canPaste={Boolean(clipboard && clipboard.nodes.length > 0)}
             placement={placement}
+            isEditing={popoverEditingNodeId === selectedNode.id}
+            onEditingChange={(editing) => {
+              setPopoverEditingNodeId(editing ? selectedNode.id : null);
+            }}
             onRotateRight={() => rotateSelectedNodes("cw")}
             onRotateLeft={() => rotateSelectedNodes("ccw")}
             onCopy={() => copySelection()}
@@ -2349,6 +2367,14 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
           onInsertJunction={(wireId, pos) => splitWireAtJunction(wireId, pos)}
           onEditNode={(node) => {
             selectNode(node.id, false);
+            setEditingCommentNodeId(null);
+            setPopoverEditingNodeId(node.id);
+          }}
+          onSetLampColor={(id, color) => {
+            updateNodeData(id, { lampColor: color });
+          }}
+          onSetButtonColor={(id, color) => {
+            updateNodeData(id, { buttonColor: color });
           }}
           onToggleNodeState={(id) => toggleComponentState(id)}
           onOpenSearch={() => {

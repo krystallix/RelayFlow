@@ -249,7 +249,14 @@ interface CircuitStoreState {
   addNode: (componentId: string, position: { x: number; y: number }) => void;
   updateNodeData: (
     nodeId: string | number,
-    data: { tag?: string | null; comment?: string | null; valueTimeOn?: number; valueTimeOff?: number },
+    data: {
+      tag?: string | null;
+      comment?: string | null;
+      valueTimeOn?: number;
+      valueTimeOff?: number;
+      lampColor?: "red" | "green" | "yellow" | "blue" | "white";
+      buttonColor?: "red" | "green" | "yellow" | "blue" | "white" | "black";
+    },
     commitToHistory?: boolean
   ) => void;
   moveSelectedNodes: (delta: { x: number; y: number }) => void;
@@ -811,6 +818,13 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
           rotation: 0,
           frameIndex: 0,
           tagVisibility: true,
+          lampColor: componentId === "panelLamp" ? "green" : undefined,
+          buttonColor:
+            componentId === "panelButtonMomentary"
+              ? "green"
+              : componentId === "panelButtonLatching"
+              ? "black"
+              : undefined,
         };
 
         const nextRecents = [
@@ -838,6 +852,8 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
             comment: data.comment !== undefined ? data.comment : n.comment,
             valueTimeOn: data.valueTimeOn !== undefined ? data.valueTimeOn : n.valueTimeOn,
             valueTimeOff: data.valueTimeOff !== undefined ? data.valueTimeOff : n.valueTimeOff,
+            lampColor: data.lampColor !== undefined ? data.lampColor : n.lampColor,
+            buttonColor: data.buttonColor !== undefined ? data.buttonColor : n.buttonColor,
           };
         });
         return { nodes: updatedNodes, ...history };
@@ -1339,6 +1355,29 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
             return { ...n, frameIndex: nextFrame, isClosed };
           }
 
+          // If target is a panel switch/button or circuit switch, couple by tag
+          const isTargetPanel = targetNode.componentId.startsWith("panelButton");
+          if (targetNode.tag && n.tag === targetNode.tag) {
+            const nComp = catalog[n.componentId];
+            if (isTargetPanel) {
+              const isSwitchOrContact =
+                nComp?.type === "switch" ||
+                nComp?.type === "button" ||
+                nComp?.type === "relayContact" ||
+                n.componentId.toLowerCase().startsWith("switch") ||
+                n.componentId.toLowerCase().startsWith("button") ||
+                n.componentId.toLowerCase().includes("contact");
+              if (isSwitchOrContact) {
+                const isNC = n.componentId.includes("NC") || nComp?.type === "contactNC";
+                const isClosed = isNC ? nextFrame === 0 : nextFrame === 1;
+                return { ...n, frameIndex: nextFrame, isClosed };
+              }
+            } else if (n.componentId.startsWith("panelButton")) {
+              // Target is a circuit switch, update matching panel switch
+              return { ...n, frameIndex: nextFrame };
+            }
+          }
+
           // If target is an overload relay (TOR), couple auxiliary contacts sharing the same tag
           if (isTargetOverload && targetNode.tag && n.tag === targetNode.tag) {
             const nComp = catalog[n.componentId];
@@ -1374,8 +1413,18 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
 
     setComponentPressed: (nodeId, pressed) => {
       set((state) => {
+        const targetNode = state.nodes.find((n) => n.id === nodeId);
+        const isTargetPanel = targetNode?.componentId.startsWith("panelButton");
+
         const updatedNodes = state.nodes.map((n) => {
-          if (n.id !== nodeId) return n;
+          const isTarget = n.id === nodeId;
+          const isCoupledByTag =
+            targetNode?.tag &&
+            n.tag === targetNode.tag &&
+            (isTargetPanel || n.componentId.startsWith("panelButton"));
+
+          if (!isTarget && !isCoupledByTag) return n;
+
           const comp = catalog[n.componentId];
           const isNC = n.componentId.includes("NC") || comp?.type === "contactNC";
           const nextFrame = pressed ? 1 : 0;

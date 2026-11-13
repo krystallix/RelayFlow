@@ -42,6 +42,8 @@ function areNodePropsEqual(prev: FlowNodeProps, next: FlowNodeProps): boolean {
     if (prev.node.valueTimeOn !== next.node.valueTimeOn) return false;
     if (prev.node.valueTimeOff !== next.node.valueTimeOff) return false;
     if (prev.node.tagVisibility !== next.node.tagVisibility) return false;
+    if (prev.node.lampColor !== next.node.lampColor) return false;
+    if (prev.node.buttonColor !== next.node.buttonColor) return false;
   }
   if (prev.isSelected !== next.isSelected) return false;
   if (prev.pairedCount !== next.pairedCount) return false;
@@ -164,11 +166,16 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
   const height = comp?.height || 120;
   const nodes = comp?.nodes || [];
 
+  const isPanelDevice =
+    node.componentId.startsWith("panelButton") || node.componentId === "panelLamp";
+
   const isSpring =
+    node.componentId === "panelButtonMomentary" ||
     node.componentId.toLowerCase().startsWith("button") ||
     node.componentId.toLowerCase().startsWith("emergency") ||
     comp?.type === "button";
   const isHold =
+    node.componentId === "panelButtonLatching" ||
     node.componentId.toLowerCase().startsWith("switch") ||
     node.componentId.toLowerCase().startsWith("breaker") ||
     node.componentId.toLowerCase().startsWith("isolator") ||
@@ -281,6 +288,9 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
   const handleMouseDown = (e: React.MouseEvent) => {
     if (isSimulating) {
       e.stopPropagation();
+      if (isSpring && e.button === 0) {
+        setComponentPressed(node.id, true);
+      }
       return;
     }
     if (isReadOnlyViewer) {
@@ -491,6 +501,290 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
                   : "bg-slate-800 border-slate-600 shadow-sm"
               }`}
             />
+          ) : node.componentId === "panelButtonMomentary" || node.componentId === "panelButtonLatching" ? (
+            <div className="w-[52px] h-[52px] rounded-full relative flex items-center justify-center pointer-events-none select-none">
+              {(() => {
+                const color = node.buttonColor || (node.componentId === "panelButtonMomentary" ? "green" : "black");
+                const isPressed = Boolean(node.isPressed);
+                const isLatched = node.componentId === "panelButtonLatching" && node.frameIndex === 1;
+
+                const buttonPalettes: Record<
+                  string,
+                  {
+                    capFill: string;
+                    capStroke: string;
+                    pressedFill: string;
+                    pressedStroke: string;
+                    pipColor: string;
+                    accentColor: string;
+                  }
+                > = {
+                  green: {
+                    capFill: "#10b981",
+                    capStroke: "#059669",
+                    pressedFill: "#047857",
+                    pressedStroke: "#065f46",
+                    pipColor: "#ffffff",
+                    accentColor: "#34d399",
+                  },
+                  red: {
+                    capFill: "#ef4444",
+                    capStroke: "#dc2626",
+                    pressedFill: "#b91c1c",
+                    pressedStroke: "#991b1b",
+                    pipColor: "#ffffff",
+                    accentColor: "#f87171",
+                  },
+                  yellow: {
+                    capFill: "#f59e0b",
+                    capStroke: "#d97706",
+                    pressedFill: "#b45309",
+                    pressedStroke: "#92400e",
+                    pipColor: "#ffffff",
+                    accentColor: "#fbbf24",
+                  },
+                  blue: {
+                    capFill: "#3b82f6",
+                    capStroke: "#2563eb",
+                    pressedFill: "#1d4ed8",
+                    pressedStroke: "#1e40af",
+                    pipColor: "#ffffff",
+                    accentColor: "#60a5fa",
+                  },
+                  white: {
+                    capFill: "#f8fafc",
+                    capStroke: "#cbd5e1",
+                    pressedFill: "#cbd5e1",
+                    pressedStroke: "#94a3b8",
+                    pipColor: "#0f172a",
+                    accentColor: "#ffffff",
+                  },
+                  black: {
+                    capFill: isDark ? "#27272a" : "#334155",
+                    capStroke: isDark ? "#52525b" : "#1e293b",
+                    pressedFill: isDark ? "#18181b" : "#0f172a",
+                    pressedStroke: isDark ? "#3f3f46" : "#020617",
+                    pipColor: "#ffffff",
+                    accentColor: "#94a3b8",
+                  },
+                };
+
+                const pal = buttonPalettes[color] || buttonPalettes.green;
+
+                if (node.componentId === "panelButtonLatching") {
+                  // Industrial Rotary Selector Switch with Smooth Mechanical Jarum/Needle Rotation
+                  return (
+                    <svg width="52" height="52" viewBox="0 0 52 52" className="overflow-visible">
+                      {/* Recessed Mounting Base Bezel */}
+                      <circle
+                        cx="26"
+                        cy="26"
+                        r="23"
+                        fill={isDark ? "#18181b" : "#f8fafc"}
+                        stroke={isLatched ? pal.accentColor : (isDark ? "#3f3f46" : "#cbd5e1")}
+                        strokeWidth={isLatched ? "2" : "1.5"}
+                        className="transition-colors duration-200"
+                      />
+                      {/* Position Tick Marks: 0 (OFF - Top Left) & 1 (ON - Top Right) */}
+                      <line
+                        x1="12"
+                        y1="12"
+                        x2="16"
+                        y2="16"
+                        stroke={!isLatched ? (isDark ? "#e4e4e7" : "#0f172a") : (isDark ? "#52525b" : "#94a3b8")}
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        className="transition-colors duration-200"
+                      />
+                      <line
+                        x1="40"
+                        y1="12"
+                        x2="36"
+                        y2="16"
+                        stroke={isLatched ? pal.accentColor : (isDark ? "#52525b" : "#94a3b8")}
+                        strokeWidth={isLatched ? "2.5" : "1.5"}
+                        strokeLinecap="round"
+                        className="transition-colors duration-200"
+                      />
+                      {/* Active ON LED Indicator Pip at position 1 */}
+                      <circle
+                        cx="40"
+                        cy="12"
+                        r={isLatched ? 3 : 2}
+                        fill={isLatched ? pal.accentColor : (isDark ? "#27272a" : "#cbd5e1")}
+                        className="transition-all duration-200"
+                      />
+                      {/* Center Rotary Knob Body */}
+                      <circle
+                        cx="26"
+                        cy="26"
+                        r="14"
+                        fill={pal.capFill}
+                        stroke={pal.capStroke}
+                        strokeWidth="1.5"
+                      />
+                      {/* Rotary Selector Jarum / Needle (Rotates smoothly: -45° OFF <-> +45° ON around center 26px, 26px) */}
+                      <g
+                        style={{
+                          transformOrigin: "26px 26px",
+                          transformBox: "view-box",
+                          transform: isLatched ? "rotate(45deg)" : "rotate(-45deg)",
+                          transition: "transform 220ms cubic-bezier(0.34, 1.35, 0.64, 1)",
+                        }}
+                      >
+                        {/* Needle Bar */}
+                        <line
+                          x1="26"
+                          y1="26"
+                          x2="26"
+                          y2="14"
+                          stroke={pal.pipColor}
+                          strokeWidth="3.5"
+                          strokeLinecap="round"
+                        />
+                        {/* Center Pivot Pip */}
+                        <circle cx="26" cy="26" r="4" fill={pal.pipColor} />
+                      </g>
+                    </svg>
+                  );
+                }
+
+                // Momentary Pushbutton: Distinct, unmistakable mechanical press feedback
+                return (
+                  <svg width="52" height="52" viewBox="0 0 52 52" className="overflow-visible">
+                    {/* Mounting Bezel with Chamber Well */}
+                    <circle
+                      cx="26"
+                      cy="26"
+                      r="23"
+                      fill={isPressed ? (isDark ? "#09090b" : "#cbd5e1") : (isDark ? "#18181b" : "#f1f5f9")}
+                      stroke={isPressed ? pal.accentColor : (isDark ? "#52525b" : "#94a3b8")}
+                      strokeWidth={isPressed ? "2.5" : "1.5"}
+                      className="transition-all duration-75"
+                    />
+                    {/* Button Cap: Noticeably depresses from r=18 down to r=14 when pressed! */}
+                    <circle
+                      cx="26"
+                      cy="26"
+                      r={isPressed ? 14 : 18}
+                      fill={isPressed ? pal.pressedFill : pal.capFill}
+                      stroke={isPressed ? pal.pressedStroke : pal.capStroke}
+                      strokeWidth="1.5"
+                      className="transition-all duration-75"
+                    />
+                    {/* Center Tactile Target: Solid bright pip when pressed, clean tactile ring when idle */}
+                    <circle
+                      cx="26"
+                      cy="26"
+                      r={isPressed ? 4 : 7}
+                      fill={isPressed ? pal.pipColor : "none"}
+                      stroke={pal.pipColor}
+                      strokeWidth="1.5"
+                      className="transition-all duration-75 opacity-90"
+                    />
+                  </svg>
+                );
+              })()}
+            </div>
+          ) : node.componentId === "panelLamp" ? (
+            <div className="w-[52px] h-[52px] rounded-full relative flex items-center justify-center pointer-events-none select-none">
+              {(() => {
+                const color = node.lampColor || "green";
+                const isLit = Boolean(node.isEnergized || node.frameIndex === 1);
+
+                const palette: Record<
+                  string,
+                  { onFill: string; onStroke: string; offFill: string; offStroke: string; markOn: string; markOff: string }
+                > = {
+                  red: {
+                    onFill: "#ef4444",
+                    onStroke: "#dc2626",
+                    offFill: isDark ? "#450a0a" : "#fee2e2",
+                    offStroke: isDark ? "#7f1d1d" : "#fca5a5",
+                    markOn: "#ffffff",
+                    markOff: isDark ? "#991b1b" : "#f87171",
+                  },
+                  green: {
+                    onFill: "#10b981",
+                    onStroke: "#059669",
+                    offFill: isDark ? "#022c22" : "#d1fae5",
+                    offStroke: isDark ? "#064e3b" : "#6ee7b7",
+                    markOn: "#ffffff",
+                    markOff: isDark ? "#065f46" : "#34d399",
+                  },
+                  yellow: {
+                    onFill: "#f59e0b",
+                    onStroke: "#d97706",
+                    offFill: isDark ? "#451a03" : "#fef3c7",
+                    offStroke: isDark ? "#78350f" : "#fcd34d",
+                    markOn: "#ffffff",
+                    markOff: isDark ? "#92400e" : "#fbbf24",
+                  },
+                  blue: {
+                    onFill: "#3b82f6",
+                    onStroke: "#2563eb",
+                    offFill: isDark ? "#172554" : "#dbeafe",
+                    offStroke: isDark ? "#1e3a8a" : "#93c5fd",
+                    markOn: "#ffffff",
+                    markOff: isDark ? "#1d4ed8" : "#60a5fa",
+                  },
+                  white: {
+                    onFill: "#f8fafc",
+                    onStroke: "#cbd5e1",
+                    offFill: isDark ? "#27272a" : "#f1f5f9",
+                    offStroke: isDark ? "#52525b" : "#cbd5e1",
+                    markOn: "#0f172a",
+                    markOff: isDark ? "#71717a" : "#94a3b8",
+                  },
+                };
+
+                const current = palette[color] || palette.green;
+
+                return (
+                  <svg width="52" height="52" viewBox="0 0 52 52" className="overflow-visible">
+                    {/* Minimalist Outer Bezel */}
+                    <circle
+                      cx="26"
+                      cy="26"
+                      r="23"
+                      fill={isDark ? "#18181b" : "#f1f5f9"}
+                      stroke={isLit ? current.onStroke : (isDark ? "#52525b" : "#94a3b8")}
+                      strokeWidth={isLit ? "2" : "1.5"}
+                      className="transition-colors duration-150"
+                    />
+                    {/* Flat Minimalist Colored Lens */}
+                    <circle
+                      cx="26"
+                      cy="26"
+                      r="17"
+                      fill={isLit ? current.onFill : current.offFill}
+                      stroke={isLit ? current.onStroke : current.offStroke}
+                      strokeWidth="1.5"
+                      className="transition-colors duration-150"
+                    />
+                    {/* Clean Minimalist Pilot Lamp Cross Reticle */}
+                    <line
+                      x1="15"
+                      y1="15"
+                      x2="37"
+                      y2="37"
+                      stroke={isLit ? current.markOn : current.markOff}
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                    />
+                    <line
+                      x1="37"
+                      y1="15"
+                      x2="15"
+                      y2="37"
+                      stroke={isLit ? current.markOn : current.markOff}
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                );
+              })()}
+            </div>
           ) : comp?.svgPath ? (
             <SymbolRenderer
               svgPath={svgPath}

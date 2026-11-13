@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60" fill="none">
+  <!-- Minimalist Clean CAD Bezel -->
+  <circle cx="30" cy="30" r="26" fill="none" stroke="#ffffff" stroke-width="2" />
+  <!-- Pilot Lens Ring -->
+  <circle cx="30" cy="30" r="17" fill="none" stroke="#ffffff" stroke-width="1.5" />
+  <!-- Minimalist Crosshair Reticle -->
+  <line x1="18" y1="18" x2="42" y2="42" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" />
+  <line x1="42" y1="18" x2="18" y2="42" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" />
+</svg>

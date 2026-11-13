@@ -1,4 +1,46 @@
 {
+  "panelButtonMomentary": {
+    "id": "panelButtonMomentary",
+    "name": "Panel Pushbutton (Momentary)",
+    "description": "Round virtual panel button (momentary spring return). Binds by Tag to matching switches and contacts.",
+    "category": "panel",
+    "type": "panelButton",
+    "tagType": "switches",
+    "width": 60,
+    "height": 60,
+    "svgPath": "/symbols/panelButtonMomentary.svg",
+    "nodes": [],
+    "contacts": [],
+    "framesCount": 2
+  },
+  "panelButtonLatching": {
+    "id": "panelButtonLatching",
+    "name": "Panel Pushbutton (Latching)",
+    "description": "Round virtual panel switch (toggle/latching ON-OFF). Binds by Tag to matching switches and contacts.",
+    "category": "panel",
+    "type": "panelButton",
+    "tagType": "switches",
+    "width": 60,
+    "height": 60,
+    "svgPath": "/symbols/panelButtonLatching.svg",
+    "nodes": [],
+    "contacts": [],
+    "framesCount": 2
+  },
+  "panelLamp": {
+    "id": "panelLamp",
+    "name": "Panel Pilot Lamp",
+    "description": "Round virtual pilot indicator lamp with configurable lens colors. Binds by Tag to matching lamps/loads in circuit.",
+    "category": "panel",
+    "type": "panelLamp",
+    "tagType": "loads",
+    "width": 60,
+    "height": 60,
+    "svgPath": "/symbols/panelLamp.svg",
+    "nodes": [],
+    "contacts": [],
+    "framesCount": 2
+  },
   "arrowDestination": {
     "id": "arrowDestination",
     "name": "Destination Arrow",

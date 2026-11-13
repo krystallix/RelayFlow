@@ -87,6 +87,7 @@ export const translations = {
         loads: "Loads & Indicators",
         contactors: "Power Contactors",
         motors: "Electric Motors",
+        panel: "HMI & Panel Devices",
         others: "Others & Junctions",
       },
       popover: {
@@ -265,6 +266,7 @@ export const translations = {
         loads: "Beban & Indikator",
         contactors: "Kontaktor Daya",
         motors: "Motor Listrik",
+        panel: "Perangkat Panel & HMI",
         others: "Lainnya & Percabangan",
       },
       popover: {

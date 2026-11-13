@@ -153,6 +153,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
     isHardwareSheetOpen,
     toggleHardwareSheet,
     setIsHardwareSheetOpen,
+    setIsPreferencesOpen,
     setCloudProjectId,
     setIsCloudSynced,
     setIsReadOnlyViewer,
@@ -526,7 +527,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
 
   return (
     <header
-      className={`h-14 border-b px-4 flex items-center justify-between z-40 select-none transition-colors duration-150 ${
+      className={`h-14 border-b px-4 flex items-center justify-between z-50 select-none transition-colors duration-150 ${
         isDark
           ? "border-white/10 bg-[#0c0e14]/95 text-white"
           : "border-slate-200 bg-white/95 text-slate-800 shadow-sm"
@@ -1023,7 +1024,11 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
 
         {/* Hardware Inspector & BOM Side Sheet Toggle Button */}
         <button
-          onClick={toggleHardwareSheet}
+          onClick={() => {
+            setExportMenuOpen(false);
+            setUserMenuOpen(false);
+            toggleHardwareSheet();
+          }}
           className={`p-2 rounded-xl transition-colors cursor-pointer ${
             isHardwareSheetOpen
               ? isDark
@@ -1071,7 +1076,15 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
         {/* 5. Unified Share & Export Popover (Icon-Only Solid Button, Borderless, Shadowless) */}
         <div className="relative" ref={exportMenuRef}>
           <button
-            onClick={() => setExportMenuOpen((prev) => !prev)}
+            onClick={() => {
+              const next = !exportMenuOpen;
+              setExportMenuOpen(next);
+              if (next) {
+                setUserMenuOpen(false);
+                setIsHardwareSheetOpen(false);
+                setIsPreferencesOpen(false);
+              }
+            }}
             className={`p-2 rounded-xl transition-colors cursor-pointer ${
               exportMenuOpen
                 ? isDark
@@ -1199,7 +1212,11 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
         {/* 6. My Projects (Icon-Only Solid Button, Borderless, Shadowless) */}
         {user && (
           <button
-            onClick={() => setShowProjectsModal(true)}
+            onClick={() => {
+              setIsHardwareSheetOpen(false);
+              setIsPreferencesOpen(false);
+              setShowProjectsModal(true);
+            }}
             className={`p-2 rounded-xl transition-colors cursor-pointer ${
               isDark
                 ? "bg-[#131620] hover:bg-[#1c202e] text-zinc-200 hover:text-white"
@@ -1234,6 +1251,8 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
         {!user ? (
           <button
             onClick={() => {
+              setIsHardwareSheetOpen(false);
+              setIsPreferencesOpen(false);
               setAuthCustomMessage(undefined);
               setPendingAction(null);
               setShowAuthModal(true);
@@ -1251,7 +1270,15 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
         ) : (
           <div className="relative" ref={userMenuRef}>
             <button
-              onClick={() => setUserMenuOpen((prev) => !prev)}
+              onClick={() => {
+                const next = !userMenuOpen;
+                setUserMenuOpen(next);
+                if (next) {
+                  setExportMenuOpen(false);
+                  setIsHardwareSheetOpen(false);
+                  setIsPreferencesOpen(false);
+                }
+              }}
               className={`p-1 rounded-xl text-xs transition-colors cursor-pointer flex items-center gap-1.5 ${
                 isDark
                   ? "bg-[#131620] hover:bg-[#1c202e] text-zinc-200"

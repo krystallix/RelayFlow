@@ -404,7 +404,9 @@ export class SimulationEngine {
         if (cid === "lamp" || cid === "lampblink" || cid.includes("indicator")) {
           const p1 = portPotentials.get(`${node.id}:0`);
           const p2 = portPotentials.get(`${node.id}:1`);
-          const lampOn = Boolean(p1 && p2 && p1 !== p2);
+          // If potentials are present, check voltage drop. If node has no ports connected, preserve existing state if already set.
+          const hasPortInfo = portPotentials.has(`${node.id}:0`) || portPotentials.has(`${node.id}:1`);
+          const lampOn = hasPortInfo ? Boolean(p1 && p2 && p1 !== p2) : Boolean(node.isEnergized);
           if (node.isEnergized !== lampOn || node.frameIndex !== (lampOn ? 1 : 0)) {
             node.isEnergized = lampOn;
             node.frameIndex = lampOn ? 1 : 0;
@@ -451,6 +453,23 @@ export class SimulationEngine {
             node.motorDirection = "cw";
           } else {
             node.motorDirection = "off";
+          }
+        } else if (cid === "panellamp" || comp?.type === "panelLamp") {
+          // Virtual Panel Lamp: binds by tag to circuit loads/lamps or contactors
+          let shouldEnergize = false;
+          if (node.tag) {
+            const matchingLoad = nodes.find(
+              (n) =>
+                n.id !== node.id &&
+                n.tag === node.tag &&
+                (n.isEnergized || (n.componentId.toLowerCase().includes("lamp") && n.frameIndex === 1))
+            );
+            shouldEnergize = Boolean(matchingLoad);
+          }
+          if (node.isEnergized !== shouldEnergize || node.frameIndex !== (shouldEnergize ? 1 : 0)) {
+            node.isEnergized = shouldEnergize;
+            node.frameIndex = shouldEnergize ? 1 : 0;
+            outerChanged = true;
           }
         }
       }

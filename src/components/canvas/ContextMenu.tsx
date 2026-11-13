@@ -42,6 +42,8 @@ interface ContextMenuProps {
   onBringToFront?: (id: string | number) => void;
   onSendToBack?: (id: string | number) => void;
   onEditNode?: (node: CircuitNode) => void;
+  onSetLampColor?: (nodeId: string | number, color: "red" | "green" | "yellow" | "blue" | "white") => void;
+  onSetButtonColor?: (nodeId: string | number, color: "red" | "green" | "yellow" | "blue" | "white" | "black") => void;
   onToggleNodeState?: (nodeId: string | number) => void;
   onOpenSearch?: () => void;
   onZoomToFit?: () => void;
@@ -67,6 +69,8 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
   onBringToFront,
   onSendToBack,
   onEditNode,
+  onSetLampColor,
+  onSetButtonColor,
   onToggleNodeState,
   onOpenSearch,
   onZoomToFit,
@@ -136,6 +140,79 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
           </div>
 
           <div className="py-1">
+            {target.node.componentId === "panelLamp" && (
+              <div className="px-2.5 py-1.5 border-b border-white/5 flex flex-col gap-1.5">
+                <span className="text-[10px] font-semibold text-zinc-400">Lamp Lens Color</span>
+                <div className="flex items-center gap-1.5">
+                  {(
+                    [
+                      { id: "red", bg: "bg-red-500", ring: "ring-red-400", label: "Red" },
+                      { id: "green", bg: "bg-emerald-500", ring: "ring-emerald-400", label: "Green" },
+                      { id: "yellow", bg: "bg-amber-400", ring: "ring-amber-300", label: "Yellow" },
+                      { id: "blue", bg: "bg-blue-500", ring: "ring-blue-400", label: "Blue" },
+                      { id: "white", bg: "bg-white", ring: "ring-slate-300", label: "White" },
+                    ] as const
+                  ).map((c) => (
+                    <button
+                      key={c.id}
+                      type="button"
+                      onClick={() => {
+                        onSetLampColor?.(target.node.id, c.id);
+                        onClose();
+                      }}
+                      className={`w-5 h-5 rounded-full ${c.bg} border border-black/30 transition-all cursor-pointer ${
+                        (target.node.lampColor || "green") === c.id
+                          ? `ring-2 ${c.ring} scale-110 shadow-xs`
+                          : "opacity-60 hover:opacity-100 hover:scale-105"
+                      }`}
+                      title={c.label}
+                      aria-label={c.label}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {(target.node.componentId === "panelButtonMomentary" ||
+              target.node.componentId === "panelButtonLatching") && (
+              <div className="px-2.5 py-1.5 border-b border-white/5 flex flex-col gap-1.5">
+                <span className="text-[10px] font-semibold text-zinc-400">Button Cap Color</span>
+                <div className="flex items-center gap-1.5">
+                  {(
+                    [
+                      { id: "green", bg: "bg-emerald-500", ring: "ring-emerald-400", label: "Green" },
+                      { id: "red", bg: "bg-red-500", ring: "ring-red-400", label: "Red" },
+                      { id: "yellow", bg: "bg-amber-400", ring: "ring-amber-300", label: "Yellow" },
+                      { id: "blue", bg: "bg-blue-500", ring: "ring-blue-400", label: "Blue" },
+                      { id: "white", bg: "bg-white", ring: "ring-slate-300", label: "White" },
+                      { id: "black", bg: "bg-zinc-900", ring: "ring-zinc-400", label: "Black" },
+                    ] as const
+                  ).map((c) => {
+                    const currentColor =
+                      target.node.buttonColor ||
+                      (target.node.componentId === "panelButtonMomentary" ? "green" : "black");
+                    return (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => {
+                          onSetButtonColor?.(target.node.id, c.id);
+                          onClose();
+                        }}
+                        className={`w-5 h-5 rounded-full ${c.bg} border border-black/30 transition-all cursor-pointer ${
+                          currentColor === c.id
+                            ? `ring-2 ${c.ring} scale-110 shadow-xs`
+                            : "opacity-60 hover:opacity-100 hover:scale-105"
+                        }`}
+                        title={c.label}
+                        aria-label={c.label}
+                      />
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {isSimulating && (
               <button
                 type="button"

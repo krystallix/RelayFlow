@@ -16,6 +16,63 @@ export interface ComponentMeta {
 }
 
 export const COMPONENT_METADATA: Record<string, ComponentMeta> = {
+  "panelButtonMomentary": {
+    "tagPrefix": "-SB",
+    "id": {
+      "name": "Tombol Panel Bulat (Momentary)",
+      "summary": "Pushbutton Panel HMI Tanpa Kabel (Spring Return)",
+      "functionDesc": "Tombol panel virtual interaktif tanpa kabel. Otomatis mengendalikan tombol/kontak di rangkaian dengan Tag yang sama saat ditekan (spring return).",
+      "application": "Tombol Start panel kontrol HMI, tombol inching/jogging, dan pushbutton kontrol."
+    },
+    "en": {
+      "name": "Round Panel Pushbutton (Momentary)",
+      "summary": "Wireless HMI Panel Pushbutton (Spring Return)",
+      "functionDesc": "Interactive wireless panel button. Automatically activates matching switches and contacts sharing the same Tag while held down.",
+      "application": "HMI start pushbuttons, jogging/inching controls, and momentary test inputs."
+    },
+    "name": "Round Panel Pushbutton (Momentary)",
+    "summary": "Wireless HMI Panel Pushbutton (Spring Return)",
+    "functionDesc": "Interactive wireless panel button. Automatically activates matching switches and contacts sharing the same Tag while held down.",
+    "application": "HMI start pushbuttons, jogging/inching controls, and momentary test inputs."
+  },
+  "panelButtonLatching": {
+    "tagPrefix": "-SA",
+    "id": {
+      "name": "Saklar Panel Bulat (Latching)",
+      "summary": "Saklar Panel HMI Tanpa Kabel (Toggle ON-OFF)",
+      "functionDesc": "Saklar panel virtual interaktif tanpa kabel. Menahan status ON/OFF (latching) dan mengendalikan saklar/kontak di rangkaian dengan Tag yang sama.",
+      "application": "Saklar pemilih mode Auto/Manual, switch daya kontrol panel, dan saklar pengunci."
+    },
+    "en": {
+      "name": "Round Panel Switch (Latching)",
+      "summary": "Wireless HMI Panel Switch (Toggle ON-OFF)",
+      "functionDesc": "Interactive wireless panel switch. Toggles and latches ON/OFF state, controlling matching switches/contacts sharing the same Tag.",
+      "application": "Auto/Manual selector switches, panel power toggles, and latching controls."
+    },
+    "name": "Round Panel Switch (Latching)",
+    "summary": "Wireless HMI Panel Switch (Toggle ON-OFF)",
+    "functionDesc": "Interactive wireless panel switch. Toggles and latches ON/OFF state, controlling matching switches/contacts sharing the same Tag.",
+    "application": "Auto/Manual selector switches, panel power toggles, and latching controls."
+  },
+  "panelLamp": {
+    "tagPrefix": "-HL",
+    "id": {
+      "name": "Lampu Pilot Panel Bulat",
+      "summary": "Pilot Lamp Panel HMI Tanpa Kabel (Pilihan Warna)",
+      "functionDesc": "Indikator lampu panel bulat dengan pilihan warna (Merah, Hijau, Kuning, Biru, Putih). Menyala otomatis jika beban/lampu di rangkaian dengan Tag yang sama aktif.",
+      "application": "Indikator status panel (Run/Stop/Fault), lampu penanda fasa, dan display HMI."
+    },
+    "en": {
+      "name": "Round Panel Pilot Lamp",
+      "summary": "Wireless HMI Pilot Lamp (Configurable Colors)",
+      "functionDesc": "Round panel indicator lamp with selectable lens colors (Red, Green, Yellow, Blue, White). Lights up automatically when matching circuit lamps/loads with the same Tag are energized.",
+      "application": "Panel status indicator (Run/Stop/Fault), phase monitors, and HMI visual displays."
+    },
+    "name": "Round Panel Pilot Lamp",
+    "summary": "Wireless HMI Pilot Lamp (Configurable Colors)",
+    "functionDesc": "Round panel indicator lamp with selectable lens colors (Red, Green, Yellow, Blue, White). Lights up automatically when matching circuit lamps/loads with the same Tag are energized.",
+    "application": "Panel status indicator (Run/Stop/Fault), phase monitors, and HMI visual displays."
+  },
   "sourceL1": {
     "tagPrefix": "L1",
     "id": {

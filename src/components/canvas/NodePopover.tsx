@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   RotateCw,
   RotateCcw,
@@ -26,6 +26,8 @@ interface NodePopoverProps {
   isDark: boolean;
   canPaste: boolean;
   placement?: "top" | "bottom";
+  isEditing?: boolean;
+  onEditingChange?: (isEditing: boolean) => void;
   onRotateRight: () => void;
   onRotateLeft: () => void;
   onCopy: () => void;
@@ -38,6 +40,8 @@ export const NodePopover: React.FC<NodePopoverProps> = ({
   isDark,
   canPaste,
   placement = "top",
+  isEditing: externalIsEditing,
+  onEditingChange,
   onRotateRight,
   onRotateLeft,
   onCopy,
@@ -45,10 +49,25 @@ export const NodePopover: React.FC<NodePopoverProps> = ({
   onDelete,
 }) => {
   const [copied, setCopied] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
+  const [internalIsEditing, setInternalIsEditing] = useState(false);
+  const isEditing = externalIsEditing !== undefined ? externalIsEditing : internalIsEditing;
+
+  const setIsEditing = (val: boolean) => {
+    setInternalIsEditing(val);
+    onEditingChange?.(val);
+  };
+
+  const tagInputRef = useRef<HTMLInputElement>(null);
+
   const [tagValue, setTagValue] = useState(node.tag || "");
   const [commentValue, setCommentValue] = useState(node.comment || "");
   const [timeValue, setTimeValue] = useState<number>(node.valueTimeOn ?? 3);
+  const [lampColor, setLampColor] = useState<"red" | "green" | "yellow" | "blue" | "white">(
+    node.lampColor || "green"
+  );
+  const [buttonColor, setButtonColor] = useState<"red" | "green" | "yellow" | "blue" | "white" | "black">(
+    node.buttonColor || (node.componentId === "panelButtonMomentary" ? "green" : "black")
+  );
   const modKey = useModifierKey();
 
   const updateNodeData = useCircuitStore((state) => state.updateNodeData);
@@ -57,12 +76,27 @@ export const NodePopover: React.FC<NodePopoverProps> = ({
     node.componentId.includes("Delay") ||
     comp?.tagType === "timerCoils" ||
     comp?.timerType !== undefined;
+  const isPanelLamp = node.componentId === "panelLamp";
+  const isPanelButton =
+    node.componentId === "panelButtonMomentary" || node.componentId === "panelButtonLatching";
 
   useEffect(() => {
     setTagValue(node.tag || "");
     setCommentValue(node.comment || "");
     setTimeValue((node.valueTimeOn || node.valueTimeOff) ?? 3);
-  }, [node.tag, node.comment, node.valueTimeOn, node.valueTimeOff]);
+    setLampColor(node.lampColor || "green");
+    setButtonColor(node.buttonColor || (node.componentId === "panelButtonMomentary" ? "green" : "black"));
+  }, [node.tag, node.comment, node.valueTimeOn, node.valueTimeOff, node.lampColor, node.buttonColor, node.componentId]);
+
+  useEffect(() => {
+    if (isEditing) {
+      const timer = setTimeout(() => {
+        tagInputRef.current?.focus();
+        tagInputRef.current?.select();
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [isEditing]);
 
   const handleCopy = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -77,6 +111,15 @@ export const NodePopover: React.FC<NodePopoverProps> = ({
     onPaste();
   };
 
+  const handleCancelEdit = () => {
+    setTagValue(node.tag || "");
+    setCommentValue(node.comment || "");
+    setTimeValue((node.valueTimeOn || node.valueTimeOff) ?? 3);
+    setLampColor(node.lampColor || "green");
+    setButtonColor(node.buttonColor || (node.componentId === "panelButtonMomentary" ? "green" : "black"));
+    setIsEditing(false);
+  };
+
   const handleSaveEdit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     updateNodeData(node.id, {
@@ -84,6 +127,8 @@ export const NodePopover: React.FC<NodePopoverProps> = ({
       comment: commentValue.trim() || null,
       valueTimeOn: isTimerCoil ? Number(timeValue) : undefined,
       valueTimeOff: isTimerCoil ? Number(timeValue) : undefined,
+      lampColor: isPanelLamp ? lampColor : undefined,
+      buttonColor: isPanelButton ? buttonColor : undefined,
     });
     setIsEditing(false);
   };
@@ -113,7 +158,39 @@ export const NodePopover: React.FC<NodePopoverProps> = ({
           title="Click to edit Tag / Comment"
         >
           <div className="w-4 h-4 flex items-center justify-center shrink-0">
-            {comp?.svgPath ? (
+            {node.componentId === "panelLamp" ? (
+              <div
+                className={`w-3.5 h-3.5 rounded-full border border-black/40 shadow-xs ${
+                  node.lampColor === "red"
+                    ? "bg-red-500"
+                    : node.lampColor === "yellow"
+                    ? "bg-amber-400"
+                    : node.lampColor === "blue"
+                    ? "bg-blue-500"
+                    : node.lampColor === "white"
+                    ? "bg-white"
+                    : "bg-emerald-500"
+                }`}
+              />
+            ) : node.componentId === "panelButtonMomentary" || node.componentId === "panelButtonLatching" ? (
+              <div
+                className={`w-3.5 h-3.5 rounded-full border border-black/40 flex items-center justify-center shadow-xs ${
+                  (node.buttonColor || (node.componentId === "panelButtonMomentary" ? "green" : "black")) === "red"
+                    ? "bg-red-500"
+                    : (node.buttonColor || (node.componentId === "panelButtonMomentary" ? "green" : "black")) === "yellow"
+                    ? "bg-amber-400"
+                    : (node.buttonColor || (node.componentId === "panelButtonMomentary" ? "green" : "black")) === "blue"
+                    ? "bg-blue-500"
+                    : (node.buttonColor || (node.componentId === "panelButtonMomentary" ? "green" : "black")) === "white"
+                    ? "bg-white"
+                    : (node.buttonColor || (node.componentId === "panelButtonMomentary" ? "green" : "black")) === "black"
+                    ? "bg-zinc-900"
+                    : "bg-emerald-500"
+                }`}
+              >
+                <div className="w-1.5 h-1.5 rounded-full bg-white/70" />
+              </div>
+            ) : comp?.svgPath ? (
               <img
                 src={comp.svgPath}
                 alt={node.name}
@@ -132,6 +209,86 @@ export const NodePopover: React.FC<NodePopoverProps> = ({
         </button>
 
         <div className={`w-[1px] h-4 mx-0.5 ${isDark ? "bg-white/10" : "bg-slate-200"}`} />
+
+        {/* 1.5 Quick Color Picker for Panel Pilot Lamp (positioned left of Rotate buttons) */}
+        {isPanelLamp && (
+          <>
+            <div className="flex items-center gap-1 px-1">
+              {(
+                [
+                  { id: "red", bg: "bg-red-500", ring: "ring-red-400" },
+                  { id: "green", bg: "bg-emerald-500", ring: "ring-emerald-400" },
+                  { id: "yellow", bg: "bg-amber-400", ring: "ring-amber-300" },
+                  { id: "blue", bg: "bg-blue-500", ring: "ring-blue-400" },
+                  { id: "white", bg: "bg-white", ring: "ring-slate-300" },
+                ] as const
+              ).map((c) => (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setLampColor(c.id);
+                    updateNodeData(node.id, { lampColor: c.id });
+                  }}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  className={`w-4 h-4 rounded-full ${c.bg} border border-black/30 transition-all cursor-pointer ${
+                    (node.lampColor || "green") === c.id
+                      ? `ring-2 ${c.ring} scale-110 shadow-xs`
+                      : "opacity-60 hover:opacity-100 hover:scale-105"
+                  }`}
+                  title={`Color: ${c.id.toUpperCase()}`}
+                  aria-label={c.id}
+                />
+              ))}
+            </div>
+
+            <div className={`w-[1px] h-4 mx-0.5 ${isDark ? "bg-white/10" : "bg-slate-200"}`} />
+          </>
+        )}
+
+        {/* 1.6 Quick Color Picker for Panel Pushbutton & Switch (left of Rotate buttons) */}
+        {isPanelButton && (
+          <>
+            <div className="flex items-center gap-1 px-1">
+              {(
+                [
+                  { id: "green", bg: "bg-emerald-500", ring: "ring-emerald-400" },
+                  { id: "red", bg: "bg-red-500", ring: "ring-red-400" },
+                  { id: "yellow", bg: "bg-amber-400", ring: "ring-amber-300" },
+                  { id: "blue", bg: "bg-blue-500", ring: "ring-blue-400" },
+                  { id: "white", bg: "bg-white", ring: "ring-slate-300" },
+                  { id: "black", bg: "bg-zinc-900", ring: "ring-zinc-400" },
+                ] as const
+              ).map((c) => {
+                const currentColor =
+                  node.buttonColor ||
+                  (node.componentId === "panelButtonMomentary" ? "green" : "black");
+                return (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setButtonColor(c.id);
+                      updateNodeData(node.id, { buttonColor: c.id });
+                    }}
+                    onMouseDown={(e) => e.stopPropagation()}
+                    className={`w-4 h-4 rounded-full ${c.bg} border border-black/30 transition-all cursor-pointer ${
+                      currentColor === c.id
+                        ? `ring-2 ${c.ring} scale-110 shadow-xs`
+                        : "opacity-60 hover:opacity-100 hover:scale-105"
+                    }`}
+                    title={`Cap Color: ${c.id.toUpperCase()}`}
+                    aria-label={c.id}
+                  />
+                );
+              })}
+            </div>
+
+            <div className={`w-[1px] h-4 mx-0.5 ${isDark ? "bg-white/10" : "bg-slate-200"}`} />
+          </>
+        )}
 
         {/* 2. Rotate Right */}
         <button
@@ -245,10 +402,17 @@ export const NodePopover: React.FC<NodePopoverProps> = ({
           <div className="flex items-center gap-1.5">
             <TagIcon className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
             <input
+              ref={tagInputRef}
               type="text"
               placeholder="Tag (e.g. -KM1)"
               value={tagValue}
               onChange={(e) => setTagValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") {
+                  e.stopPropagation();
+                  handleCancelEdit();
+                }
+              }}
               className={`flex-1 px-2 py-1 rounded-lg text-xs font-mono border focus:outline-none focus:border-zinc-500 ${
                 isDark
                   ? "bg-black/40 border-white/10 text-white"
@@ -265,6 +429,12 @@ export const NodePopover: React.FC<NodePopoverProps> = ({
               placeholder="Comment (e.g. Main Motor)"
               value={commentValue}
               onChange={(e) => setCommentValue(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") {
+                  e.stopPropagation();
+                  handleCancelEdit();
+                }
+              }}
               className={`flex-1 px-2 py-1 rounded-lg text-xs border focus:outline-none focus:border-zinc-500 ${
                 isDark
                   ? "bg-black/40 border-white/10 text-white"
@@ -284,6 +454,12 @@ export const NodePopover: React.FC<NodePopoverProps> = ({
                 placeholder="Delay (seconds)"
                 value={timeValue}
                 onChange={(e) => setTimeValue(parseFloat(e.target.value) || 0)}
+                onKeyDown={(e) => {
+                  if (e.key === "Escape") {
+                    e.stopPropagation();
+                    handleCancelEdit();
+                  }
+                }}
                 className={`flex-1 px-2 py-1 rounded-lg text-xs font-mono border focus:outline-none focus:border-zinc-500 ${
                   isDark
                     ? "bg-black/40 border-white/10 text-white"
@@ -294,11 +470,76 @@ export const NodePopover: React.FC<NodePopoverProps> = ({
             </div>
           )}
 
+          {isPanelLamp && (
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] text-zinc-400 w-3.5 text-center shrink-0">🎨</span>
+              <div className="flex items-center gap-1.5 flex-1 py-1">
+                {(
+                  [
+                    { id: "red", bg: "bg-red-500", ring: "ring-red-400" },
+                    { id: "green", bg: "bg-emerald-500", ring: "ring-emerald-400" },
+                    { id: "yellow", bg: "bg-amber-400", ring: "ring-amber-300" },
+                    { id: "blue", bg: "bg-blue-500", ring: "ring-blue-400" },
+                    { id: "white", bg: "bg-white", ring: "ring-slate-300" },
+                  ] as const
+                ).map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => {
+                      setLampColor(c.id);
+                      updateNodeData(node.id, { lampColor: c.id });
+                    }}
+                    className={`w-5 h-5 rounded-full ${c.bg} border border-black/30 transition-all cursor-pointer ${
+                      lampColor === c.id
+                        ? `ring-2 ${c.ring} scale-110 shadow-sm`
+                        : "opacity-60 hover:opacity-100 hover:scale-105"
+                    }`}
+                    title={c.id.toUpperCase()}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {isPanelButton && (
+            <div className="flex items-center gap-1.5">
+              <span className="text-[10px] text-zinc-400 w-3.5 text-center shrink-0">🎨</span>
+              <div className="flex items-center gap-1.5 flex-1 py-1">
+                {(
+                  [
+                    { id: "green", bg: "bg-emerald-500", ring: "ring-emerald-400" },
+                    { id: "red", bg: "bg-red-500", ring: "ring-red-400" },
+                    { id: "yellow", bg: "bg-amber-400", ring: "ring-amber-300" },
+                    { id: "blue", bg: "bg-blue-500", ring: "ring-blue-400" },
+                    { id: "white", bg: "bg-white", ring: "ring-slate-300" },
+                    { id: "black", bg: "bg-zinc-900", ring: "ring-zinc-400" },
+                  ] as const
+                ).map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    onClick={() => {
+                      setButtonColor(c.id);
+                      updateNodeData(node.id, { buttonColor: c.id });
+                    }}
+                    className={`w-5 h-5 rounded-full ${c.bg} border border-black/30 transition-all cursor-pointer ${
+                      buttonColor === c.id
+                        ? `ring-2 ${c.ring} scale-110 shadow-sm`
+                        : "opacity-60 hover:opacity-100 hover:scale-105"
+                    }`}
+                    title={`Cap Color: ${c.id.toUpperCase()}`}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="flex justify-end gap-1.5 mt-0.5">
             <button
               type="button"
-              onClick={() => setIsEditing(false)}
-              className={`px-2 py-0.5 rounded text-[11px] transition-colors ${
+              onClick={handleCancelEdit}
+              className={`px-2 py-0.5 rounded text-[11px] transition-colors cursor-pointer ${
                 isDark ? "hover:bg-white/10 text-zinc-400" : "hover:bg-slate-100 text-slate-600"
               }`}
             >
@@ -306,7 +547,7 @@ export const NodePopover: React.FC<NodePopoverProps> = ({
             </button>
             <button
               type="submit"
-              className={`px-2.5 py-0.5 rounded font-semibold text-[11px] transition-colors border ${
+              className={`px-2.5 py-0.5 rounded font-semibold text-[11px] transition-colors border cursor-pointer ${
                 isDark
                   ? "bg-white text-black hover:bg-zinc-200 border-white"
                   : "bg-slate-900 text-white hover:bg-slate-800 border-slate-900"
