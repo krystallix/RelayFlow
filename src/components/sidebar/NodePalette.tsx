@@ -14,6 +14,7 @@ import {
   Cpu,
   Clock,
   X,
+  SlidersHorizontal,
 } from "lucide-react";
 import catalogData from "@/constants/components-catalog.json";
 import { COMPONENT_METADATA } from "@/constants/component-descriptions";
@@ -32,7 +33,7 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   loads: <Cpu className="w-3.5 h-3.5 text-zinc-400 shrink-0" />,
   contactors: <Zap className="w-3.5 h-3.5 text-zinc-400 shrink-0" />,
   motors: <Cpu className="w-3.5 h-3.5 text-zinc-400 shrink-0" />,
-  panel: <Radio className="w-3.5 h-3.5 text-amber-400 shrink-0" />,
+  panel: <SlidersHorizontal className="w-3.5 h-3.5 text-zinc-400 shrink-0" />,
   others: <Layers className="w-3.5 h-3.5 text-zinc-400 shrink-0" />,
 };
 
