@@ -63,6 +63,18 @@ export class SimulationEngine {
     let shortCircuitMessage = "";
     const shortNodes: (string | number)[] = [];
 
+    // Helper: Evaluates 3-phase sequence direction (L1-L2-L3 -> cw, reversed -> ccw)
+    const get3PhaseDirection = (pA?: string, pB?: string, pC?: string): "cw" | "ccw" => {
+      if (!pA || !pB || !pC) return "cw";
+      const seq = `${pA}-${pB}-${pC}`;
+      if (seq === "L1-L2-L3" || seq === "L2-L3-L1" || seq === "L3-L1-L2") {
+        return "cw";
+      } else if (seq === "L1-L3-L2" || seq === "L3-L2-L1" || seq === "L2-L1-L3") {
+        return "ccw";
+      }
+      return "cw";
+    };
+
     // Helper: Checks if two potentials conflict directly (Short Circuit)
     const isConflict = (p1: string, p2: string): boolean => {
       if (p1 === p2) return false;
@@ -83,6 +95,7 @@ export class SimulationEngine {
     let outerIteration = 0;
     const maxOuterIterations = 15;
     let portPotentials = new Map<string, string>();
+    let starNetworkPorts = new Set<string>();
 
     while (outerChanged && outerIteration < maxOuterIterations) {
       outerChanged = false;
@@ -90,6 +103,7 @@ export class SimulationEngine {
 
       // Reset potentials on each evaluation pass to prevent stale potential leakage
       portPotentials = new Map<string, string>();
+      starNetworkPorts = new Set<string>();
       for (const wire of wires) {
         wire.potential = null;
         wire.isHot = false;
@@ -396,6 +410,116 @@ export class SimulationEngine {
         }
       }
 
+      // Build port continuity graph for Star/Delta connectivity validation
+      const portGraphAdj = new Map<string, Set<string>>();
+      const addGraphEdge = (u: string, v: string) => {
+        if (!u || !v || u === v) return;
+        let setU = portGraphAdj.get(u);
+        if (!setU) {
+          setU = new Set();
+          portGraphAdj.set(u, setU);
+        }
+        let setV = portGraphAdj.get(v);
+        if (!setV) {
+          setV = new Set();
+          portGraphAdj.set(v, setV);
+        }
+        setU.add(v);
+        setV.add(u);
+      };
+
+      const wireMap = new Map<string | number, CircuitWire>(wires.map((w) => [w.id, w]));
+      for (const wire of wires) {
+        const keyFrom = `${wire.fromNodeId}:${wire.fromPortId}`;
+        if (wire.toWireId) {
+          const target = wireMap.get(wire.toWireId);
+          if (target) {
+            addGraphEdge(keyFrom, `${target.fromNodeId}:${target.fromPortId}`);
+            addGraphEdge(keyFrom, `${target.toNodeId}:${target.toPortId}`);
+          }
+        } else {
+          const keyTo = `${wire.toNodeId}:${wire.toPortId}`;
+          addGraphEdge(keyFrom, keyTo);
+        }
+      }
+
+      for (const n of nodes) {
+        const c = catalog[n.componentId];
+        if (!c) continue;
+
+        const isJunction =
+          c.type === "junction" ||
+          n.componentId.startsWith("junction") ||
+          c.tagType === "junctions";
+
+        if (isJunction && c.nodes && c.nodes.length > 1) {
+          for (let i = 0; i < c.nodes.length; i++) {
+            for (let j = i + 1; j < c.nodes.length; j++) {
+              addGraphEdge(`${n.id}:${c.nodes[i].id}`, `${n.id}:${c.nodes[j].id}`);
+            }
+          }
+        }
+
+        if (c.contacts && c.contacts.length > 0) {
+          for (const contact of c.contacts) {
+            let isConducting = false;
+            if (contact.enableFrames) {
+              const ef = contact.enableFrames.split(",").map((s: string) => s.trim());
+              const currentFrame = n.frameIndex ?? 0;
+              isConducting = ef[currentFrame] === "1";
+            } else {
+              const isNC = contact.type === "nc";
+              isConducting = isNC ? (n.frameIndex === 0) : (n.frameIndex === 1);
+            }
+            if (isConducting) {
+              addGraphEdge(`${n.id}:${contact.nodeId1}`, `${n.id}:${contact.nodeId2}`);
+            }
+          }
+        }
+      }
+
+      const arePortsConnected = (u: string, v: string): boolean => {
+        if (u === v) return true;
+        if (!portGraphAdj.has(u) || !portGraphAdj.has(v)) return false;
+        const visited = new Set<string>();
+        const queue = [u];
+        visited.add(u);
+        while (queue.length > 0) {
+          const curr = queue.shift()!;
+          if (curr === v) return true;
+          const neighbors = portGraphAdj.get(curr);
+          if (neighbors) {
+            for (const nxt of neighbors) {
+              if (!visited.has(nxt)) {
+                visited.add(nxt);
+                queue.push(nxt);
+              }
+            }
+          }
+        }
+        return false;
+      };
+
+      const getConnectedPorts = (start: string): Set<string> => {
+        const component = new Set<string>();
+        if (!portGraphAdj.has(start)) return component;
+        const queue = [start];
+        component.add(start);
+        while (queue.length > 0) {
+          const curr = queue.shift()!;
+          const neighbors = portGraphAdj.get(curr);
+          if (neighbors) {
+            for (const nxt of neighbors) {
+              if (!component.has(nxt)) {
+                component.add(nxt);
+                queue.push(nxt);
+              }
+            }
+          }
+        }
+        return component;
+      };
+
       // D. Evaluate Actuators: Lamps, Motors, Horns, Buzzers, and Solenoids
       for (const node of nodes) {
         const comp = catalog[node.componentId];
@@ -412,7 +536,155 @@ export class SimulationEngine {
             node.frameIndex = lampOn ? 1 : 0;
             outerChanged = true;
           }
-        } else if (cid.startsWith("motor3ph") || cid === "motortwospeeds" || cid === "motordhalander") {
+        } else if (cid === "motorstardelta") {
+          const p0 = portPotentials.get(`${node.id}:0`);
+          const p1 = portPotentials.get(`${node.id}:1`);
+          const p2 = portPotentials.get(`${node.id}:2`);
+          const p3 = portPotentials.get(`${node.id}:3`);
+          const p4 = portPotentials.get(`${node.id}:4`);
+          const p5 = portPotentials.get(`${node.id}:5`);
+
+          const hasTop3Ph = Boolean(p0 && p1 && p2 && p0 !== p1 && p1 !== p2 && p0 !== p2);
+          const hasBottom3Ph = Boolean(p3 && p4 && p5 && p3 !== p4 && p4 !== p5 && p3 !== p5);
+
+          const hasBottomWires = wires.some(
+            (w) =>
+              (w.fromNodeId === node.id && (Number(w.fromPortId) === 3 || Number(w.fromPortId) === 4 || Number(w.fromPortId) === 5)) ||
+              (w.toNodeId === node.id && (Number(w.toPortId) === 3 || Number(w.toPortId) === 4 || Number(w.toPortId) === 5))
+          );
+
+          const hasTopWires = wires.some(
+            (w) =>
+              (w.fromNodeId === node.id && (Number(w.fromPortId) === 0 || Number(w.fromPortId) === 1 || Number(w.fromPortId) === 2)) ||
+              (w.toNodeId === node.id && (Number(w.toPortId) === 0 || Number(w.toPortId) === 1 || Number(w.toPortId) === 2))
+          );
+
+          // Delta mode: windings have phase difference across terminals
+          // Winding 1: U1 (0) to U2 (4)
+          // Winding 2: V1 (1) to V2 (5)
+          // Winding 3: W1 (2) to W2 (3)
+          const deltaRunning = Boolean(
+            hasTop3Ph &&
+            p4 && p0 !== p4 &&
+            p5 && p1 !== p5 &&
+            p3 && p2 !== p3
+          );
+
+          // Star mode: bottom terminals W2 (3), U2 (4), V2 (5) are interconnected or tied to N/PE
+          const starTied = Boolean(
+            (arePortsConnected(`${node.id}:3`, `${node.id}:4`) &&
+             arePortsConnected(`${node.id}:4`, `${node.id}:5`)) ||
+            (p3 && p4 && p5 && p3 === p4 && p4 === p5)
+          );
+          const starRunning = Boolean(hasTop3Ph && starTied);
+
+          // Fallback star: if user only wired 3-phase to top without bottom wires
+          const defaultStarRunning = Boolean(hasTop3Ph && !hasBottomWires);
+
+          // Reverse feed (3-phase fed into bottom terminals W2, U2, V2)
+          const deltaRunningRev = Boolean(
+            hasBottom3Ph &&
+            p0 && p0 !== p4 &&
+            p1 && p1 !== p5 &&
+            p2 && p2 !== p3
+          );
+          const starTiedRev = Boolean(
+            (arePortsConnected(`${node.id}:0`, `${node.id}:1`) &&
+             arePortsConnected(`${node.id}:1`, `${node.id}:2`)) ||
+            (p0 && p1 && p2 && p0 === p1 && p1 === p2)
+          );
+          const starRunningRev = Boolean(hasBottom3Ph && starTiedRev);
+          const defaultStarRunningRev = Boolean(hasBottom3Ph && !hasTopWires);
+
+          const motorRunning = Boolean(
+            deltaRunning || starRunning || defaultStarRunning ||
+            deltaRunningRev || starRunningRev || defaultStarRunningRev
+          );
+
+          if (node.isEnergized !== motorRunning || node.frameIndex !== (motorRunning ? 1 : 0)) {
+            node.isEnergized = motorRunning;
+            node.frameIndex = motorRunning ? 1 : 0;
+            outerChanged = true;
+          }
+
+          if (motorRunning) {
+            if (hasTop3Ph) {
+              node.motorDirection = get3PhaseDirection(p0, p1, p2);
+            } else if (hasBottom3Ph) {
+              node.motorDirection = get3PhaseDirection(p4, p5, p3);
+            } else {
+              node.motorDirection = "cw";
+            }
+
+            if (starRunning) {
+              const comp3 = getConnectedPorts(`${node.id}:3`);
+              for (const p of comp3) starNetworkPorts.add(p);
+            } else if (starRunningRev) {
+              const comp0 = getConnectedPorts(`${node.id}:0`);
+              for (const p of comp0) starNetworkPorts.add(p);
+            }
+          } else {
+            node.motorDirection = "off";
+          }
+        } else if (cid === "motortwospeeds") {
+          // Speed 1: U1 (0), V1 (1), W1 (2)
+          const pU1 = portPotentials.get(`${node.id}:0`);
+          const pV1 = portPotentials.get(`${node.id}:1`);
+          const pW1 = portPotentials.get(`${node.id}:2`);
+          const speed1Running = Boolean(pU1 && pV1 && pW1 && pU1 !== pV1 && pV1 !== pW1 && pU1 !== pW1);
+
+          // Speed 2: U2 (3), V2 (4), W2 (5)
+          const pU2 = portPotentials.get(`${node.id}:3`);
+          const pV2 = portPotentials.get(`${node.id}:4`);
+          const pW2 = portPotentials.get(`${node.id}:5`);
+          const speed2Running = Boolean(pU2 && pV2 && pW2 && pU2 !== pV2 && pV2 !== pW2 && pU2 !== pW2);
+
+          const motorRunning = speed1Running || speed2Running;
+          if (node.isEnergized !== motorRunning || node.frameIndex !== (motorRunning ? 1 : 0)) {
+            node.isEnergized = motorRunning;
+            node.frameIndex = motorRunning ? 1 : 0;
+            outerChanged = true;
+          }
+
+          if (motorRunning) {
+            if (speed1Running) {
+              node.motorDirection = get3PhaseDirection(pU1, pV1, pW1);
+            } else {
+              node.motorDirection = get3PhaseDirection(pU2, pV2, pW2);
+            }
+          } else {
+            node.motorDirection = "off";
+          }
+        } else if (cid === "motordhalander") {
+          // Low Speed: U1 (0), V1 (1), W1 (2)
+          const pU1 = portPotentials.get(`${node.id}:0`);
+          const pV1 = portPotentials.get(`${node.id}:1`);
+          const pW1 = portPotentials.get(`${node.id}:2`);
+          const lowSpeedRunning = Boolean(pU1 && pV1 && pW1 && pU1 !== pV1 && pV1 !== pW1 && pU1 !== pW1);
+
+          // High Speed (Double Star): U2 (3), V2 (4), W2 (5)
+          const pU2 = portPotentials.get(`${node.id}:3`);
+          const pV2 = portPotentials.get(`${node.id}:4`);
+          const pW2 = portPotentials.get(`${node.id}:5`);
+          const highSpeedRunning = Boolean(pU2 && pV2 && pW2 && pU2 !== pV2 && pV2 !== pW2 && pU2 !== pW2);
+
+          const motorRunning = lowSpeedRunning || highSpeedRunning;
+          if (node.isEnergized !== motorRunning || node.frameIndex !== (motorRunning ? 1 : 0)) {
+            node.isEnergized = motorRunning;
+            node.frameIndex = motorRunning ? 1 : 0;
+            outerChanged = true;
+          }
+
+          if (motorRunning) {
+            if (lowSpeedRunning) {
+              node.motorDirection = get3PhaseDirection(pU1, pV1, pW1);
+            } else {
+              node.motorDirection = get3PhaseDirection(pU2, pV2, pW2);
+            }
+          } else {
+            node.motorDirection = "off";
+          }
+        } else if (cid.startsWith("motor3ph")) {
           const pU = portPotentials.get(`${node.id}:0`);
           const pV = portPotentials.get(`${node.id}:1`);
           const pW = portPotentials.get(`${node.id}:2`);
@@ -425,16 +697,8 @@ export class SimulationEngine {
             outerChanged = true;
           }
 
-          // Determine 3-phase rotation direction
           if (motorRunning) {
-            const seq = `${pU}-${pV}-${pW}`;
-            if (seq === "L1-L2-L3" || seq === "L2-L3-L1" || seq === "L3-L1-L2") {
-              node.motorDirection = "cw";
-            } else if (seq === "L1-L3-L2" || seq === "L3-L2-L1" || seq === "L2-L1-L3") {
-              node.motorDirection = "ccw";
-            } else {
-              node.motorDirection = "cw";
-            }
+            node.motorDirection = get3PhaseDirection(pU, pV, pW);
           } else {
             node.motorDirection = "off";
           }
@@ -524,6 +788,20 @@ export class SimulationEngine {
     for (const wire of wires) {
       if (wire.potential && returnPotentials.has(wire.potential)) {
         wire.isHot = hotReturnWires.has(wire.id);
+      }
+    }
+
+    // Star network wires (W2, U2, V2 connected through star contactor or jumpers to form star point)
+    if (starNetworkPorts.size > 0) {
+      for (const wire of wires) {
+        const fromKey = `${wire.fromNodeId}:${wire.fromPortId}`;
+        const toKey = `${wire.toNodeId}:${wire.toPortId}`;
+        if (starNetworkPorts.has(fromKey) || starNetworkPorts.has(toKey)) {
+          wire.isHot = true;
+          if (!wire.flowDirection) {
+            wire.flowDirection = "forward";
+          }
+        }
       }
     }
 

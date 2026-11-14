@@ -604,4 +604,337 @@ describe("SimulationEngine Logic", () => {
     expect(resReset.nodes.find((n) => n.id === "lamp-run")?.isEnergized).toBe(true);
     expect(resReset.nodes.find((n) => n.id === "lamp-trip")?.isEnergized).toBe(false);
   });
+
+  describe("Motor Energization & Direction Logic Across All Variants", () => {
+    it("should energize motorStarDelta in Star configuration and star wires glow hot", () => {
+      const src3p: CircuitNode = {
+        id: "src3p",
+        componentId: "sourceL1L2L3",
+        name: "Source 3P",
+        category: "sources",
+        tag: null,
+        comment: null,
+        position: { x: 0, y: 0 },
+        rotation: 0,
+        frameIndex: 0,
+      };
+
+      const motor: CircuitNode = {
+        id: "motor-sd",
+        componentId: "motorStarDelta",
+        name: "Motor Star/Delta",
+        category: "motors",
+        tag: "-M1",
+        comment: null,
+        position: { x: 100, y: 100 },
+        rotation: 0,
+        frameIndex: 0,
+      };
+
+      // Star contactor KM2 (frameIndex: 1 = closed)
+      const contactorStar: CircuitNode = {
+        id: "km-star",
+        componentId: "contactor3p",
+        name: "Contactor Star",
+        category: "contactors",
+        tag: "-KM2",
+        comment: null,
+        position: { x: 100, y: 300 },
+        rotation: 0,
+        frameIndex: 1, // closed
+      };
+
+      const wires: CircuitWire[] = [
+        // Power to U1, V1, W1 (ports 0, 1, 2)
+        { id: "w-u1", fromNodeId: "src3p", fromPortId: 0, toNodeId: "motor-sd", toPortId: 0, margins: { start: 0, center: 0, end: 0 } },
+        { id: "w-v1", fromNodeId: "src3p", fromPortId: 1, toNodeId: "motor-sd", toPortId: 1, margins: { start: 0, center: 0, end: 0 } },
+        { id: "w-w1", fromNodeId: "src3p", fromPortId: 2, toNodeId: "motor-sd", toPortId: 2, margins: { start: 0, center: 0, end: 0 } },
+
+        // Motor W2 (3), U2 (4), V2 (5) connected to KM2 terminals 1 (0), 3 (2), 5 (4)
+        { id: "w-w2", fromNodeId: "motor-sd", fromPortId: 3, toNodeId: "km-star", toPortId: 0, margins: { start: 0, center: 0, end: 0 } },
+        { id: "w-u2", fromNodeId: "motor-sd", fromPortId: 4, toNodeId: "km-star", toPortId: 2, margins: { start: 0, center: 0, end: 0 } },
+        { id: "w-v2", fromNodeId: "motor-sd", fromPortId: 5, toNodeId: "km-star", toPortId: 4, margins: { start: 0, center: 0, end: 0 } },
+
+        // KM2 star bridge: jumper connecting terminals 2 (1), 4 (3), 6 (5) together
+        { id: "w-bridge1", fromNodeId: "km-star", fromPortId: 1, toNodeId: "km-star", toPortId: 3, margins: { start: 0, center: 0, end: 0 } },
+        { id: "w-bridge2", fromNodeId: "km-star", fromPortId: 3, toNodeId: "km-star", toPortId: 5, margins: { start: 0, center: 0, end: 0 } },
+      ];
+
+      // 1. With KM-Star closed (frameIndex: 1): motor runs in Star!
+      const resStar = SimulationEngine.step([src3p, motor, contactorStar], wires);
+      const motorRes = resStar.nodes.find((n) => n.id === "motor-sd");
+      expect(motorRes?.isEnergized).toBe(true);
+      expect(motorRes?.frameIndex).toBe(1);
+      expect(motorRes?.motorDirection).toBe("cw");
+
+      // Verify star wires to KM2 and star jumper are hot
+      expect(resStar.wires.find((w) => w.id === "w-w2")?.isHot).toBe(true);
+      expect(resStar.wires.find((w) => w.id === "w-u2")?.isHot).toBe(true);
+      expect(resStar.wires.find((w) => w.id === "w-v2")?.isHot).toBe(true);
+      expect(resStar.wires.find((w) => w.id === "w-bridge1")?.isHot).toBe(true);
+
+      // 2. When KM-Star opens (frameIndex: 0): star point broken, motor stops!
+      const contactorOpen = { ...contactorStar, frameIndex: 0 };
+      const resOpen = SimulationEngine.step([src3p, motor, contactorOpen], wires);
+      const motorOpenRes = resOpen.nodes.find((n) => n.id === "motor-sd");
+      expect(motorOpenRes?.isEnergized).toBe(false);
+      expect(motorOpenRes?.motorDirection).toBe("off");
+      expect(resOpen.wires.find((w) => w.id === "w-w2")?.isHot).toBe(false);
+    });
+
+    it("should energize motorStarDelta in Delta configuration and run cw or ccw based on phase sequence", () => {
+      const src3p: CircuitNode = {
+        id: "src3p",
+        componentId: "sourceL1L2L3",
+        name: "Source 3P",
+        category: "sources",
+        tag: null,
+        comment: null,
+        position: { x: 0, y: 0 },
+        rotation: 0,
+        frameIndex: 0,
+      };
+
+      const motor: CircuitNode = {
+        id: "motor-sd",
+        componentId: "motorStarDelta",
+        name: "Motor Star/Delta",
+        category: "motors",
+        tag: "-M1",
+        comment: null,
+        position: { x: 100, y: 100 },
+        rotation: 0,
+        frameIndex: 0,
+      };
+
+      // Standard Delta connection:
+      // U1 (0) = L1, V1 (1) = L2, W1 (2) = L3
+      // W2 (3) = L1, U2 (4) = L2, V2 (5) = L3
+      // Winding U1-U2 is between L1 and L2
+      // Winding V1-V2 is between L2 and L3
+      // Winding W1-W2 is between L3 and L1
+      const wiresCW: CircuitWire[] = [
+        { id: "w-u1", fromNodeId: "src3p", fromPortId: 0, toNodeId: "motor-sd", toPortId: 0, margins: { start: 0, center: 0, end: 0 } },
+        { id: "w-v1", fromNodeId: "src3p", fromPortId: 1, toNodeId: "motor-sd", toPortId: 1, margins: { start: 0, center: 0, end: 0 } },
+        { id: "w-w1", fromNodeId: "src3p", fromPortId: 2, toNodeId: "motor-sd", toPortId: 2, margins: { start: 0, center: 0, end: 0 } },
+
+        { id: "w-w2", fromNodeId: "src3p", fromPortId: 0, toNodeId: "motor-sd", toPortId: 3, margins: { start: 0, center: 0, end: 0 } },
+        { id: "w-u2", fromNodeId: "src3p", fromPortId: 1, toNodeId: "motor-sd", toPortId: 4, margins: { start: 0, center: 0, end: 0 } },
+        { id: "w-v2", fromNodeId: "src3p", fromPortId: 2, toNodeId: "motor-sd", toPortId: 5, margins: { start: 0, center: 0, end: 0 } },
+      ];
+
+      const resCW = SimulationEngine.step([src3p, motor], wiresCW);
+      const motorCW = resCW.nodes.find((n) => n.id === "motor-sd");
+      expect(motorCW?.isEnergized).toBe(true);
+      expect(motorCW?.motorDirection).toBe("cw");
+
+      // Swap L2 and L3 to test CCW rotation
+      const wiresCCW: CircuitWire[] = [
+        { id: "w-u1", fromNodeId: "src3p", fromPortId: 0, toNodeId: "motor-sd", toPortId: 0, margins: { start: 0, center: 0, end: 0 } },
+        { id: "w-v1", fromNodeId: "src3p", fromPortId: 2, toNodeId: "motor-sd", toPortId: 1, margins: { start: 0, center: 0, end: 0 } }, // L3
+        { id: "w-w1", fromNodeId: "src3p", fromPortId: 1, toNodeId: "motor-sd", toPortId: 2, margins: { start: 0, center: 0, end: 0 } }, // L2
+
+        { id: "w-w2", fromNodeId: "src3p", fromPortId: 0, toNodeId: "motor-sd", toPortId: 3, margins: { start: 0, center: 0, end: 0 } },
+        { id: "w-u2", fromNodeId: "src3p", fromPortId: 2, toNodeId: "motor-sd", toPortId: 4, margins: { start: 0, center: 0, end: 0 } },
+        { id: "w-v2", fromNodeId: "src3p", fromPortId: 1, toNodeId: "motor-sd", toPortId: 5, margins: { start: 0, center: 0, end: 0 } },
+      ];
+
+      const resCCW = SimulationEngine.step([src3p, motor], wiresCCW);
+      const motorCCW = resCCW.nodes.find((n) => n.id === "motor-sd");
+      expect(motorCCW?.isEnergized).toBe(true);
+      expect(motorCCW?.motorDirection).toBe("ccw");
+    });
+
+    it("should energize motorTwoSpeeds on both Speed 1 and Speed 2", () => {
+      const src3p: CircuitNode = {
+        id: "src3p",
+        componentId: "sourceL1L2L3",
+        name: "Source 3P",
+        category: "sources",
+        tag: null,
+        comment: null,
+        position: { x: 0, y: 0 },
+        rotation: 0,
+        frameIndex: 0,
+      };
+
+      const motor: CircuitNode = {
+        id: "motor-2spd",
+        componentId: "motorTwoSpeeds",
+        name: "Two Speed Motor",
+        category: "motors",
+        tag: "-M1",
+        comment: null,
+        position: { x: 100, y: 100 },
+        rotation: 0,
+        frameIndex: 0,
+      };
+
+      // Speed 1: power to U1 (0), V1 (1), W1 (2)
+      const wiresSpd1: CircuitWire[] = [
+        { id: "w1", fromNodeId: "src3p", fromPortId: 0, toNodeId: "motor-2spd", toPortId: 0, margins: { start: 0, center: 0, end: 0 } },
+        { id: "w2", fromNodeId: "src3p", fromPortId: 1, toNodeId: "motor-2spd", toPortId: 1, margins: { start: 0, center: 0, end: 0 } },
+        { id: "w3", fromNodeId: "src3p", fromPortId: 2, toNodeId: "motor-2spd", toPortId: 2, margins: { start: 0, center: 0, end: 0 } },
+      ];
+      const resSpd1 = SimulationEngine.step([src3p, motor], wiresSpd1);
+      expect(resSpd1.nodes.find((n) => n.id === "motor-2spd")?.isEnergized).toBe(true);
+      expect(resSpd1.nodes.find((n) => n.id === "motor-2spd")?.motorDirection).toBe("cw");
+
+      // Speed 2: power to U2 (3), V2 (4), W2 (5)
+      const wiresSpd2: CircuitWire[] = [
+        { id: "w1", fromNodeId: "src3p", fromPortId: 0, toNodeId: "motor-2spd", toPortId: 3, margins: { start: 0, center: 0, end: 0 } },
+        { id: "w2", fromNodeId: "src3p", fromPortId: 1, toNodeId: "motor-2spd", toPortId: 4, margins: { start: 0, center: 0, end: 0 } },
+        { id: "w3", fromNodeId: "src3p", fromPortId: 2, toNodeId: "motor-2spd", toPortId: 5, margins: { start: 0, center: 0, end: 0 } },
+      ];
+      const resSpd2 = SimulationEngine.step([src3p, motor], wiresSpd2);
+      expect(resSpd2.nodes.find((n) => n.id === "motor-2spd")?.isEnergized).toBe(true);
+      expect(resSpd2.nodes.find((n) => n.id === "motor-2spd")?.motorDirection).toBe("cw");
+    });
+
+    it("should energize motorDhalander on Low Speed and High Speed", () => {
+      const src3p: CircuitNode = {
+        id: "src3p",
+        componentId: "sourceL1L2L3",
+        name: "Source 3P",
+        category: "sources",
+        tag: null,
+        comment: null,
+        position: { x: 0, y: 0 },
+        rotation: 0,
+        frameIndex: 0,
+      };
+
+      const motor: CircuitNode = {
+        id: "motor-dh",
+        componentId: "motorDhalander",
+        name: "Dahlander Motor",
+        category: "motors",
+        tag: "-M1",
+        comment: null,
+        position: { x: 100, y: 100 },
+        rotation: 0,
+        frameIndex: 0,
+      };
+
+      // Low Speed: power on U1 (0), V1 (1), W1 (2)
+      const wiresLow: CircuitWire[] = [
+        { id: "w1", fromNodeId: "src3p", fromPortId: 0, toNodeId: "motor-dh", toPortId: 0, margins: { start: 0, center: 0, end: 0 } },
+        { id: "w2", fromNodeId: "src3p", fromPortId: 1, toNodeId: "motor-dh", toPortId: 1, margins: { start: 0, center: 0, end: 0 } },
+        { id: "w3", fromNodeId: "src3p", fromPortId: 2, toNodeId: "motor-dh", toPortId: 2, margins: { start: 0, center: 0, end: 0 } },
+      ];
+      const resLow = SimulationEngine.step([src3p, motor], wiresLow);
+      expect(resLow.nodes.find((n) => n.id === "motor-dh")?.isEnergized).toBe(true);
+
+      // High Speed: power on U2 (3), V2 (4), W2 (5)
+      const wiresHigh: CircuitWire[] = [
+        { id: "w1", fromNodeId: "src3p", fromPortId: 0, toNodeId: "motor-dh", toPortId: 3, margins: { start: 0, center: 0, end: 0 } },
+        { id: "w2", fromNodeId: "src3p", fromPortId: 1, toNodeId: "motor-dh", toPortId: 4, margins: { start: 0, center: 0, end: 0 } },
+        { id: "w3", fromNodeId: "src3p", fromPortId: 2, toNodeId: "motor-dh", toPortId: 5, margins: { start: 0, center: 0, end: 0 } },
+      ];
+      const resHigh = SimulationEngine.step([src3p, motor], wiresHigh);
+      expect(resHigh.nodes.find((n) => n.id === "motor-dh")?.isEnergized).toBe(true);
+    });
+
+    it("should energize motor1ph and motorDC with correct directional response", () => {
+      const src1p: CircuitNode = {
+        id: "src1p",
+        componentId: "sourceL1",
+        name: "L1",
+        category: "sources",
+        tag: null,
+        comment: null,
+        position: { x: 0, y: 0 },
+        rotation: 0,
+        frameIndex: 0,
+      };
+
+      const srcN: CircuitNode = {
+        id: "srcN",
+        componentId: "sourceN",
+        name: "N",
+        category: "sources",
+        tag: null,
+        comment: null,
+        position: { x: 0, y: 100 },
+        rotation: 0,
+        frameIndex: 0,
+      };
+
+      const motor1ph: CircuitNode = {
+        id: "m-1ph",
+        componentId: "motor1ph",
+        name: "Single Phase Motor",
+        category: "motors",
+        tag: "-M1",
+        comment: null,
+        position: { x: 100, y: 50 },
+        rotation: 0,
+        frameIndex: 0,
+      };
+
+      const wires1ph: CircuitWire[] = [
+        { id: "w1", fromNodeId: "src1p", fromPortId: 0, toNodeId: "m-1ph", toPortId: 0, margins: { start: 0, center: 0, end: 0 } },
+        { id: "w2", fromNodeId: "m-1ph", fromPortId: 1, toNodeId: "srcN", toPortId: 0, margins: { start: 0, center: 0, end: 0 } },
+      ];
+
+      const res1ph = SimulationEngine.step([src1p, srcN, motor1ph], wires1ph);
+      expect(res1ph.nodes.find((n) => n.id === "m-1ph")?.isEnergized).toBe(true);
+      expect(res1ph.nodes.find((n) => n.id === "m-1ph")?.motorDirection).toBe("cw");
+
+      // Test DC Motor
+      const srcPlus: CircuitNode = {
+        id: "src+",
+        componentId: "sourcePlus",
+        name: "+24V",
+        category: "sources",
+        tag: null,
+        comment: "+24V",
+        position: { x: 0, y: 200 },
+        rotation: 0,
+        frameIndex: 0,
+      };
+
+      const srcMinus: CircuitNode = {
+        id: "src-",
+        componentId: "sourceNegative",
+        name: "-24V",
+        category: "sources",
+        tag: null,
+        comment: "-24V",
+        position: { x: 0, y: 300 },
+        rotation: 0,
+        frameIndex: 0,
+      };
+
+      const motorDC: CircuitNode = {
+        id: "m-dc",
+        componentId: "motorDC",
+        name: "DC Motor",
+        category: "motors",
+        tag: "-M2",
+        comment: null,
+        position: { x: 100, y: 250 },
+        rotation: 0,
+        frameIndex: 0,
+      };
+
+      // Normal DC: +24V to port 0 (X1), -24V to port 1 (X2) -> CW
+      const wiresDC_CW: CircuitWire[] = [
+        { id: "w3", fromNodeId: "src+", fromPortId: 0, toNodeId: "m-dc", toPortId: 0, margins: { start: 0, center: 0, end: 0 } },
+        { id: "w4", fromNodeId: "m-dc", fromPortId: 1, toNodeId: "src-", toPortId: 0, margins: { start: 0, center: 0, end: 0 } },
+      ];
+      const resDC_CW = SimulationEngine.step([srcPlus, srcMinus, motorDC], wiresDC_CW);
+      expect(resDC_CW.nodes.find((n) => n.id === "m-dc")?.isEnergized).toBe(true);
+      expect(resDC_CW.nodes.find((n) => n.id === "m-dc")?.motorDirection).toBe("cw");
+
+      // Reversed DC: -24V to port 0, +24V to port 1 -> CCW
+      const wiresDC_CCW: CircuitWire[] = [
+        { id: "w5", fromNodeId: "src-", fromPortId: 0, toNodeId: "m-dc", toPortId: 0, margins: { start: 0, center: 0, end: 0 } },
+        { id: "w6", fromNodeId: "m-dc", fromPortId: 1, toNodeId: "src+", toPortId: 0, margins: { start: 0, center: 0, end: 0 } },
+      ];
+      const resDC_CCW = SimulationEngine.step([srcPlus, srcMinus, motorDC], wiresDC_CCW);
+      expect(resDC_CCW.nodes.find((n) => n.id === "m-dc")?.isEnergized).toBe(true);
+      expect(resDC_CCW.nodes.find((n) => n.id === "m-dc")?.motorDirection).toBe("ccw");
+    });
+  });
 });
