@@ -798,7 +798,7 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
             <div className="text-[10px] text-zinc-500">{node.componentId}</div>
           )}
 
-          {/* Fan Blades / Kincir Baling-Baling Motor Rotation Indicator */}
+          {/* 3 Crossing Lines Motor Rotation Indicator (3 Garis Melintang) */}
           {isMotor && node.isEnergized && (
             <div
               style={{
@@ -821,30 +821,28 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
                   const cx = width / 2;
                   const cy = height / 2;
                   const isDC = width === 120;
-                  const R = isDC ? 34 : 50;
-                  const hubR = isDC ? 5.5 : 7.5;
+                  const R = isDC ? 32 : 48;
+                  const hubR = isDC ? 4.5 : 6;
                   const isCCW = node.motorDirection === "ccw";
                   const colorStroke = isCCW ? "#3b82f6" : "#22c55e";
-                  const colorFill = isCCW ? "rgba(59, 130, 246, 0.4)" : "rgba(34, 197, 94, 0.4)";
 
                   return (
                     <g transform={`translate(${cx}, ${cy})`}>
-                      {/* 4 Aerodynamic Fan Blades (Baling-baling / Kincir) */}
-                      {[0, 90, 180, 270].map((angle) => (
-                        <path
+                      {/* 3 Crossing Lines (Saling Melintang 60 deg) */}
+                      {[0, 60, 120].map((angle) => (
+                        <line
                           key={angle}
+                          x1={-R}
+                          y1={0}
+                          x2={R}
+                          y2={0}
                           transform={`rotate(${angle})`}
-                          d={`M 0 -${hubR} 
-                              C ${R * 0.35} -${R * 0.35}, ${R * 0.48} -${R * 0.75}, ${R * 0.22} -${R} 
-                              C ${R * 0.05} -${R * 1.04}, -${R * 0.18} -${R * 0.96}, -${R * 0.16} -${R * 0.72} 
-                              C -${R * 0.12} -${R * 0.48}, -${hubR * 0.6} -${hubR * 0.9}, 0 -${hubR} Z`}
-                          fill={colorFill}
                           stroke={colorStroke}
-                          strokeWidth="1.8"
-                          strokeLinejoin="round"
+                          strokeWidth="3.5"
+                          strokeLinecap="round"
                         />
                       ))}
-                      {/* Center Hub (Poros Tengah) */}
+                      {/* Center Hub */}
                       <circle
                         cx="0"
                         cy="0"
@@ -853,7 +851,6 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
                         stroke="#ffffff"
                         strokeWidth="1.5"
                       />
-                      {/* Center Pin Accent */}
                       <circle cx="0" cy="0" r={hubR * 0.4} fill="#ffffff" />
                     </g>
                   );
