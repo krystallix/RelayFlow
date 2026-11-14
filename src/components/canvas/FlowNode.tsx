@@ -798,7 +798,7 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
             <div className="text-[10px] text-zinc-500">{node.componentId}</div>
           )}
 
-          {/* Inner Circular Arrow Motor Rotation Indicator */}
+          {/* Fan Blades / Kincir Baling-Baling Motor Rotation Indicator */}
           {isMotor && node.isEnergized && (
             <div
               style={{
@@ -817,34 +817,47 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
                 viewBox={`0 0 ${width} ${height}`}
                 className="overflow-visible"
               >
-                <defs>
-                  <marker
-                    id={`arrowhead-${node.id}`}
-                    markerWidth="6"
-                    markerHeight="6"
-                    refX="4"
-                    refY="3"
-                    orient="auto"
-                  >
-                    <polygon
-                      points="0 0, 6 3, 0 6"
-                      fill={node.motorDirection === "ccw" ? "#3b82f6" : "#22c55e"}
-                    />
-                  </marker>
-                </defs>
-                {/* Perfect circular arc inside the motor circle (R=58px centered at width/2, height/2) */}
-                <path
-                  d={
-                    node.motorDirection === "ccw"
-                      ? `M ${width / 2 + 58} ${height / 2} A 58 58 0 1 0 ${width / 2 - 20} ${height / 2 + 54}`
-                      : `M ${width / 2 - 58} ${height / 2} A 58 58 0 1 1 ${width / 2 + 20} ${height / 2 + 54}`
-                  }
-                  fill="none"
-                  stroke={node.motorDirection === "ccw" ? "#3b82f6" : "#22c55e"}
-                  strokeWidth="3.5"
-                  strokeLinecap="round"
-                  markerEnd={`url(#arrowhead-${node.id})`}
-                />
+                {(() => {
+                  const cx = width / 2;
+                  const cy = height / 2;
+                  const isDC = width === 120;
+                  const R = isDC ? 34 : 50;
+                  const hubR = isDC ? 5.5 : 7.5;
+                  const isCCW = node.motorDirection === "ccw";
+                  const colorStroke = isCCW ? "#3b82f6" : "#22c55e";
+                  const colorFill = isCCW ? "rgba(59, 130, 246, 0.4)" : "rgba(34, 197, 94, 0.4)";
+
+                  return (
+                    <g transform={`translate(${cx}, ${cy})`}>
+                      {/* 4 Aerodynamic Fan Blades (Baling-baling / Kincir) */}
+                      {[0, 90, 180, 270].map((angle) => (
+                        <path
+                          key={angle}
+                          transform={`rotate(${angle})`}
+                          d={`M 0 -${hubR} 
+                              C ${R * 0.35} -${R * 0.35}, ${R * 0.48} -${R * 0.75}, ${R * 0.22} -${R} 
+                              C ${R * 0.05} -${R * 1.04}, -${R * 0.18} -${R * 0.96}, -${R * 0.16} -${R * 0.72} 
+                              C -${R * 0.12} -${R * 0.48}, -${hubR * 0.6} -${hubR * 0.9}, 0 -${hubR} Z`}
+                          fill={colorFill}
+                          stroke={colorStroke}
+                          strokeWidth="1.8"
+                          strokeLinejoin="round"
+                        />
+                      ))}
+                      {/* Center Hub (Poros Tengah) */}
+                      <circle
+                        cx="0"
+                        cy="0"
+                        r={hubR}
+                        fill={colorStroke}
+                        stroke="#ffffff"
+                        strokeWidth="1.5"
+                      />
+                      {/* Center Pin Accent */}
+                      <circle cx="0" cy="0" r={hubR * 0.4} fill="#ffffff" />
+                    </g>
+                  );
+                })()}
               </svg>
             </div>
           )}
