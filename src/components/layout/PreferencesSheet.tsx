@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { useCircuitStore } from "@/store/useCircuitStore";
 import {
   X,
@@ -140,6 +140,17 @@ export const PreferencesSheet: React.FC = React.memo(() => {
   const locale = useCircuitStore((s) => s.locale);
 
   const isId = locale === "id";
+
+  useEffect(() => {
+    if (!isPreferencesOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsPreferencesOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isPreferencesOpen, setIsPreferencesOpen]);
 
   return (
     <aside

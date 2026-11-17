@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { X, Share2, Copy, Check, Eye, Play, ShieldAlert, Sparkles, Globe } from "lucide-react";
 import { useCircuitStore } from "@/store/useCircuitStore";
 import { getTranslation } from "@/i18n/translations";
@@ -23,6 +23,17 @@ export const ShareModal: React.FC<ShareModalProps> = ({
   const isDark = theme === "dark";
   const t = getTranslation(locale).share;
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const origin = typeof window !== "undefined" ? window.location.origin : "https://relayflow.app";
@@ -37,8 +48,12 @@ export const ShareModal: React.FC<ShareModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-150">
+    <div
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-150"
+      onClick={onClose}
+    >
       <div
+        onClick={(e) => e.stopPropagation()}
         className={`w-full max-w-md rounded-2xl border p-5 shadow-2xl animate-in zoom-in-95 duration-150 select-none ${
           isDark ? "bg-[#131620] border-white/15 text-white" : "bg-white border-slate-200 text-slate-800"
         }`}

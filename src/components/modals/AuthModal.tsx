@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { X, AlertCircle, CheckCircle2 } from "lucide-react";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useCircuitStore } from "@/store/useCircuitStore";
@@ -38,6 +38,17 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   const isDark = theme === "dark";
   const t = getTranslation(locale).auth;
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -94,11 +105,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   return (
     <div
       className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in duration-150"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
+      onClick={onClose}
     >
       <div
+        onClick={(e) => e.stopPropagation()}
         className={`w-full max-w-[390px] rounded-2xl border p-7 shadow-2xl relative animate-in zoom-in-95 duration-150 ${
           isDark
             ? "bg-[#11131a] border-zinc-800 text-zinc-100"

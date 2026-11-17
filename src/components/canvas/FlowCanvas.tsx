@@ -1304,6 +1304,10 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
           setPanOffset((prev) => ({ x: prev.x - dx, y: prev.y - dy }));
         }
       } else if (e.key === "Escape") {
+        if (showQuickSearch) {
+          setShowQuickSearch(false);
+          return;
+        }
         if (popoverEditingNodeId) {
           setPopoverEditingNodeId(null);
           return;

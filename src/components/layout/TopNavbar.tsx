@@ -15,7 +15,6 @@ import {
   ZoomOut,
   Sparkles,
   FileCode,
-  Zap,
   Sun,
   Moon,
   HelpCircle,
@@ -42,6 +41,7 @@ import {
   Loader2,
   Save,
   Cpu,
+  Printer,
 } from "lucide-react";
 import { useCircuitStore } from "@/store/useCircuitStore";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -49,6 +49,8 @@ import { ProjectsService, CloudProjectRecord } from "@/lib/projectsService";
 import { AuthModal } from "@/components/modals/AuthModal";
 import { ProjectsModal } from "@/components/modals/ProjectsModal";
 import { ShareModal } from "@/components/modals/ShareModal";
+import { ExportCadModal } from "@/components/modals/ExportCadModal";
+import { BomExporter } from "@/engine/export/BomExporter";
 import { getTranslation } from "@/i18n/translations";
 import { FileAdapter } from "@/engine/serializer/FileAdapter";
 import { useIsMac, useModifierKey } from "@/utils/platform";
@@ -111,6 +113,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
   const userMenuRef = useRef<HTMLDivElement>(null);
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
   const exportMenuRef = useRef<HTMLDivElement>(null);
+  const [showExportCadModal, setShowExportCadModal] = useState(false);
 
   const { user, signOut } = useAuthStore();
 
@@ -252,6 +255,32 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [user, projectTitle, nodes, wires, currentProjectId, isReadOnlyViewer]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        if (showHelpModal) {
+          setShowHelpModal(false);
+          return;
+        }
+        if (mobileMenuOpen) {
+          setMobileMenuOpen(false);
+          return;
+        }
+        if (activeMenu) {
+          setActiveMenu(null);
+        }
+        if (userMenuOpen) {
+          setUserMenuOpen(false);
+        }
+        if (exportMenuOpen) {
+          setExportMenuOpen(false);
+        }
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showHelpModal, mobileMenuOpen, activeMenu, userMenuOpen, exportMenuOpen]);
 
   const handleOpenShare = async () => {
     if (!user) {
@@ -489,36 +518,13 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
   };
 
   const handleExportBom = () => {
-    // Generate Bill of Materials CSV
-    const rows = [["Component", "Tag", "Category", "Comment", "Count"]];
-    const summary: Record<string, { tag: string; category: string; comment: string; count: number }> = {};
-
-    for (const node of nodes) {
-      const key = `${node.name}_${node.tag || ""}`;
-      if (!summary[key]) {
-        summary[key] = {
-          tag: node.tag || "-",
-          category: node.category,
-          comment: node.comment || "-",
-          count: 0,
-        };
-      }
-      summary[key].count += 1;
-    }
-
-    for (const [nameWithTag, info] of Object.entries(summary)) {
-      const name = nameWithTag.split("_")[0];
-      rows.push([name, info.tag, info.category, info.comment, String(info.count)]);
-    }
-
-    const csvContent = "data:text/csv;charset=utf-8," + rows.map((e) => e.join(",")).join("\n");
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `${projectTitle.toLowerCase().replace(/\s+/g, "_")}_BOM.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const summary = BomExporter.generateBomSummary(nodes, wires);
+    const csvContent = BomExporter.toCsv(summary, projectTitle);
+    downloadFile(
+      csvContent,
+      `${(projectTitle || "circuit").toLowerCase().replace(/\s+/g, "_")}_BOM.csv`,
+      "text/csv;charset=utf-8;"
+    );
   };
 
   const toggleMenu = (menu: string) => {
@@ -545,8 +551,10 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
       <div className="hidden md:flex items-center gap-3">
         {/* Branding Logo */}
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-200 font-bold">
-            <Zap className="w-4 h-4 fill-current text-zinc-300" />
+          <div className={`w-8 h-8 rounded-lg border flex items-center justify-center shrink-0 overflow-hidden ${
+            isDark ? "bg-zinc-800 border-zinc-700" : "bg-slate-100 border-slate-200"
+          }`}>
+            <img src="/favicon.ico" alt="RelayFlow" className="w-5 h-5 object-contain" />
           </div>
           <span className={`font-bold tracking-tight text-base hidden sm:inline ${isDark ? "text-white" : "text-slate-900"}`}>
             RelayFlow
@@ -670,6 +678,22 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                   <div className="flex-1 flex justify-between items-center">
                     <span>{t.navbar.exportBom}</span>
                     <span className="text-[10px] font-mono bg-white/10 text-zinc-300 px-1 py-0.5 rounded">Parts List</span>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setActiveMenu(null);
+                    setShowExportCadModal(true);
+                  }}
+                  className={`w-full text-left px-3 py-2 rounded-lg flex items-center gap-2.5 text-xs transition-colors ${
+                    isDark ? "hover:bg-white/10" : "hover:bg-slate-100 text-slate-800"
+                  }`}
+                >
+                  <Printer className="w-4 h-4 text-zinc-400" />
+                  <div className="flex-1 flex justify-between items-center">
+                    <span>{t.navbar.exportCad}</span>
+                    <span className="text-[10px] font-mono bg-white/10 text-zinc-300 px-1 py-0.5 rounded">PDF/SVG</span>
                   </div>
                 </button>
               </div>
@@ -1205,6 +1229,25 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                   BOM
                 </span>
               </button>
+
+              {/* Export CAD Blueprint */}
+              <button
+                onClick={() => {
+                  setExportMenuOpen(false);
+                  setShowExportCadModal(true);
+                }}
+                className={`w-full text-left px-3 py-2 rounded-lg flex items-center justify-between text-xs transition-colors ${
+                  isDark ? "hover:bg-white/10 text-zinc-200" : "hover:bg-slate-100 text-slate-800"
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <Printer className="w-4 h-4 text-zinc-400" />
+                  <span>{t.navbar.exportCad}</span>
+                </div>
+                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-white/10 text-zinc-300 border border-white/10">
+                  CAD
+                </span>
+              </button>
             </div>
           )}
         </div>
@@ -1338,8 +1381,10 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
       <div className="flex md:hidden items-center justify-between w-full">
         {/* Left: Brand + Project Title */}
         <div className="flex items-center gap-2 min-w-0">
-          <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-200 font-bold shrink-0">
-            <Zap className="w-4 h-4 fill-current text-zinc-300" />
+          <div className={`w-8 h-8 rounded-lg border flex items-center justify-center shrink-0 overflow-hidden ${
+            isDark ? "bg-zinc-800 border-zinc-700" : "bg-slate-100 border-slate-200"
+          }`}>
+            <img src="/favicon.ico" alt="RelayFlow" className="w-5 h-5 object-contain" />
           </div>
           <div
             className={`min-w-0 flex items-center gap-1.5 px-2 py-1 rounded-lg border text-xs shadow-xs transition-colors ${
@@ -1452,8 +1497,10 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
             {/* Drawer Header */}
             <div className="flex items-center justify-between pb-3 border-b border-white/10 mb-3">
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-200 font-bold">
-                  <Zap className="w-3.5 h-3.5 fill-current text-zinc-300" />
+                <div className={`w-7 h-7 rounded-lg border flex items-center justify-center shrink-0 overflow-hidden ${
+                  isDark ? "bg-zinc-800 border-zinc-700" : "bg-slate-100 border-slate-200"
+                }`}>
+                  <img src="/favicon.ico" alt="RelayFlow" className="w-4 h-4 object-contain" />
                 </div>
                 <span className="font-bold text-sm tracking-tight">RelayFlow Menu</span>
               </div>
@@ -1710,6 +1757,18 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                   </div>
                   <span className="text-[10px] font-mono bg-white/10 px-1.5 py-0.5 rounded">Parts List</span>
                 </button>
+                <button
+                  onClick={() => { setShowExportCadModal(true); setMobileMenuOpen(false); }}
+                  className={`w-full text-left p-2 rounded-xl flex items-center justify-between ${
+                    isDark ? "hover:bg-white/10" : "hover:bg-slate-100"
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Printer className="w-4 h-4 text-zinc-400" />
+                    <span>{t.navbar.exportCad}</span>
+                  </div>
+                  <span className="text-[10px] font-mono bg-white/10 px-1.5 py-0.5 rounded">PDF/SVG</span>
+                </button>
               </div>
             </div>
 
@@ -1798,10 +1857,21 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
         />
       )}
 
+      {showExportCadModal && (
+        <ExportCadModal
+          isOpen={showExportCadModal}
+          onClose={() => setShowExportCadModal(false)}
+        />
+      )}
+
       {/* Keyboard Shortcuts Help Modal */}
       {showHelpModal && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-150"
+          onClick={() => setShowHelpModal(false)}
+        >
           <div
+            onClick={(e) => e.stopPropagation()}
             className={`w-full max-w-md rounded-2xl border p-5 shadow-2xl animate-in zoom-in-95 duration-150 ${
               isDark ? "bg-[#131620] border-white/15 text-white" : "bg-white border-slate-200 text-slate-800"
             }`}

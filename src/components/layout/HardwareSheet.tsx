@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { useCircuitStore } from "@/store/useCircuitStore";
 import {
   getCircuitComponentSummary,
   getDetailedHardwareList,
 } from "@/utils/circuitSummary";
+import { BomExporter } from "@/engine/export/BomExporter";
 import {
   X,
   Copy,
@@ -23,6 +24,7 @@ interface HardwareSheetProps {
 
 export const HardwareSheet: React.FC<HardwareSheetProps> = React.memo(({ onLocateNode }) => {
   const nodes = useCircuitStore((s) => s.nodes);
+  const wires = useCircuitStore((s) => s.wires);
   const isHardwareSheetOpen = useCircuitStore((s) => s.isHardwareSheetOpen);
   const setIsHardwareSheetOpen = useCircuitStore((s) => s.setIsHardwareSheetOpen);
   const projectTitle = useCircuitStore((s) => s.projectTitle);
@@ -31,6 +33,17 @@ export const HardwareSheet: React.FC<HardwareSheetProps> = React.memo(({ onLocat
   const [activeTab, setActiveTab] = useState<"telemetry" | "bom">("telemetry");
   const [searchQuery, setSearchQuery] = useState("");
   const [copiedBom, setCopiedBom] = useState(false);
+
+  useEffect(() => {
+    if (!isHardwareSheetOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsHardwareSheetOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isHardwareSheetOpen, setIsHardwareSheetOpen]);
 
   // Grouped Hardware Telemetry Items (only calculated when sheet is open to prevent idle background compute)
   const hardwareItems = useMemo(() => {
@@ -61,32 +74,34 @@ export const HardwareSheet: React.FC<HardwareSheetProps> = React.memo(({ onLocat
     );
   }, [hardwareItems, searchQuery]);
 
-  // Copy BOM as text
+  // Rich BOM summary with wire stats
+  const bomSummary = useMemo(() => {
+    if (!isHardwareSheetOpen) return null;
+    return BomExporter.generateBomSummary(nodes, wires);
+  }, [nodes, wires, isHardwareSheetOpen]);
+
+  // Copy BOM as TSV table (Directly pastable into Excel / Google Sheets)
   const handleCopyBom = () => {
-    const text = summaryItems.map(([type, total]) => `${type} : ${total}`).join("\n");
+    if (!bomSummary) return;
+    const text = BomExporter.toTsv(bomSummary);
     navigator.clipboard.writeText(text);
     setCopiedBom(true);
     setTimeout(() => setCopiedBom(false), 2000);
   };
 
-  // Export BOM as CSV
+  // Export BOM as RFC-4180 CSV with UTF-8 BOM byte for Excel
   const handleExportBomCsv = () => {
-    const rows = [["Component Type", "Quantity"]];
-    for (const [type, total] of summaryItems) {
-      rows.push([type, String(total)]);
-    }
-    const csvContent =
-      "data:text/csv;charset=utf-8," + rows.map((e) => e.map((x) => `"${x}"`).join(",")).join("\n");
-    const encodedUri = encodeURI(csvContent);
+    if (!bomSummary) return;
+    const csvContent = BomExporter.toCsv(bomSummary, projectTitle);
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute(
-      "download",
-      `${(projectTitle || "circuit").toLowerCase().replace(/\s+/g, "_")}_BOM.csv`
-    );
+    link.href = url;
+    link.download = `${(projectTitle || "circuit").toLowerCase().replace(/\s+/g, "_")}_BOM.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   return (
