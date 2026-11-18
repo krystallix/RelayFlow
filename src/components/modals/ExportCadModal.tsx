@@ -26,11 +26,11 @@ interface ExportCadModalProps {
 }
 
 export const ExportCadModal: React.FC<ExportCadModalProps> = ({ isOpen, onClose }) => {
-  const { nodes, wires, projectTitle, theme, locale } = useCircuitStore();
+  const { nodes, wires, projectTitle, locale } = useCircuitStore();
   const { user } = useAuthStore();
   const t = getTranslation(locale).cadModal;
 
-  // Options state (Monochrome by default, drawing style removed)
+  // Options state (Monochrome CAD Standard, clean shadcn UI)
   const [paperSize, setPaperSize] = useState<"A4" | "A3">("A4");
   const [orientation, setOrientation] = useState<"landscape" | "portrait">("landscape");
   const [title, setTitle] = useState(projectTitle || "RelayFlow Circuit");
@@ -256,24 +256,25 @@ export const ExportCadModal: React.FC<ExportCadModalProps> = ({ isOpen, onClose 
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 duration-200 animate-in fade-in select-none"
+      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 duration-200 animate-in fade-in select-none"
       onClick={onClose}
     >
+      {/* shadcn Dialog Content - Crisp Light Mode matching HardwareSheet & PreferencesSheet */}
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-4xl max-h-[90vh] flex flex-col rounded-xl border border-zinc-200 bg-white shadow-2xl duration-200 animate-in zoom-in-95 overflow-hidden dark:border-zinc-800 dark:bg-zinc-950 text-zinc-950 dark:text-zinc-50"
+        className="w-full max-w-4xl max-h-[90vh] flex flex-col rounded-xl border border-zinc-200 bg-white shadow-2xl duration-200 animate-in zoom-in-95 overflow-hidden text-zinc-950"
       >
         {/* shadcn DialogHeader */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200 dark:border-zinc-800 shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="p-1.5 rounded-md border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300">
+            <div className="p-1.5 rounded-md border border-zinc-200 bg-zinc-50 text-zinc-700">
               <Printer className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-100">
+              <h2 className="text-sm font-semibold tracking-tight text-zinc-900">
                 {t.title}
               </h2>
-              <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5 truncate max-w-[280px] sm:max-w-md">
+              <p className="text-xs text-zinc-500 mt-0.5 truncate max-w-[280px] sm:max-w-md">
                 {title || "RelayFlow Circuit"} • {paperSize} {orientation} • CAD Monochrome
               </p>
             </div>
@@ -281,7 +282,7 @@ export const ExportCadModal: React.FC<ExportCadModalProps> = ({ isOpen, onClose 
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors cursor-pointer"
+            className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors cursor-pointer"
             title="Close"
           >
             <X className="w-4 h-4" />
@@ -291,23 +292,23 @@ export const ExportCadModal: React.FC<ExportCadModalProps> = ({ isOpen, onClose 
         {/* Content Area: Left Settings + Right Blueprint Preview */}
         <div className="flex-1 min-h-0 flex flex-col md:flex-row overflow-hidden">
           {/* Left Configuration Panel (shadcn Form styling) */}
-          <div className="w-full md:w-[320px] lg:w-[340px] shrink-0 p-5 border-b md:border-b-0 md:border-r border-zinc-200 dark:border-zinc-800 overflow-y-auto space-y-5">
+          <div className="w-full md:w-[320px] lg:w-[340px] shrink-0 p-5 border-b md:border-b-0 md:border-r border-zinc-200 overflow-y-auto space-y-5">
             {/* 1. Paper Size & Orientation */}
             <div className="space-y-3">
-              <label className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5">
+              <label className="text-xs font-semibold uppercase tracking-wider text-zinc-500 flex items-center gap-1.5">
                 <Layers className="w-3.5 h-3.5" />
                 <span>{t.paperSize} & {t.orientation}</span>
               </label>
 
               {/* Size Segmented Control (shadcn TabsList) */}
-              <div className="grid grid-cols-2 p-1 rounded-lg bg-zinc-100 dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 text-xs font-medium border border-zinc-200/60 dark:border-zinc-800/80">
+              <div className="grid grid-cols-2 p-1 rounded-lg bg-zinc-100 text-zinc-500 text-xs font-medium border border-zinc-200/70">
                 <button
                   type="button"
                   onClick={() => setPaperSize("A4")}
                   className={`py-1.5 px-3 rounded-md text-xs font-medium transition-all cursor-pointer ${
                     paperSize === "A4"
-                      ? "bg-white text-zinc-950 shadow-xs dark:bg-zinc-800 dark:text-zinc-50 font-semibold"
-                      : "hover:text-zinc-900 dark:hover:text-zinc-200"
+                      ? "bg-white text-zinc-950 shadow-xs font-semibold"
+                      : "hover:text-zinc-900"
                   }`}
                 >
                   A4 (297×210)
@@ -317,8 +318,8 @@ export const ExportCadModal: React.FC<ExportCadModalProps> = ({ isOpen, onClose 
                   onClick={() => setPaperSize("A3")}
                   className={`py-1.5 px-3 rounded-md text-xs font-medium transition-all cursor-pointer ${
                     paperSize === "A3"
-                      ? "bg-white text-zinc-950 shadow-xs dark:bg-zinc-800 dark:text-zinc-50 font-semibold"
-                      : "hover:text-zinc-900 dark:hover:text-zinc-200"
+                      ? "bg-white text-zinc-950 shadow-xs font-semibold"
+                      : "hover:text-zinc-900"
                   }`}
                 >
                   A3 (420×297)
@@ -326,14 +327,14 @@ export const ExportCadModal: React.FC<ExportCadModalProps> = ({ isOpen, onClose 
               </div>
 
               {/* Orientation Segmented Control (shadcn TabsList) */}
-              <div className="grid grid-cols-2 p-1 rounded-lg bg-zinc-100 dark:bg-zinc-900 text-zinc-500 dark:text-zinc-400 text-xs font-medium border border-zinc-200/60 dark:border-zinc-800/80">
+              <div className="grid grid-cols-2 p-1 rounded-lg bg-zinc-100 text-zinc-500 text-xs font-medium border border-zinc-200/70">
                 <button
                   type="button"
                   onClick={() => setOrientation("landscape")}
                   className={`py-1.5 px-3 rounded-md text-xs font-medium transition-all cursor-pointer ${
                     orientation === "landscape"
-                      ? "bg-white text-zinc-950 shadow-xs dark:bg-zinc-800 dark:text-zinc-50 font-semibold"
-                      : "hover:text-zinc-900 dark:hover:text-zinc-200"
+                      ? "bg-white text-zinc-950 shadow-xs font-semibold"
+                      : "hover:text-zinc-900"
                   }`}
                 >
                   {t.landscape}
@@ -343,8 +344,8 @@ export const ExportCadModal: React.FC<ExportCadModalProps> = ({ isOpen, onClose 
                   onClick={() => setOrientation("portrait")}
                   className={`py-1.5 px-3 rounded-md text-xs font-medium transition-all cursor-pointer ${
                     orientation === "portrait"
-                      ? "bg-white text-zinc-950 shadow-xs dark:bg-zinc-800 dark:text-zinc-50 font-semibold"
-                      : "hover:text-zinc-900 dark:hover:text-zinc-200"
+                      ? "bg-white text-zinc-950 shadow-xs font-semibold"
+                      : "hover:text-zinc-900"
                   }`}
                 >
                   {t.portrait}
@@ -353,73 +354,73 @@ export const ExportCadModal: React.FC<ExportCadModalProps> = ({ isOpen, onClose 
             </div>
 
             {/* 2. Title Block Metadata Form (shadcn Input & Label) */}
-            <div className="space-y-3 pt-1 border-t border-zinc-100 dark:border-zinc-900">
-              <label className="text-xs font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400 flex items-center gap-1.5">
+            <div className="space-y-3 pt-1 border-t border-zinc-100">
+              <label className="text-xs font-semibold uppercase tracking-wider text-zinc-500 flex items-center gap-1.5">
                 <Settings className="w-3.5 h-3.5" />
                 <span>{t.titleBlock} (ISO 7200)</span>
               </label>
 
               <div className="space-y-3">
                 <div className="space-y-1">
-                  <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300">
+                  <label className="block text-xs font-medium text-zinc-700">
                     {t.projectTitle}
                   </label>
                   <input
                     type="text"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    className="flex h-8 w-full rounded-md border border-zinc-200 bg-transparent px-3 py-1 text-xs shadow-xs transition-colors placeholder:text-zinc-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-950 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800 dark:focus-visible:ring-zinc-300 dark:text-zinc-50"
+                    className="flex h-8 w-full rounded-md border border-zinc-200 bg-white px-3 py-1 text-xs shadow-xs transition-colors placeholder:text-zinc-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-950 text-zinc-900"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-2.5">
                   <div className="space-y-1">
-                    <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300">
+                    <label className="block text-xs font-medium text-zinc-700">
                       {t.drafter}
                     </label>
                     <input
                       type="text"
                       value={author}
                       onChange={(e) => setAuthor(e.target.value)}
-                      className="flex h-8 w-full rounded-md border border-zinc-200 bg-transparent px-3 py-1 text-xs shadow-xs transition-colors placeholder:text-zinc-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-950 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800 dark:focus-visible:ring-zinc-300 dark:text-zinc-50"
+                      className="flex h-8 w-full rounded-md border border-zinc-200 bg-white px-3 py-1 text-xs shadow-xs transition-colors placeholder:text-zinc-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-950 text-zinc-900"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300">
+                    <label className="block text-xs font-medium text-zinc-700">
                       {t.revision}
                     </label>
                     <input
                       type="text"
                       value={revision}
                       onChange={(e) => setRevision(e.target.value)}
-                      className="flex h-8 w-full rounded-md border border-zinc-200 bg-transparent px-3 py-1 text-xs shadow-xs transition-colors placeholder:text-zinc-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-950 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800 dark:focus-visible:ring-zinc-300 dark:text-zinc-50"
+                      className="flex h-8 w-full rounded-md border border-zinc-200 bg-white px-3 py-1 text-xs shadow-xs transition-colors placeholder:text-zinc-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-950 text-zinc-900"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2.5">
                   <div className="space-y-1">
-                    <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300">
+                    <label className="block text-xs font-medium text-zinc-700">
                       {t.organization}
                     </label>
                     <input
                       type="text"
                       value={organization}
                       onChange={(e) => setOrganization(e.target.value)}
-                      className="flex h-8 w-full rounded-md border border-zinc-200 bg-transparent px-3 py-1 text-xs shadow-xs transition-colors placeholder:text-zinc-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-950 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800 dark:focus-visible:ring-zinc-300 dark:text-zinc-50"
+                      className="flex h-8 w-full rounded-md border border-zinc-200 bg-white px-3 py-1 text-xs shadow-xs transition-colors placeholder:text-zinc-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-950 text-zinc-900"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="block text-xs font-medium text-zinc-700 dark:text-zinc-300">
+                    <label className="block text-xs font-medium text-zinc-700">
                       {t.date}
                     </label>
                     <input
                       type="date"
                       value={date}
                       onChange={(e) => setDate(e.target.value)}
-                      className="flex h-8 w-full rounded-md border border-zinc-200 bg-transparent px-3 py-1 text-xs shadow-xs transition-colors placeholder:text-zinc-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-950 disabled:cursor-not-allowed disabled:opacity-50 dark:border-zinc-800 dark:focus-visible:ring-zinc-300 dark:text-zinc-50"
+                      className="flex h-8 w-full rounded-md border border-zinc-200 bg-white px-3 py-1 text-xs shadow-xs transition-colors placeholder:text-zinc-400 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-950 text-zinc-900"
                     />
                   </div>
                 </div>
@@ -428,19 +429,19 @@ export const ExportCadModal: React.FC<ExportCadModalProps> = ({ isOpen, onClose 
           </div>
 
           {/* Right Blueprint Sheet Preview */}
-          <div className="flex-1 min-w-0 p-5 bg-zinc-50 dark:bg-zinc-900/40 flex flex-col items-center justify-center overflow-hidden">
-            <div className="w-full flex items-center justify-between text-zinc-500 dark:text-zinc-400 text-xs mb-3 px-1">
+          <div className="flex-1 min-w-0 p-5 bg-zinc-50 flex flex-col items-center justify-center overflow-hidden">
+            <div className="w-full flex items-center justify-between text-zinc-500 text-xs mb-3 px-1">
               <span className="flex items-center gap-1.5 font-medium">
                 <Eye className="w-3.5 h-3.5" />
                 <span>{t.preview}</span>
               </span>
-              <span className="font-mono text-[10px] text-zinc-400 dark:text-zinc-500 uppercase">
+              <span className="font-mono text-[10px] text-zinc-400 uppercase">
                 {paperSize} {orientation} • ISO 7200
               </span>
             </div>
 
             {/* Drawing Sheet Container with Soft Shadow */}
-            <div className="w-full h-full max-h-[460px] flex items-center justify-center p-4 rounded-lg border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 shadow-xs overflow-hidden">
+            <div className="w-full h-full max-h-[460px] flex items-center justify-center p-4 rounded-lg border border-zinc-200 bg-white shadow-xs overflow-hidden">
               <div
                 className="w-full h-full flex items-center justify-center bg-white shadow-md rounded-[2px] overflow-hidden [&>svg]:w-full [&>svg]:h-full [&>svg]:max-h-full [&>svg]:object-contain"
                 dangerouslySetInnerHTML={{ __html: svgOutput }}
@@ -450,14 +451,14 @@ export const ExportCadModal: React.FC<ExportCadModalProps> = ({ isOpen, onClose 
         </div>
 
         {/* shadcn DialogFooter */}
-        <div className="flex items-center justify-between px-6 py-3.5 border-t border-zinc-200 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/20 shrink-0">
+        <div className="flex items-center justify-between px-6 py-3.5 border-t border-zinc-200 bg-zinc-50/70 shrink-0">
           {/* Left Action: Copy SVG (shadcn Button variant="outline") */}
           <button
             type="button"
             onClick={handleCopySvg}
-            className="inline-flex items-center justify-center gap-1.5 rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-900 shadow-xs hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 dark:hover:bg-zinc-800 cursor-pointer transition-colors"
+            className="inline-flex items-center justify-center gap-1.5 rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-900 shadow-xs hover:bg-zinc-100 hover:text-zinc-900 cursor-pointer transition-colors"
           >
-            {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5 text-zinc-400" />}
+            {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-zinc-400" />}
             <span>{copied ? t.copied : t.copySvg}</span>
           </button>
 
@@ -466,7 +467,7 @@ export const ExportCadModal: React.FC<ExportCadModalProps> = ({ isOpen, onClose 
             <button
               type="button"
               onClick={handleDownloadPng}
-              className="inline-flex items-center justify-center gap-1.5 rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-900 shadow-xs hover:bg-zinc-100 hover:text-zinc-900 dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 dark:hover:bg-zinc-800 cursor-pointer transition-colors"
+              className="inline-flex items-center justify-center gap-1.5 rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-900 shadow-xs hover:bg-zinc-100 hover:text-zinc-900 cursor-pointer transition-colors"
             >
               <ImageIcon className="w-3.5 h-3.5 text-zinc-400" />
               <span>PNG</span>
@@ -475,18 +476,18 @@ export const ExportCadModal: React.FC<ExportCadModalProps> = ({ isOpen, onClose 
             <button
               type="button"
               onClick={handlePrintPdf}
-              className="inline-flex items-center justify-center gap-1.5 rounded-md bg-zinc-100 px-3.5 py-1.5 text-xs font-medium text-zinc-900 shadow-xs hover:bg-zinc-200/80 dark:bg-zinc-800 dark:text-zinc-100 dark:hover:bg-zinc-700 cursor-pointer transition-colors"
+              className="inline-flex items-center justify-center gap-1.5 rounded-md bg-zinc-100 px-3.5 py-1.5 text-xs font-medium text-zinc-900 shadow-xs hover:bg-zinc-200/80 cursor-pointer transition-colors"
             >
-              <Printer className="w-3.5 h-3.5" />
+              <Printer className="w-3.5 h-3.5 text-zinc-600" />
               <span>{t.downloadPdf}</span>
             </button>
 
             <button
               type="button"
               onClick={handleDownloadSvg}
-              className="inline-flex items-center justify-center gap-1.5 rounded-md bg-zinc-900 px-4 py-1.5 text-xs font-medium text-zinc-50 shadow-xs hover:bg-zinc-900/90 dark:bg-zinc-50 dark:text-zinc-900 dark:hover:bg-zinc-50/90 cursor-pointer transition-colors"
+              className="inline-flex items-center justify-center gap-1.5 rounded-md bg-zinc-900 px-4 py-1.5 text-xs font-medium text-zinc-50 shadow-xs hover:bg-zinc-900/90 cursor-pointer transition-colors"
             >
-              <Download className="w-3.5 h-3.5" />
+              <Download className="w-3.5 h-3.5 text-zinc-100" />
               <span>{t.downloadSvg}</span>
             </button>
           </div>
