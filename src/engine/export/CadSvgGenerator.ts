@@ -2,6 +2,7 @@ import { CircuitNode, CircuitWire, Point } from "@/engine/types";
 import { ManhattanRouter } from "@/engine/router/ManhattanRouter";
 import { WireIntersectionResolver } from "@/engine/router/WireIntersectionResolver";
 import { WireNetResolver } from "@/engine/router/WireNetResolver";
+import { TEXT_CENTERS } from "@/constants/symbol-text-centers";
 import catalogData from "@/constants/components-catalog.json";
 
 const catalog = catalogData as Record<string, any>;
@@ -62,8 +63,8 @@ export class CadSvgGenerator {
     const frameH = pageHeight - marginT - marginB;
 
     // 3. Title Block Dimensions (Bottom-Right ISO 7200 format)
-    const titleBlockW = 320;
-    const titleBlockH = 88;
+    const titleBlockW = 340;
+    const titleBlockH = 92;
     const tbX = frameX + frameW - titleBlockW;
     const tbY = frameY + frameH - titleBlockH;
 
@@ -219,50 +220,50 @@ export class CadSvgGenerator {
     svgParts.push(`<g id="cad-title-block">`);
     // Outer box
     svgParts.push(`<rect x="${tbX}" y="${tbY}" width="${titleBlockW}" height="${titleBlockH}" class="cad-border" fill="#ffffff" />`);
-    // Horizontal dividers
+    // Horizontal dividers separating the 4 distinct rows
     svgParts.push(`<line x1="${tbX}" y1="${tbY + 28}" x2="${tbX + titleBlockW}" y2="${tbY + 28}" class="cad-thin" />`);
-    svgParts.push(`<line x1="${tbX}" y1="${tbY + 54}" x2="${tbX + titleBlockW}" y2="${tbY + 54}" class="cad-thin" />`);
-    svgParts.push(`<line x1="${tbX}" y1="${tbY + 72}" x2="${tbX + titleBlockW}" y2="${tbY + 72}" class="cad-thin" />`);
+    svgParts.push(`<line x1="${tbX}" y1="${tbY + 52}" x2="${tbX + titleBlockW}" y2="${tbY + 52}" class="cad-thin" />`);
+    svgParts.push(`<line x1="${tbX}" y1="${tbY + 76}" x2="${tbX + titleBlockW}" y2="${tbY + 76}" class="cad-thin" />`);
 
-    // Vertical dividers in row 3
+    // Vertical dividers strictly inside Row 3 (Drafter, Date, Scale, Revision)
     const col3W = titleBlockW / 4;
-    svgParts.push(`<line x1="${tbX + col3W}" y1="${tbY + 28}" x2="${tbX + col3W}" y2="${tbY + 72}" class="cad-thin" />`);
-    svgParts.push(`<line x1="${tbX + col3W * 2}" y1="${tbY + 28}" x2="${tbX + col3W * 2}" y2="${tbY + 72}" class="cad-thin" />`);
-    svgParts.push(`<line x1="${tbX + col3W * 3}" y1="${tbY + 28}" x2="${tbX + col3W * 3}" y2="${tbY + 72}" class="cad-thin" />`);
+    svgParts.push(`<line x1="${tbX + col3W}" y1="${tbY + 52}" x2="${tbX + col3W}" y2="${tbY + 76}" class="cad-thin" />`);
+    svgParts.push(`<line x1="${tbX + col3W * 2}" y1="${tbY + 52}" x2="${tbX + col3W * 2}" y2="${tbY + 76}" class="cad-thin" />`);
+    svgParts.push(`<line x1="${tbX + col3W * 3}" y1="${tbY + 52}" x2="${tbX + col3W * 3}" y2="${tbY + 76}" class="cad-thin" />`);
 
-    // Row 1 Content: Project Title & Format
+    // Row 1 Content: Project Title & Format (tbY to tbY + 28)
     const safeTitle = (options.projectTitle || "RelayFlow Circuit").replace(/[<>&]/g, "");
     svgParts.push(`<text x="${tbX + 8}" y="${tbY + 18}" class="cad-tb-title">${safeTitle}</text>`);
     svgParts.push(`<text x="${tbX + titleBlockW - 8}" y="${tbY + 18}" text-anchor="end" class="cad-tb-header">${options.paperSize} ${options.orientation.toUpperCase()}</text>`);
 
-    // Row 2 Content: Organization / Institution
+    // Row 2 Content: Organization / Institution (tbY + 28 to tbY + 52)
     const safeOrg = (options.organization || "RelayFlow Industrial CAD Studio").replace(/[<>&]/g, "");
-    svgParts.push(`<text x="${tbX + 8}" y="${tbY + 42}" class="cad-tb-header">ORGANIZATION / COMPANY</text>`);
-    svgParts.push(`<text x="${tbX + 8}" y="${tbY + 50}" class="cad-tb-val">${safeOrg}</text>`);
+    svgParts.push(`<text x="${tbX + 8}" y="${tbY + 38}" class="cad-tb-header">ORGANIZATION / COMPANY</text>`);
+    svgParts.push(`<text x="${tbX + 8}" y="${tbY + 48}" class="cad-tb-val">${safeOrg}</text>`);
 
-    // Row 3 Content: 4 Columns (Drafter, Date, Scale, Revision)
+    // Row 3 Content: 4 Columns (Drafter, Date, Scale, Revision) (tbY + 52 to tbY + 76)
     // Col 1: Drafter
     const safeAuthor = (options.author || "RelayFlow Web").replace(/[<>&]/g, "");
-    svgParts.push(`<text x="${tbX + 6}" y="${tbY + 36}" class="cad-tb-header">DRAFTER</text>`);
-    svgParts.push(`<text x="${tbX + 6}" y="${tbY + 48}" class="cad-tb-val">${safeAuthor}</text>`);
+    svgParts.push(`<text x="${tbX + 6}" y="${tbY + 62}" class="cad-tb-header">DRAFTER</text>`);
+    svgParts.push(`<text x="${tbX + 6}" y="${tbY + 72}" class="cad-tb-val">${safeAuthor}</text>`);
 
     // Col 2: Date
     const safeDate = (options.date || new Date().toISOString().slice(0, 10)).replace(/[<>&]/g, "");
-    svgParts.push(`<text x="${tbX + col3W + 6}" y="${tbY + 36}" class="cad-tb-header">DATE</text>`);
-    svgParts.push(`<text x="${tbX + col3W + 6}" y="${tbY + 48}" class="cad-tb-val">${safeDate}</text>`);
+    svgParts.push(`<text x="${tbX + col3W + 6}" y="${tbY + 62}" class="cad-tb-header">DATE</text>`);
+    svgParts.push(`<text x="${tbX + col3W + 6}" y="${tbY + 72}" class="cad-tb-val">${safeDate}</text>`);
 
     // Col 3: Scale & Sheet
     const safeScale = (options.scale || `1:${(1 / effectiveScale).toFixed(1)}`).replace(/[<>&]/g, "");
-    svgParts.push(`<text x="${tbX + col3W * 2 + 6}" y="${tbY + 36}" class="cad-tb-header">SCALE / SHEET</text>`);
-    svgParts.push(`<text x="${tbX + col3W * 2 + 6}" y="${tbY + 48}" class="cad-tb-val">${safeScale} • ${options.sheetNumber || "1/1"}</text>`);
+    svgParts.push(`<text x="${tbX + col3W * 2 + 6}" y="${tbY + 62}" class="cad-tb-header">SCALE / SHEET</text>`);
+    svgParts.push(`<text x="${tbX + col3W * 2 + 6}" y="${tbY + 72}" class="cad-tb-val">${safeScale} • ${options.sheetNumber || "1/1"}</text>`);
 
     // Col 4: Revision
     const safeRev = (options.revision || "REV 1.0").replace(/[<>&]/g, "");
-    svgParts.push(`<text x="${tbX + col3W * 3 + 6}" y="${tbY + 36}" class="cad-tb-header">REVISION</text>`);
-    svgParts.push(`<text x="${tbX + col3W * 3 + 6}" y="${tbY + 48}" class="cad-tb-val">${safeRev}</text>`);
+    svgParts.push(`<text x="${tbX + col3W * 3 + 6}" y="${tbY + 62}" class="cad-tb-header">REVISION</text>`);
+    svgParts.push(`<text x="${tbX + col3W * 3 + 6}" y="${tbY + 72}" class="cad-tb-val">${safeRev}</text>`);
 
-    // Row 4: Watermark & Standard
-    svgParts.push(`<text x="${tbX + 8}" y="${tbY + 81}" class="cad-tb-header" fill="${subTextColor}">IEC 61082 / ISO 7200 STANDARD • RELAYFLOW ELECTRICAL CAD</text>`);
+    // Row 4: Watermark & Standard (tbY + 76 to tbY + 92)
+    svgParts.push(`<text x="${tbX + 8}" y="${tbY + 86}" class="cad-tb-header" fill="${subTextColor}">IEC 61082 / ISO 7200 STANDARD • RELAYFLOW ELECTRICAL CAD</text>`);
     svgParts.push(`</g>`);
 
     // 10. Render Circuit Content (Transformed with Center & Scale)
@@ -320,24 +321,62 @@ export class CadSvgGenerator {
       const inlinedSvg = symbolSvgMap?.get(svgPath);
 
       if (inlinedSvg) {
-        // Strip XML prolog and embed cleanly inside <g>
+        // Strip XML prolog, comments, inkscape metadata and sodipodi nodes
         let cleanSymbol = inlinedSvg
           .replace(/<\?xml[^>]*\?>/g, "")
           .replace(/<!--[\s\S]*?-->/g, "")
+          .replace(/<sodipodi:namedview[\s\S]*?\/>/gi, "")
+          .replace(/<metadata[\s\S]*?<\/metadata>/gi, "")
           .trim();
 
+        // Counter-rotate text markings (e.g., "M" on motors, "L1/L2/L3" on power sources)
+        // so they stay upright and readable when the component is rotated
+        if (node.rotation && TEXT_CENTERS[node.componentId]) {
+          const centers = TEXT_CENTERS[node.componentId];
+          const counterRot = -node.rotation * 90;
+          for (const [tId, { cx, cy }] of Object.entries(centers)) {
+            const regex = new RegExp(`(<path[^>]*id="${tId}"[^>]*\\/?>)`, "g");
+            cleanSymbol = cleanSymbol.replace(regex, `<g transform="rotate(${counterRot} ${cx} ${cy})">$1</g>`);
+          }
+        }
+
+        // Normalize root <svg> tag attributes to match component dimension & preserve viewBox
+        cleanSymbol = cleanSymbol.replace(/<svg\b([^>]*)>/i, (_match, attrs) => {
+          let cleanAttrs = attrs
+            .replace(/\s*x="[^"]*"/gi, "")
+            .replace(/\s*y="[^"]*"/gi, "")
+            .replace(/\s*width="[^"]*"/gi, "")
+            .replace(/\s*height="[^"]*"/gi, "");
+          if (!/viewBox=/i.test(cleanAttrs)) {
+            cleanAttrs += ` viewBox="0 0 ${nw} ${nh}"`;
+          }
+          return `<svg x="0" y="0" width="${nw}" height="${nh}" ${cleanAttrs}>`;
+        });
+
         if (isMono) {
-          // Clean CAD Monochrome stroke
+          // Monochrome CAD standard:
+          // 1. Replace all non-none strokes with dark slate CAD ink
           cleanSymbol = cleanSymbol
-            .replace(/stroke="[^"]*"/g, `stroke="#0f172a"`)
-            .replace(/stroke:[^;"]*/g, `stroke:#0f172a`);
+            .replace(/stroke\s*:\s*(?!none\b|transparent\b)[^;"]+/gi, `stroke:#0f172a`)
+            .replace(/stroke\s*=\s*["'](?!none["']|transparent["'])[^"']+["']/gi, `stroke="#0f172a"`);
+
+          // 2. Replace white fills (e.g., "M", "3~", "L1", "L2", "PE") with dark slate CAD ink
+          // so text markings are clearly visible against the white CAD drawing paper
+          cleanSymbol = cleanSymbol
+            .replace(/fill\s*:\s*#(?:ffffff|fff|f9f9f9|white)\b/gi, `fill:#0f172a`)
+            .replace(/fill\s*=\s*["']#(?:ffffff|fff|f9f9f9|white)["']/gi, `fill="#0f172a"`);
+
+          // 3. Replace any other colored fills (e.g. hex codes) with dark slate CAD ink
+          cleanSymbol = cleanSymbol
+            .replace(/fill\s*:\s*(?!none\b|transparent\b)#[0-9a-fA-F]{3,6}/gi, `fill:#0f172a`)
+            .replace(/fill\s*=\s*["'](?!none["']|transparent["'])#[0-9a-fA-F]{3,6}["']/gi, `fill="#0f172a"`);
         }
 
         svgParts.push(`<g transform="translate(${-halfW}, ${-halfH}) rotate(${rotAngle} ${halfW} ${halfH})">
           ${cleanSymbol}
         </g>`);
       } else {
-        // Fallback: embedded image link or standard CAD symbol box
+        // Fallback: embedded image link
         svgParts.push(`<g transform="translate(${-halfW}, ${-halfH}) rotate(${rotAngle} ${halfW} ${halfH})">
           <image href="${svgPath}" width="${nw}" height="${nh}" />
         </g>`);

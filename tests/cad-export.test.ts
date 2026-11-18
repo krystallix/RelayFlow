@@ -207,4 +207,65 @@ describe("CadSvgGenerator", () => {
     expect(svg).toContain('class="cad-wire"');
     expect(svg).toContain("101"); // Wire label rendered
   });
+
+  it("organizes title block rows with non-overlapping Y coordinates", () => {
+    const svg = CadSvgGenerator.generateSvg([], [], mockOptions);
+
+    // Organization should be in Row 2, Drafter in Row 3
+    const orgHeaderMatch = svg.match(/<text [^>]*>ORGANIZATION \/ COMPANY<\/text>/);
+    const orgValMatch = svg.match(/<text [^>]*>PT Industrial Automation<\/text>/);
+    const drafterHeaderMatch = svg.match(/<text [^>]*>DRAFTER<\/text>/);
+    const drafterValMatch = svg.match(/<text [^>]*>Ir\. John Doe<\/text>/);
+
+    expect(orgHeaderMatch).toBeTruthy();
+    expect(orgValMatch).toBeTruthy();
+    expect(drafterHeaderMatch).toBeTruthy();
+    expect(drafterValMatch).toBeTruthy();
+
+    const parseY = (tag: string) => {
+      const match = tag.match(/y="([^"]+)"/);
+      return match ? parseFloat(match[1]) : NaN;
+    };
+
+    const orgHeaderY = parseY(orgHeaderMatch![0]);
+    const orgValY = parseY(orgValMatch![0]);
+    const drafterHeaderY = parseY(drafterHeaderMatch![0]);
+    const drafterValY = parseY(drafterValMatch![0]);
+
+    // Organization must be placed strictly above Drafter
+    expect(orgValY).toBeLessThan(drafterHeaderY);
+    expect(orgHeaderY).toBeLessThan(orgValY);
+    expect(drafterHeaderY).toBeLessThan(drafterValY);
+  });
+
+  it("inlines original SVG symbols, replaces white fills with CAD dark ink, and counter-rotates text", () => {
+    const mockMotorSvg = `<svg width="180" height="180" viewBox="0 0 180 180">
+      <circle cx="90" cy="90" r="70" id="mainPath1" style="fill:none;stroke:#ffffff;stroke-width:2" />
+      <path id="textPath1" style="fill:#ffffff" d="M 100 80 L 120 100" />
+    </svg>`;
+
+    const symbolMap = new Map<string, string>();
+    symbolMap.set("/symbols/motor3ph.svg", mockMotorSvg);
+
+    const nodes: CircuitNode[] = [
+      createMockNode({
+        id: "motor-1",
+        componentId: "motor3ph",
+        name: "Three-Phase Motor",
+        rotation: 1, // 90 degrees clockwise
+        position: { x: 500, y: 500 },
+      }),
+    ];
+
+    const svg = CadSvgGenerator.generateSvg(nodes, [], mockOptions, symbolMap);
+
+    // Motor main circle stroke converted to dark ink
+    expect(svg).toContain('style="fill:none;stroke:#0f172a;stroke-width:2"');
+    // Motor "M" text path converted from fill:#ffffff to fill:#0f172a
+    expect(svg).toContain('id="textPath1" style="fill:#0f172a"');
+    // White fills must NOT remain in the symbol
+    expect(svg).not.toContain('style="fill:#ffffff"');
+    // Counter-rotation (-90 deg around motor center 90, 90) applied to textPath1
+    expect(svg).toContain('transform="rotate(-90 90 90)"');
+  });
 });

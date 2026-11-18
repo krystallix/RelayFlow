@@ -16,9 +16,11 @@ import { useCircuitStore } from "@/store/useCircuitStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { getTranslation } from "@/i18n/translations";
 import { CadSvgGenerator, CadExportOptions } from "@/engine/export/CadSvgGenerator";
+import { svgCache } from "@/components/canvas/SymbolRenderer";
 import catalogData from "@/constants/components-catalog.json";
 
 const catalog = catalogData as Record<string, any>;
+const globalCadSymbolCache = new Map<string, string>();
 
 interface ExportCadModalProps {
   isOpen: boolean;
@@ -40,7 +42,13 @@ export const ExportCadModal: React.FC<ExportCadModalProps> = ({ isOpen, onClose 
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
 
   const [copied, setCopied] = useState(false);
-  const [symbolSvgMap, setSymbolSvgMap] = useState<Map<string, string>>(new Map());
+  const [symbolSvgMap, setSymbolSvgMap] = useState<Map<string, string>>(() => {
+    const initial = new Map<string, string>(globalCadSymbolCache);
+    for (const [k, v] of svgCache.entries()) {
+      if (!initial.has(k)) initial.set(k, v);
+    }
+    return initial;
+  });
   const printFrameRef = useRef<HTMLIFrameElement>(null);
 
   // Sync title with projectTitle when modal opens
@@ -62,7 +70,7 @@ export const ExportCadModal: React.FC<ExportCadModalProps> = ({ isOpen, onClose 
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
-  // Pre-fetch symbol SVGs
+  // Pre-fetch symbol SVGs (caching them for instant vector rendering)
   useEffect(() => {
     if (!isOpen) return;
 
@@ -75,25 +83,52 @@ export const ExportCadModal: React.FC<ExportCadModalProps> = ({ isOpen, onClose 
       uniquePaths.add(svgPath);
     }
 
-    Promise.all(
-      Array.from(uniquePaths).map(async (path) => {
-        try {
-          const res = await fetch(path);
-          if (!res.ok) return [path, ""] as const;
-          const text = await res.text();
-          return [path, text] as const;
-        } catch {
-          return [path, ""] as const;
+    // Immediately incorporate any SVGs cached from canvas rendering
+    const current = new Map(symbolSvgMap);
+    let updated = false;
+    for (const p of uniquePaths) {
+      if (!current.has(p)) {
+        const cached = svgCache.get(p) || globalCadSymbolCache.get(p);
+        if (cached) {
+          current.set(p, cached);
+          updated = true;
         }
-      })
-    ).then((results) => {
-      if (!isMounted) return;
-      const newMap = new Map<string, string>();
-      for (const [path, svgText] of results) {
-        if (svgText) newMap.set(path, svgText);
       }
-      setSymbolSvgMap(newMap);
-    });
+    }
+    if (updated) {
+      setSymbolSvgMap(new Map(current));
+    }
+
+    const pathsToFetch = Array.from(uniquePaths).filter(
+      (p) => !current.has(p) && !svgCache.has(p) && !globalCadSymbolCache.has(p)
+    );
+
+    if (pathsToFetch.length > 0) {
+      Promise.all(
+        pathsToFetch.map(async (path) => {
+          try {
+            const res = await fetch(path);
+            if (!res.ok) return [path, ""] as const;
+            const text = await res.text();
+            return [path, text] as const;
+          } catch {
+            return [path, ""] as const;
+          }
+        })
+      ).then((results) => {
+        if (!isMounted) return;
+        setSymbolSvgMap((prev) => {
+          const next = new Map(prev);
+          for (const [path, svgText] of results) {
+            if (svgText) {
+              globalCadSymbolCache.set(path, svgText);
+              next.set(path, svgText);
+            }
+          }
+          return next;
+        });
+      });
+    }
 
     return () => {
       isMounted = false;
