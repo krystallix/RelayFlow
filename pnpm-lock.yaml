@@ -1,5 +1,7 @@
 lockfileVersion: '9.0'
-
+allowBuilds:
+  esbuild: true
+  sharp: true
 settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
