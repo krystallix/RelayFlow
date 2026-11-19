@@ -2,20 +2,22 @@
 FROM node:22-alpine AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-# Pin pnpm to the version used to generate pnpm-lock.yaml. pnpm@12 enforces
-# build-script approvals differently and rejects this frozen lockfile in Dokploy.
-RUN corepack enable && corepack prepare pnpm@11.7.0 --activate
 WORKDIR /app
 
 # Dependencies stage
 FROM base AS deps
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-RUN pnpm install --frozen-lockfile
+RUN apk add --no-cache libc6-compat
+RUN corepack enable pnpm
+COPY package.json pnpm-lock.yaml ./
+# The project does not need install-time lifecycle scripts. Avoid pnpm's
+# interactive approval policy in a non-interactive Dokploy Docker build.
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 # Builder stage
 FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+RUN corepack enable pnpm
 
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
