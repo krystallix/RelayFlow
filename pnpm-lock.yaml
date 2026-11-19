@@ -11,6 +11,9 @@ importers:
       '@supabase/supabase-js':
         specifier: ^2.119.0
         version: 2.119.0
+      '@tailwindcss/postcss':
+        specifier: ^4.0.7
+        version: 4.3.4
       clsx:
         specifier: 2.1.1
         version: 2.1.1
@@ -23,6 +26,9 @@ importers:
       next:
         specifier: 15.2.0
         version: 15.2.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      postcss:
+        specifier: ^8.5.2
+        version: 8.5.32
       react:
         specifier: 19.0.0
         version: 19.0.0
@@ -32,13 +38,13 @@ importers:
       tailwind-merge:
         specifier: 3.0.1
         version: 3.0.1
+      tailwindcss:
+        specifier: ^4.0.7
+        version: 4.3.4
       zustand:
         specifier: 5.0.3
         version: 5.0.3(@types/react@19.3.0)(react@19.0.0)
     devDependencies:
-      '@tailwindcss/postcss':
-        specifier: ^4.0.7
-        version: 4.3.4
       '@types/node':
         specifier: ^22.13.4
         version: 22.20.5
@@ -48,12 +54,6 @@ importers:
       '@types/react-dom':
         specifier: ^19.0.4
         version: 19.3.0(@types/react@19.3.0)
-      postcss:
-        specifier: ^8.5.2
-        version: 8.5.32
-      tailwindcss:
-        specifier: ^4.0.7
-        version: 4.3.4
       tsx:
         specifier: ^4.19.3
         version: 4.23.15
