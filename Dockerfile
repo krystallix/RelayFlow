@@ -9,7 +9,7 @@ WORKDIR /app
 
 # Dependencies stage
 FROM base AS deps
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml* ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 RUN pnpm install --frozen-lockfile
 
 # Builder stage

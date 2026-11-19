@@ -1,0 +1,5 @@
+# pnpm v11 reads lifecycle build-script approvals from workspace config.
+# Required for Next.js image optimization (sharp) and test tooling (esbuild).
+onlyBuiltDependencies:
+  - esbuild
+  - sharp
