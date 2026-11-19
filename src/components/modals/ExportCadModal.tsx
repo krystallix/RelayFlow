@@ -11,6 +11,7 @@ import {
   Layers,
   Settings,
   Eye,
+  Palette,
 } from "lucide-react";
 import { useCircuitStore } from "@/store/useCircuitStore";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -28,11 +29,12 @@ interface ExportCadModalProps {
 }
 
 export const ExportCadModal: React.FC<ExportCadModalProps> = ({ isOpen, onClose }) => {
-  const { nodes, wires, projectTitle, locale } = useCircuitStore();
+  const { nodes, wires, projectTitle, locale, canvasPreferences } = useCircuitStore();
   const { user } = useAuthStore();
   const t = getTranslation(locale).cadModal;
 
-  // Options state (Monochrome CAD Standard, clean shadcn UI)
+  // Options state (Drawing Style: Color as in Canvas by default or Monochrome CAD Standard)
+  const [drawingStyle, setDrawingStyle] = useState<"color" | "monochrome">("color");
   const [paperSize, setPaperSize] = useState<"A4" | "A3">("A4");
   const [orientation, setOrientation] = useState<"landscape" | "portrait">("landscape");
   const [title, setTitle] = useState(projectTitle || "RelayFlow Circuit");
@@ -135,21 +137,36 @@ export const ExportCadModal: React.FC<ExportCadModalProps> = ({ isOpen, onClose 
     };
   }, [isOpen, nodes]);
 
-  // Generate Cad SVG Output (Pure Monochrome CAD Standard)
+  // Generate Cad SVG Output (WYSIWYG Canvas Drawing Style & Preferences)
   const svgOutput = useMemo(() => {
     if (!isOpen) return "";
     const options: CadExportOptions = {
       paperSize,
       orientation,
-      theme: "monochrome",
+      theme: drawingStyle,
       projectTitle: title,
       author,
       organization,
       revision,
       date,
+      preferences: canvasPreferences,
     };
     return CadSvgGenerator.generateSvg(nodes, wires, options, symbolSvgMap);
-  }, [isOpen, nodes, wires, paperSize, orientation, title, author, organization, revision, date, symbolSvgMap]);
+  }, [
+    isOpen,
+    nodes,
+    wires,
+    paperSize,
+    orientation,
+    drawingStyle,
+    title,
+    author,
+    organization,
+    revision,
+    date,
+    canvasPreferences,
+    symbolSvgMap,
+  ]);
 
   if (!isOpen) return null;
 
@@ -310,7 +327,7 @@ export const ExportCadModal: React.FC<ExportCadModalProps> = ({ isOpen, onClose 
                 {t.title}
               </h2>
               <p className="text-xs text-zinc-500 mt-0.5 truncate max-w-[280px] sm:max-w-md">
-                {title || "RelayFlow Circuit"} • {paperSize} {orientation} • CAD Monochrome
+                {title || "RelayFlow Circuit"} • {paperSize} {orientation} • {drawingStyle === "color" ? t.color : t.monochrome}
               </p>
             </div>
           </div>
@@ -328,8 +345,41 @@ export const ExportCadModal: React.FC<ExportCadModalProps> = ({ isOpen, onClose 
         <div className="flex-1 min-h-0 flex flex-col md:flex-row overflow-hidden">
           {/* Left Configuration Panel (shadcn Form styling) */}
           <div className="w-full md:w-[320px] lg:w-[340px] shrink-0 p-5 border-b md:border-b-0 md:border-r border-zinc-200 overflow-y-auto space-y-5">
-            {/* 1. Paper Size & Orientation */}
+            {/* 1. Drawing Style (Canvas Color vs CAD Monochrome) */}
             <div className="space-y-3">
+              <label className="text-xs font-semibold uppercase tracking-wider text-zinc-500 flex items-center gap-1.5">
+                <Palette className="w-3.5 h-3.5" />
+                <span>{t.style}</span>
+              </label>
+
+              <div className="grid grid-cols-2 p-1 rounded-lg bg-zinc-100 text-zinc-500 text-xs font-medium border border-zinc-200/70">
+                <button
+                  type="button"
+                  onClick={() => setDrawingStyle("color")}
+                  className={`py-1.5 px-3 rounded-md text-xs font-medium transition-all cursor-pointer ${
+                    drawingStyle === "color"
+                      ? "bg-white text-zinc-950 shadow-xs font-semibold"
+                      : "hover:text-zinc-900"
+                  }`}
+                >
+                  {t.color}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setDrawingStyle("monochrome")}
+                  className={`py-1.5 px-3 rounded-md text-xs font-medium transition-all cursor-pointer ${
+                    drawingStyle === "monochrome"
+                      ? "bg-white text-zinc-950 shadow-xs font-semibold"
+                      : "hover:text-zinc-900"
+                  }`}
+                >
+                  {t.monochrome}
+                </button>
+              </div>
+            </div>
+
+            {/* 2. Paper Size & Orientation */}
+            <div className="space-y-3 pt-1 border-t border-zinc-100">
               <label className="text-xs font-semibold uppercase tracking-wider text-zinc-500 flex items-center gap-1.5">
                 <Layers className="w-3.5 h-3.5" />
                 <span>{t.paperSize} & {t.orientation}</span>

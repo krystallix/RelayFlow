@@ -3,6 +3,7 @@ import { ManhattanRouter } from "@/engine/router/ManhattanRouter";
 import { WireIntersectionResolver } from "@/engine/router/WireIntersectionResolver";
 import { WireNetResolver } from "@/engine/router/WireNetResolver";
 import { TEXT_CENTERS } from "@/constants/symbol-text-centers";
+import { CanvasPreferences, DEFAULT_CANVAS_PREFERENCES } from "@/store/useCircuitStore";
 import catalogData from "@/constants/components-catalog.json";
 
 const catalog = catalogData as Record<string, any>;
@@ -18,6 +19,7 @@ export interface CadExportOptions {
   date: string;
   sheetNumber?: string;
   scale?: string;
+  preferences?: CanvasPreferences;
 }
 
 export class CadSvgGenerator {
@@ -30,6 +32,16 @@ export class CadSvgGenerator {
     options: CadExportOptions,
     symbolSvgMap?: Map<string, string>
   ): string {
+    const prefs: CanvasPreferences = options.preferences || DEFAULT_CANVAS_PREFERENCES;
+    const wireNumberSize = typeof prefs.wireNumberSize === "number" ? prefs.wireNumberSize : 9;
+    const componentTagSize = typeof prefs.componentTagSize === "number" ? prefs.componentTagSize : 12;
+    const commentTextSize = typeof prefs.commentTextSize === "number" ? prefs.commentTextSize : 10;
+    const wireThickness = typeof prefs.wireThickness === "number" ? prefs.wireThickness : 2;
+    const showCommentText = prefs.showCommentText !== false;
+    const highContrastBadges = prefs.highContrastBadges !== false;
+    const showTerminalPinsAlways = prefs.showTerminalPinsAlways === true;
+    const highlightCrossings = prefs.highlightCrossings !== false;
+
     // 1. Determine Sheet Dimensions (in standard CAD points: 72/96 DPI compliant)
     // A4: 1190 x 842 pt (Landscape) or 842 x 1190 pt (Portrait)
     // A3: 1684 x 1190 pt (Landscape) or 1190 x 1684 pt (Portrait)
@@ -44,12 +56,14 @@ export class CadSvgGenerator {
       pageHeight = options.orientation === "portrait" ? 1190 : 842;
     }
 
-    const isMono = options.theme !== "color";
+    const isMono = options.theme === "monochrome";
     const bgFill = "#ffffff";
     const cadBorderStroke = isMono ? "#0f172a" : "#1e293b";
-    const wireStroke = isMono ? "#0f172a" : "#2563eb";
-    const textColor = isMono ? "#0f172a" : "#0f172a";
+    // Color style matches canvas light mode: #334155 for idle wires, vibrant #d97706 (amber-600) for tags
+    const wireStroke = isMono ? "#0f172a" : "#334155";
+    const textColor = "#0f172a";
     const subTextColor = "#64748b";
+    const tagTextColor = isMono ? "#0f172a" : "#d97706";
 
     // 2. Margins & Inner Drawing Frame (Left binding margin: 40px, Others: 20px)
     const marginL = 40;
@@ -143,6 +157,14 @@ export class CadSvgGenerator {
     const crossingsMap = WireIntersectionResolver.resolveAllCrossings(wires, wireRoutes);
     const wireNets = WireNetResolver.resolveWireNets(wires, nodes);
 
+    // Precompute tag counts for cross-reference badges
+    const tagCountMap = new Map<string, number>();
+    for (const n of nodes) {
+      if (n.tag) {
+        tagCountMap.set(n.tag, (tagCountMap.get(n.tag) || 0) + 1);
+      }
+    }
+
     // 6. Build SVG XML Content
     const svgParts: string[] = [];
 
@@ -161,11 +183,12 @@ export class CadSvgGenerator {
       .cad-tb-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 13px; font-weight: bold; fill: ${textColor}; }
       .cad-tb-header { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 8px; font-weight: bold; fill: ${subTextColor}; text-transform: uppercase; }
       .cad-tb-val { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 10px; font-weight: 600; fill: ${textColor}; }
-      .cad-wire { stroke: ${wireStroke}; stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+      .cad-wire { stroke: ${wireStroke}; stroke-width: ${wireThickness}; fill: none; stroke-linecap: round; stroke-linejoin: round; }
       .cad-wire-dot { fill: ${wireStroke}; }
-      .cad-tag { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 11px; font-weight: bold; fill: ${textColor}; }
-      .cad-comment { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 9px; fill: ${subTextColor}; font-style: italic; }
+      .cad-tag { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace, sans-serif; font-size: ${componentTagSize}px; font-weight: bold; fill: ${tagTextColor}; }
+      .cad-comment { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: ${commentTextSize}px; fill: ${subTextColor}; font-style: normal; }
       .cad-pin { font-family: 'Courier New', monospace; font-size: 8px; font-weight: bold; fill: ${subTextColor}; }
+      .cad-wire-label { font-family: 'Courier New', monospace; font-size: ${wireNumberSize}px; font-weight: bold; fill: ${textColor}; text-anchor: middle; dominant-baseline: central; }
     </style>`);
 
     // Paper Background
@@ -277,8 +300,8 @@ export class CadSvgGenerator {
       const crossings = crossingsMap.get(wire.id);
       let pathD = wireSvgPaths.get(wire.id) || "";
 
-      // Inject bridge arc jumps if crossings exist
-      if (crossings && crossings.length > 0) {
+      // Inject bridge arc jumps if crossings exist and highlightCrossings is enabled
+      if (highlightCrossings && crossings && crossings.length > 0) {
         pathD = WireIntersectionResolver.injectArcJumps(points, crossings);
       }
 
@@ -294,13 +317,26 @@ export class CadSvgGenerator {
       const labelText = wire.label || netInfo?.label;
       if (labelText) {
         const optimalPositions = WireNetResolver.getOptimalLabelPositions(points);
+        const charW = Math.max(5, wireNumberSize * 0.6);
+        const tw = Math.max(16, labelText.length * charW + 8);
+        const th = Math.max(12, wireNumberSize + 4);
+
         for (const pos of optimalPositions) {
-          const tw = Math.max(16, labelText.length * 6 + 6);
-          const th = 11;
-          svgParts.push(`<g transform="translate(${pos.x}, ${pos.y})">
-            <rect x="${-tw / 2}" y="${-th / 2}" width="${tw}" height="${th}" rx="2" fill="#ffffff" stroke="${isMono ? '#0f172a' : '#2563eb'}" stroke-width="0.8" />
-            <text x="0" y="0.5" font-family="'Courier New', monospace" font-size="8" font-weight="bold" fill="${textColor}" text-anchor="middle" dominant-baseline="central">${labelText}</text>
-          </g>`);
+          const offsetX = pos.orientation === "horizontal" ? 0 : 7;
+          const offsetY = pos.orientation === "horizontal" ? -8 : 0;
+          const lx = pos.x + offsetX;
+          const ly = pos.y + offsetY;
+
+          if (highContrastBadges) {
+            svgParts.push(`<g transform="translate(${lx}, ${ly})">
+              <rect x="${-tw / 2}" y="${-th / 2}" width="${tw}" height="${th}" rx="3" fill="#ffffff" stroke="${isMono ? '#0f172a' : '#cbd5e1'}" stroke-width="0.8" />
+              <text x="0" y="0.5" class="cad-wire-label">${labelText}</text>
+            </g>`);
+          } else {
+            svgParts.push(`<g transform="translate(${lx}, ${ly})">
+              <text x="0" y="0.5" class="cad-wire-label">${labelText}</text>
+            </g>`);
+          }
         }
       }
     }
@@ -370,6 +406,14 @@ export class CadSvgGenerator {
           cleanSymbol = cleanSymbol
             .replace(/fill\s*:\s*(?!none\b|transparent\b)#[0-9a-fA-F]{3,6}/gi, `fill:#0f172a`)
             .replace(/fill\s*=\s*["'](?!none["']|transparent["'])#[0-9a-fA-F]{3,6}["']/gi, `fill="#0f172a"`);
+        } else {
+          // Color Schematic mode (matches light canvas appearance):
+          // In light mode, symbols have dark strokes #0f172a while keeping vivid fills (or lamp/button colors)
+          cleanSymbol = cleanSymbol
+            .replace(/stroke\s*:\s*#(?:ffffff|fff|f9f9f9|white)\b/gi, `stroke:#0f172a`)
+            .replace(/stroke\s*=\s*["']#(?:ffffff|fff|f9f9f9|white)["']/gi, `stroke="#0f172a"`)
+            .replace(/fill\s*:\s*#(?:ffffff|fff|f9f9f9|white)\b/gi, `fill:#0f172a`)
+            .replace(/fill\s*=\s*["']#(?:ffffff|fff|f9f9f9|white)["']/gi, `fill="#0f172a"`);
         }
 
         svgParts.push(`<g transform="translate(${-halfW}, ${-halfH}) rotate(${rotAngle} ${halfW} ${halfH})">
@@ -382,29 +426,80 @@ export class CadSvgGenerator {
         </g>`);
       }
 
-      // Component Tag (e.g., "-KM1", "-Q1", "-F1")
-      if (node.tag) {
-        const tagX = -halfW;
-        const tagY = -halfH - 4;
-        svgParts.push(`<text x="${tagX}" y="${tagY}" class="cad-tag">${node.tag}</text>`);
+      // Schematic Annotation Label (Tag & Comment) matching Canvas FlowNode exact smart placement
+      const isHorizontal = node.rotation === 1 || node.rotation === 3;
+      const isTagVisible = node.tagVisibility !== false;
+      const showTag = isTagVisible && Boolean(node.tag);
+      const showComment = Boolean(node.comment) && showCommentText;
+
+      if (showTag || showComment) {
+        let labelGroupX = 0;
+        let labelGroupY = 0;
+        let anchor = "start";
+
+        if (isHorizontal) {
+          // Placed centered above rotated symbol
+          const visualHalfHeight = nw / 2;
+          const visualTop = nh / 2 - visualHalfHeight;
+          const topPos = Math.min(-14, visualTop - 26);
+          labelGroupX = 0;
+          labelGroupY = topPos;
+          anchor = "middle";
+        } else {
+          // Vertical symbols: ports top & bottom, place label on right or left
+          const hasRightPorts = c?.nodes && Array.isArray(c.nodes)
+            ? c.nodes.some((p: any) => p.x >= nw - 15)
+            : false;
+
+          if (!hasRightPorts) {
+            labelGroupX = halfW + 10;
+            labelGroupY = Math.max(10, Math.min(22, nh * 0.15)) - halfH;
+            anchor = "start";
+          } else {
+            labelGroupX = -halfW - 10;
+            labelGroupY = Math.max(10, Math.min(22, nh * 0.15)) - halfH;
+            anchor = "end";
+          }
+        }
+
+        const pairedCount = node.tag ? (tagCountMap.get(node.tag) || 1) - 1 : 0;
+
+        // Render Tag and Cross-reference badge
+        let lineY = labelGroupY + componentTagSize * 0.8;
+        if (showTag) {
+          if (highContrastBadges) {
+            const approxTagW = (node.tag?.length || 3) * componentTagSize * 0.65 + 8;
+            const approxTagH = componentTagSize + 6;
+            const badgeX = anchor === "middle" ? labelGroupX - approxTagW / 2 : anchor === "end" ? labelGroupX - approxTagW : labelGroupX - 4;
+            svgParts.push(`<rect x="${badgeX}" y="${lineY - componentTagSize * 0.8 - 2}" width="${approxTagW}" height="${approxTagH}" rx="3" fill="#ffffff" stroke="${isMono ? '#0f172a' : '#e2e8f0'}" stroke-width="0.8" />`);
+          }
+
+          svgParts.push(`<text x="${labelGroupX}" y="${lineY}" class="cad-tag" text-anchor="${anchor}">${node.tag}</text>`);
+
+          if (pairedCount > 0) {
+            const crossRefText = `↔ ${pairedCount}`;
+            const crX = anchor === "middle" ? labelGroupX + 25 : anchor === "end" ? labelGroupX - 35 : labelGroupX + (node.tag?.length || 3) * componentTagSize * 0.65 + 6;
+            svgParts.push(`<text x="${crX}" y="${lineY}" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="9" font-weight="600" fill="${isMono ? '#0f172a' : '#d97706'}">${crossRefText}</text>`);
+          }
+
+          lineY += componentTagSize * 0.3 + commentTextSize + 2;
+        }
+
+        // Render Comment
+        if (showComment) {
+          svgParts.push(`<text x="${labelGroupX}" y="${lineY}" class="cad-comment" text-anchor="${anchor}">${node.comment}</text>`);
+        }
       }
 
-      // Component Comment / Description
-      if (node.comment) {
-        const commX = -halfW;
-        const commY = halfH + 12;
-        svgParts.push(`<text x="${commX}" y="${commY}" class="cad-comment">${node.comment}</text>`);
-      }
-
-      // Port Pin Numbers (Terminal markers if available in catalog)
-      if (c?.nodes && Array.isArray(c.nodes)) {
+      // Port Pin Numbers (Terminal markers)
+      if (showTerminalPinsAlways && c?.nodes && Array.isArray(c.nodes)) {
         for (let pIdx = 0; pIdx < c.nodes.length; pIdx++) {
           const port = c.nodes[pIdx];
           const pinLabel = port.name || port.label;
           if (pinLabel) {
             const px = port.x - halfW;
             const py = port.y - halfH;
-            svgParts.push(`<text x="${px}" y="${py - 3}" class="cad-pin">${pinLabel}</text>`);
+            svgParts.push(`<text x="${px}" y="${py - 3}" class="cad-pin" text-anchor="middle">${pinLabel}</text>`);
           }
         }
       }

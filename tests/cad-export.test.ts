@@ -268,4 +268,51 @@ describe("CadSvgGenerator", () => {
     // Counter-rotation (-90 deg around motor center 90, 90) applied to textPath1
     expect(svg).toContain('transform="rotate(-90 90 90)"');
   });
+
+  it("respects canvas preferences and color drawing style (orange tags, custom font sizes, wire thickness)", () => {
+    const nodes: CircuitNode[] = [
+      createMockNode({
+        id: "km1",
+        componentId: "coil",
+        tag: "-KM1",
+        comment: "Main Contactor Coil",
+        position: { x: 200, y: 200 },
+      }),
+    ];
+    const wires: CircuitWire[] = [
+      {
+        id: "w1",
+        fromNodeId: "km1",
+        fromPortId: 0,
+        toNodeId: "km1",
+        toPortId: 1,
+        label: "L1",
+      },
+    ];
+
+    const colorSvg = CadSvgGenerator.generateSvg(nodes, wires, {
+      ...mockOptions,
+      theme: "color",
+      preferences: {
+        wireNumberSize: 14,
+        componentTagSize: 18,
+        commentTextSize: 12,
+        wireThickness: 3.5,
+        showCommentText: true,
+        highContrastBadges: true,
+        showTerminalPinsAlways: true,
+        highlightCrossings: true,
+      },
+    });
+
+    // In color style, component tag text has amber/orange color
+    expect(colorSvg).toContain("cad-tag");
+    expect(colorSvg).toContain("font-size: 18px");
+    expect(colorSvg).toContain("#d97706"); // Amber/orange tag
+    expect(colorSvg).toContain("font-size: 12px"); // Comment font size
+    expect(colorSvg).toContain("stroke-width: 3.5"); // Wire thickness
+    expect(colorSvg).toContain("font-size: 14px"); // Wire label font size
+    expect(colorSvg).toContain("Main Contactor Coil");
+    expect(colorSvg).toContain("-KM1");
+  });
 });
