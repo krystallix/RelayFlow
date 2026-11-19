@@ -2,7 +2,9 @@
 FROM node:22-alpine AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# Pin pnpm to the version used to generate pnpm-lock.yaml. pnpm@12 enforces
+# build-script approvals differently and rejects this frozen lockfile in Dokploy.
+RUN corepack enable && corepack prepare pnpm@11.7.0 --activate
 WORKDIR /app
 
 # Dependencies stage
