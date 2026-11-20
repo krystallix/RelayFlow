@@ -288,9 +288,6 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
   const handleMouseDown = (e: React.MouseEvent) => {
     if (isSimulating) {
       e.stopPropagation();
-      if (isSpring && e.button === 0) {
-        setComponentPressed(node.id, true);
-      }
       return;
     }
     if (isReadOnlyViewer) {
@@ -302,9 +299,6 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
   const handleTouchStart = (e: React.TouchEvent) => {
     e.stopPropagation();
     if (isSimulating) {
-      if (isSpring) {
-        setComponentPressed(node.id, true);
-      }
       return;
     }
     if (isReadOnlyViewer) {
@@ -315,12 +309,9 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
 
   const handleTouchEnd = (e: React.TouchEvent) => {
     e.stopPropagation();
-    if (isSimulating) {
-      if (isSpring) {
-        setComponentPressed(node.id, false);
-      } else if (isHold) {
-        toggleComponentState(node.id);
-      }
+    if (isSimulating && isInteractive) {
+      e.preventDefault();
+      toggleComponentState(node.id);
     }
   };
 
@@ -505,7 +496,7 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
             <div className="w-[52px] h-[52px] rounded-full relative flex items-center justify-center pointer-events-none select-none">
               {(() => {
                 const color = node.buttonColor || (node.componentId === "panelButtonMomentary" ? "green" : "black");
-                const isPressed = Boolean(node.isPressed);
+                const isPressed = Boolean(node.isPressed || node.frameIndex === 1);
                 const isLatched = node.componentId === "panelButtonLatching" && node.frameIndex === 1;
 
                 const buttonPalettes: Record<

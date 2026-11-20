@@ -154,6 +154,8 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   const wireDraft = useCircuitStore((s) => s.wireDraft);
   const theme = useCircuitStore((s) => s.theme);
   const showGrid = useCircuitStore((s) => s.showGrid);
+  const showSubGrid = useCircuitStore((s) => s.showSubGrid);
+  const showMajorGrid = useCircuitStore((s) => s.showMajorGrid);
   const showWireLabels = useCircuitStore((s) => s.showWireLabels);
   const pageViewEnabled = useCircuitStore((s) => s.pageViewEnabled);
   const isSimulating = useCircuitStore((s) => s.isSimulating);
@@ -1754,11 +1756,29 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
         touchAction: "none",
         // Continuous fine mesh grid lines with low opacity (Engineering CAD style) - only shown in infinite canvas mode
         backgroundImage: !pageViewEnabled && showGrid
-          ? isDark
-            ? `linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px)`
-            : `linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px)`
+          ? [
+              ...(showMajorGrid
+                ? [
+                    `linear-gradient(to right, ${isDark ? "rgba(255, 255, 255, 0.085)" : "rgba(0, 0, 0, 0.095)"} 2px, transparent 2px)`,
+                    `linear-gradient(to bottom, ${isDark ? "rgba(255, 255, 255, 0.085)" : "rgba(0, 0, 0, 0.095)"} 2px, transparent 2px)`,
+                  ]
+                : []),
+              `linear-gradient(to right, ${isDark ? "rgba(255, 255, 255, 0.045)" : "rgba(0, 0, 0, 0.055)"} 1px, transparent 1px)`,
+              `linear-gradient(to bottom, ${isDark ? "rgba(255, 255, 255, 0.045)" : "rgba(0, 0, 0, 0.055)"} 1px, transparent 1px)`,
+              ...(showSubGrid
+                ? [
+                    `linear-gradient(to right, ${isDark ? "rgba(255, 255, 255, 0.018)" : "rgba(0, 0, 0, 0.022)"} 1px, transparent 1px)`,
+                    `linear-gradient(to bottom, ${isDark ? "rgba(255, 255, 255, 0.018)" : "rgba(0, 0, 0, 0.022)"} 1px, transparent 1px)`,
+                  ]
+                : []),
+            ].join(", ")
           : "none",
-        backgroundSize: `${30 * zoomScale}px ${30 * zoomScale}px`,
+        backgroundSize: [
+          ...(showMajorGrid ? [`${90 * zoomScale}px ${90 * zoomScale}px`, `${90 * zoomScale}px ${90 * zoomScale}px`] : []),
+          `${30 * zoomScale}px ${30 * zoomScale}px`,
+          `${30 * zoomScale}px ${30 * zoomScale}px`,
+          ...(showSubGrid ? [`${15 * zoomScale}px ${15 * zoomScale}px`, `${15 * zoomScale}px ${15 * zoomScale}px`] : []),
+        ].join(", "),
         backgroundPosition: `${panOffset.x}px ${panOffset.y}px`,
       }}
     >
@@ -1813,15 +1833,39 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
                 <defs>
                   <pattern
                     id="page-sheet-grid"
-                    width="30"
-                    height="30"
+                    width="90"
+                    height="90"
                     patternUnits="userSpaceOnUse"
                   >
+                    {showSubGrid && (
+                      <path
+                        d="M 15 0 L 15 90 M 45 0 L 45 90 M 75 0 L 75 90 M 0 15 L 90 15 M 0 45 L 90 45 M 0 75 L 90 75"
+                        fill="none"
+                        stroke={isDark ? "rgba(255, 255, 255, 0.03)" : "rgba(0, 0, 0, 0.035)"}
+                        strokeWidth={0.5}
+                        vectorEffect="non-scaling-stroke"
+                      />
+                    )}
                     <path
-                      d="M 30 0 L 0 0 0 30"
+                      d="M 30 0 L 30 90 M 60 0 L 60 90 M 0 30 L 90 30 M 0 60 L 90 60"
                       fill="none"
                       stroke={isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.08)"}
                       strokeWidth={1}
+                      vectorEffect="non-scaling-stroke"
+                    />
+                    <path
+                      d="M 90 0 L 0 0 0 90"
+                      fill="none"
+                      stroke={
+                        showMajorGrid
+                          ? isDark
+                            ? "rgba(255, 255, 255, 0.14)"
+                            : "rgba(0, 0, 0, 0.14)"
+                          : isDark
+                          ? "rgba(255, 255, 255, 0.08)"
+                          : "rgba(0, 0, 0, 0.08)"
+                      }
+                      strokeWidth={showMajorGrid ? 2 : 1}
                       vectorEffect="non-scaling-stroke"
                     />
                   </pattern>

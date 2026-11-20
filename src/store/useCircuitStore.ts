@@ -178,6 +178,8 @@ interface CircuitStoreState {
   theme: "dark" | "light";
   locale: "en" | "id";
   showGrid: boolean;
+  showSubGrid: boolean;
+  showMajorGrid: boolean;
   showWireLabels: boolean;
   pageViewEnabled: boolean;
 
@@ -233,6 +235,8 @@ interface CircuitStoreState {
   setLocale: (locale: "en" | "id") => void;
   toggleLocale: () => void;
   toggleGrid: () => void;
+  toggleSubGrid: () => void;
+  toggleMajorGrid: () => void;
   togglePageView: () => void;
   setPageViewEnabled: (enabled: boolean) => void;
   loadProject: (project: RelayFlowProject, format?: "rflow" | "smrl") => void;
@@ -324,6 +328,8 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
     theme: initial.theme,
     locale: initial.locale,
     showGrid: true,
+    showSubGrid: true,
+    showMajorGrid: true,
     showWireLabels: true,
     pageViewEnabled: false,
     isSimulating: false,
@@ -535,6 +541,8 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
         return { locale: next };
       }),
     toggleGrid: () => set((state) => ({ showGrid: !state.showGrid })),
+    toggleSubGrid: () => set((state) => ({ showSubGrid: !state.showSubGrid })),
+    toggleMajorGrid: () => set((state) => ({ showMajorGrid: !state.showMajorGrid })),
     togglePageView: () => set((state) => ({ pageViewEnabled: !state.pageViewEnabled })),
     setPageViewEnabled: (enabled: boolean) => set({ pageViewEnabled: enabled }),
     toggleWireLabels: () => set((state) => ({ showWireLabels: !state.showWireLabels })),

@@ -20,8 +20,10 @@ import {
   HelpCircle,
   Grid,
   Grid2x2,
+  Grid3x3,
   Check,
   ChevronDown,
+  ChevronRight,
   Trash2,
   Copy,
   Menu,
@@ -125,6 +127,8 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
     theme,
     locale,
     showGrid,
+    showSubGrid,
+    showMajorGrid,
     showWireLabels,
     toggleWireLabels,
     renumberWires,
@@ -135,6 +139,8 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
     toggleTheme,
     toggleLocale,
     toggleGrid,
+    toggleSubGrid,
+    toggleMajorGrid,
     pageViewEnabled,
     togglePageView,
     startSimulation,
@@ -855,18 +861,82 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                   </div>
                 </button>
 
-                <button
-                  onClick={() => { toggleGrid(); setActiveMenu(null); }}
-                  className={`w-full text-left px-3 py-2 rounded-lg flex items-center justify-between text-xs transition-colors ${
-                    isDark ? "hover:bg-white/10" : "hover:bg-slate-100 text-slate-800"
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <Grid className="w-4 h-4 text-zinc-400" />
-                    <span>{t.navbar.dottedGrid}</span>
+                <div className="relative group/grid">
+                  <button
+                    onClick={() => toggleGrid()}
+                    className={`w-full text-left px-3 py-2 rounded-lg flex items-center justify-between text-xs transition-colors ${
+                      isDark ? "hover:bg-white/10" : "hover:bg-slate-100 text-slate-800"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Grid className="w-4 h-4 text-zinc-400" />
+                      <span>{t.navbar.dottedGrid}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      {showGrid && <Check className="w-3.5 h-3.5 text-zinc-400" />}
+                      <ChevronRight className="w-3.5 h-3.5 opacity-60" />
+                    </div>
+                  </button>
+
+                  <div
+                    className={`hidden group-hover/grid:block absolute left-full top-0 ml-1 w-52 rounded-xl border p-1 shadow-2xl z-50 ${
+                      isDark
+                        ? "bg-[#161a23] border-white/15 text-zinc-200"
+                        : "bg-white border-slate-200 text-slate-700"
+                    }`}
+                  >
+                    <button
+                      onClick={() => toggleGrid()}
+                      className={`w-full text-left px-3 py-2 rounded-lg flex items-center justify-between text-xs transition-colors ${
+                        isDark ? "hover:bg-white/10" : "hover:bg-slate-100 text-slate-800"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Grid className="w-4 h-4 text-zinc-400" />
+                        <span>{t.navbar.dottedGrid}</span>
+                      </div>
+                      {showGrid && <Check className="w-3.5 h-3.5 text-zinc-400" />}
+                    </button>
+
+                    <div className={`my-1 border-t ${isDark ? "border-white/10" : "border-slate-200"}`} />
+
+                    <button
+                      onClick={() => showGrid && toggleMajorGrid()}
+                      disabled={!showGrid}
+                      className={`w-full text-left px-3 py-2 rounded-lg flex items-center justify-between text-xs transition-colors ${
+                        !showGrid
+                          ? "opacity-40 cursor-not-allowed"
+                          : isDark
+                          ? "hover:bg-white/10"
+                          : "hover:bg-slate-100 text-slate-800"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Grid className="w-4 h-4 text-zinc-300" />
+                        <span>{t.navbar.majorGrid}</span>
+                      </div>
+                      {showGrid && showMajorGrid && <Check className="w-3.5 h-3.5 text-zinc-400" />}
+                    </button>
+
+                    <button
+                      onClick={() => showGrid && toggleSubGrid()}
+                      disabled={!showGrid}
+                      className={`w-full text-left px-3 py-2 rounded-lg flex items-center justify-between text-xs transition-colors ${
+                        !showGrid
+                          ? "opacity-40 cursor-not-allowed"
+                          : isDark
+                          ? "hover:bg-white/10"
+                          : "hover:bg-slate-100 text-slate-800"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Grid3x3 className="w-4 h-4 text-zinc-400 opacity-75" />
+                        <span>{t.navbar.subGrid}</span>
+                      </div>
+                      {showGrid && showSubGrid && <Check className="w-3.5 h-3.5 text-zinc-400" />}
+                    </button>
                   </div>
-                  {showGrid && <Check className="w-3.5 h-3.5 text-zinc-400" />}
-                </button>
+                </div>
 
                 <button
                   onClick={() => { togglePageView(); setActiveMenu(null); }}
@@ -1801,18 +1871,42 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                   </div>
                   <span className="font-semibold">{isDark ? t.common.darkMode : t.common.lightMode}</span>
                 </button>
-                <button
-                  onClick={() => toggleGrid()}
-                  className={`w-full flex items-center justify-between p-2 rounded-xl border ${
-                    isDark ? "bg-white/5 border-white/10" : "bg-slate-100 border-slate-200"
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <Grid className="w-4 h-4 text-zinc-400" />
-                    <span>{t.navbar.dottedGrid}</span>
+                <div className={`rounded-xl border overflow-hidden ${isDark ? "bg-white/5 border-white/10" : "bg-slate-100 border-slate-200"}`}>
+                  <button
+                    onClick={() => toggleGrid()}
+                    className="w-full flex items-center justify-between p-2"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Grid className="w-4 h-4 text-zinc-400" />
+                      <span>{t.navbar.dottedGrid}</span>
+                    </div>
+                    {showGrid ? <Check className="w-4 h-4 text-zinc-200" /> : <span className="text-zinc-500">Off</span>}
+                  </button>
+                  <div className={`border-t pl-5 pr-2 py-1 space-y-1 ${isDark ? "border-white/10 bg-black/20" : "border-slate-200 bg-white/50"}`}>
+                    <button
+                      onClick={() => showGrid && toggleMajorGrid()}
+                      disabled={!showGrid}
+                      className={`w-full flex items-center justify-between py-1.5 text-xs ${!showGrid ? "opacity-40 cursor-not-allowed" : ""}`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Grid className="w-3.5 h-3.5 text-zinc-300" />
+                        <span>{t.navbar.majorGrid}</span>
+                      </div>
+                      {showGrid && showMajorGrid ? <Check className="w-3.5 h-3.5 text-zinc-200" /> : <span className="text-zinc-500">Off</span>}
+                    </button>
+                    <button
+                      onClick={() => showGrid && toggleSubGrid()}
+                      disabled={!showGrid}
+                      className={`w-full flex items-center justify-between py-1.5 text-xs ${!showGrid ? "opacity-40 cursor-not-allowed" : ""}`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Grid3x3 className="w-3.5 h-3.5 text-zinc-400 opacity-75" />
+                        <span>{t.navbar.subGrid}</span>
+                      </div>
+                      {showGrid && showSubGrid ? <Check className="w-3.5 h-3.5 text-zinc-200" /> : <span className="text-zinc-500">Off</span>}
+                    </button>
                   </div>
-                  {showGrid ? <Check className="w-4 h-4 text-zinc-200" /> : <span className="text-zinc-500">Off</span>}
-                </button>
+                </div>
               </div>
             </div>
 
