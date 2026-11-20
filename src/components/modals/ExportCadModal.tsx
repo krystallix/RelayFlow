@@ -19,6 +19,7 @@ import { getTranslation } from "@/i18n/translations";
 import { CadSvgGenerator, CadExportOptions } from "@/engine/export/CadSvgGenerator";
 import { svgCache } from "@/components/canvas/SymbolRenderer";
 import catalogData from "@/constants/components-catalog.json";
+import { Modal, Button } from "@/components/ui";
 
 const catalog = catalogData as Record<string, any>;
 const globalCadSymbolCache = new Map<string, string>();
@@ -59,18 +60,6 @@ export const ExportCadModal: React.FC<ExportCadModalProps> = ({ isOpen, onClose 
       setTitle(projectTitle || "RelayFlow Circuit");
     }
   }, [isOpen, projectTitle]);
-
-  // Handle ESC key
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
 
   // Pre-fetch symbol SVGs (caching them for instant vector rendering)
   useEffect(() => {
@@ -307,16 +296,14 @@ export const ExportCadModal: React.FC<ExportCadModalProps> = ({ isOpen, onClose 
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5 duration-200 animate-in fade-in select-none"
-      onClick={onClose}
-    >
-      {/* shadcn Dialog Content - Crisp Light Mode matching HardwareSheet & PreferencesSheet */}
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-4xl max-h-[90vh] flex flex-col rounded-xl border border-zinc-200 bg-white shadow-2xl duration-200 animate-in zoom-in-95 overflow-hidden text-zinc-950"
+    <>
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        maxWidthClassName="max-w-4xl"
+        className="max-h-[90vh] p-0 flex flex-col rounded-xl border-zinc-200 bg-white text-zinc-950 dark:bg-white dark:border-zinc-200 dark:text-zinc-950 overflow-hidden"
       >
-        {/* shadcn DialogHeader */}
+        {/* DialogHeader */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200 shrink-0">
           <div className="flex items-center gap-3">
             <div className="p-1.5 rounded-md border border-zinc-200 bg-zinc-50 text-zinc-700">
@@ -332,13 +319,15 @@ export const ExportCadModal: React.FC<ExportCadModalProps> = ({ isOpen, onClose 
             </div>
           </div>
 
-          <button
+          <Button
+            variant="ghost"
+            size="icon-sm"
             onClick={onClose}
-            className="p-1.5 rounded-md text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors cursor-pointer"
+            className="text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 dark:hover:bg-zinc-100 dark:hover:text-zinc-900"
             title="Close"
           >
             <X className="w-4 h-4" />
-          </button>
+          </Button>
         </div>
 
         {/* Content Area: Left Settings + Right Blueprint Preview */}
@@ -549,38 +538,41 @@ export const ExportCadModal: React.FC<ExportCadModalProps> = ({ isOpen, onClose 
 
           {/* Right Actions: PNG, Print/PDF, SVG */}
           <div className="flex items-center gap-2">
-            <button
-              type="button"
+            <Button
+              variant="outline"
+              size="sm"
               onClick={handleDownloadPng}
-              className="inline-flex items-center justify-center gap-1.5 rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-xs font-medium text-zinc-900 shadow-xs hover:bg-zinc-100 hover:text-zinc-900 cursor-pointer transition-colors"
+              className="border-zinc-200 bg-white text-zinc-900 hover:bg-zinc-100 dark:border-zinc-200 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100"
             >
               <ImageIcon className="w-3.5 h-3.5 text-zinc-400" />
               <span>PNG</span>
-            </button>
+            </Button>
 
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={handlePrintPdf}
-              className="inline-flex items-center justify-center gap-1.5 rounded-md bg-zinc-100 px-3.5 py-1.5 text-xs font-medium text-zinc-900 shadow-xs hover:bg-zinc-200/80 cursor-pointer transition-colors"
+              className="bg-zinc-100 text-zinc-900 hover:bg-zinc-200/80 dark:bg-zinc-100 dark:text-zinc-900 dark:hover:bg-zinc-200/80"
             >
               <Printer className="w-3.5 h-3.5 text-zinc-600" />
               <span>{t.downloadPdf}</span>
-            </button>
+            </Button>
 
-            <button
-              type="button"
+            <Button
+              variant="primary"
+              size="sm"
               onClick={handleDownloadSvg}
-              className="inline-flex items-center justify-center gap-1.5 rounded-md bg-zinc-900 px-4 py-1.5 text-xs font-medium text-zinc-50 shadow-xs hover:bg-zinc-900/90 cursor-pointer transition-colors"
+              className="bg-zinc-900 text-zinc-50 hover:bg-zinc-900/90 dark:bg-zinc-900 dark:text-zinc-50 dark:hover:bg-zinc-900/90"
             >
               <Download className="w-3.5 h-3.5 text-zinc-100" />
               <span>{t.downloadSvg}</span>
-            </button>
+            </Button>
           </div>
         </div>
-      </div>
+      </Modal>
 
       {/* Hidden print iframe for razor-sharp vector PDF rendering */}
       <iframe ref={printFrameRef} className="hidden w-0 h-0 border-0" title="CAD Print Engine" />
-    </div>
+    </>
   );
 };

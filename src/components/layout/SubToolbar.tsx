@@ -12,6 +12,8 @@ import {
   GitCommit,
   Hash,
   Sliders,
+  Undo2,
+  Redo2,
 } from "lucide-react";
 
 interface SubToolbarProps {
@@ -105,6 +107,10 @@ export const SubToolbar: React.FC<SubToolbarProps> = ({ onAutoLayout }) => {
     nodes,
     isPreferencesOpen,
     togglePreferences,
+    undo,
+    redo,
+    undoStack,
+    redoStack,
   } = useCircuitStore();
 
   const isDark = theme === "dark";
@@ -116,10 +122,10 @@ export const SubToolbar: React.FC<SubToolbarProps> = ({ onAutoLayout }) => {
   };
 
   return (
-    <div className="absolute top-4 left-4 z-30 pointer-events-auto select-none">
+    <div className="absolute top-4 left-4 right-4 sm:right-auto z-30 pointer-events-none select-none">
       {/* Floating Island / Capsule Container */}
       <div
-        className={`flex items-center gap-1.5 px-2 py-1.5 rounded-2xl border shadow-2xl backdrop-blur-md transition-all duration-200 ${
+        className={`inline-flex max-w-full overflow-x-auto pointer-events-auto items-center gap-1.5 px-2 py-1.5 rounded-2xl border shadow-2xl backdrop-blur-md transition-all duration-200 ${
           isDark
             ? "bg-[#11141c]/80 border-white/15 text-zinc-300 shadow-black/60"
             : "bg-white/85 border-slate-200/90 text-slate-700 shadow-slate-900/15"
@@ -173,14 +179,32 @@ export const SubToolbar: React.FC<SubToolbarProps> = ({ onAutoLayout }) => {
           <RotateCcw className="w-4 h-4" />
         </TooltipButton>
 
-        {/* Auto Layout (Editor only) */}
+        {/* Undo, Redo & Auto Layout (Editor only) */}
         {!isReadOnlyViewer && (
           <>
             <div
-              className={`h-4 w-[1px] mx-1 ${
+              className={`h-4 w-[1px] mx-1 shrink-0 ${
                 isDark ? "bg-white/10" : "bg-slate-200"
               }`}
             />
+            <TooltipButton
+              onClick={undo}
+              disabled={undoStack.length === 0}
+              tooltip={locale === "id" ? "Batal Aksi (Undo)" : "Undo"}
+              shortcut="Ctrl+Z"
+              isDark={isDark}
+            >
+              <Undo2 className="w-4 h-4" />
+            </TooltipButton>
+            <TooltipButton
+              onClick={redo}
+              disabled={redoStack.length === 0}
+              tooltip={locale === "id" ? "Ulangi Aksi (Redo)" : "Redo"}
+              shortcut="Ctrl+Shift+Z"
+              isDark={isDark}
+            >
+              <Redo2 className="w-4 h-4" />
+            </TooltipButton>
             <TooltipButton
               onClick={handleAutoLayout}
               disabled={nodes.length === 0}

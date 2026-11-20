@@ -1,75 +1,24 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React from "react";
 import { useCircuitStore } from "@/store/useCircuitStore";
 import {
-  X,
   RotateCcw,
   Sliders,
   Type,
   Activity,
-  Check,
   Minus,
   Plus,
   Grid,
 } from "lucide-react";
-
-interface CheckboxItemProps {
-  id: string;
-  checked: boolean;
-  onChange: (checked: boolean) => void;
-  label: string;
-  description?: string;
-  disabled?: boolean;
-}
-
-const CheckboxItem: React.FC<CheckboxItemProps> = ({
-  id,
-  checked,
-  onChange,
-  label,
-  description,
-  disabled = false,
-}) => {
-  return (
-    <label
-      htmlFor={id}
-      className={`flex items-start gap-3 p-2.5 -mx-2 rounded-lg transition-colors group select-none ${
-        disabled ? "opacity-40 cursor-not-allowed" : "hover:bg-zinc-50 cursor-pointer"
-      }`}
-    >
-      <div className="relative flex items-center justify-center mt-0.5">
-        <input
-          id={id}
-          type="checkbox"
-          checked={checked}
-          disabled={disabled}
-          onChange={(e) => !disabled && onChange(e.target.checked)}
-          className="peer sr-only"
-        />
-        <div
-          className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${
-            checked
-              ? "bg-zinc-900 border-zinc-900 text-white shadow-xs"
-              : "border-zinc-300 bg-white group-hover:border-zinc-400"
-          }`}
-        >
-          {checked && <Check className="w-3 h-3 stroke-[3]" />}
-        </div>
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="text-xs font-medium text-zinc-900 leading-tight">
-          {label}
-        </div>
-        {description && (
-          <div className="text-[11px] text-zinc-500 mt-0.5 leading-normal">
-            {description}
-          </div>
-        )}
-      </div>
-    </label>
-  );
-};
+import {
+  Button,
+  Checkbox,
+  SideSheet,
+  SideSheetHeader,
+  SideSheetBody,
+  SideSheetFooter,
+} from "@/components/ui";
 
 interface PxStepperProps {
   label: string;
@@ -147,44 +96,23 @@ export const PreferencesSheet: React.FC = React.memo(() => {
 
   const isId = locale === "id";
 
-  useEffect(() => {
-    if (!isPreferencesOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setIsPreferencesOpen(false);
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isPreferencesOpen, setIsPreferencesOpen]);
-
   return (
-    <aside
-      aria-hidden={!isPreferencesOpen}
-      className={`fixed top-14 bottom-0 right-0 z-40 w-full sm:w-[350px] md:w-[380px] flex flex-col bg-white text-zinc-950 border-l border-zinc-200 shadow-xl transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] select-none pointer-events-auto ${
-        isPreferencesOpen ? "translate-x-0" : "translate-x-full pointer-events-none"
-      }`}
+    <SideSheet
+      isOpen={isPreferencesOpen}
+      onClose={() => setIsPreferencesOpen(false)}
+      side="right"
+      modal={false}
+      widthClassName="w-full sm:w-[350px] md:w-[380px]"
+      className="bg-white text-zinc-950 border-zinc-200 dark:bg-white dark:text-zinc-950 dark:border-zinc-200 select-none pointer-events-auto"
     >
-      {/* 1. Header (shadcn-style) */}
-      <div className="px-5 py-3.5 border-b border-zinc-100 flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-2">
-          <Sliders className="w-4 h-4 text-zinc-700" />
-          <h2 className="text-sm font-semibold tracking-tight text-zinc-900">
-            {isId ? "Preferensi Tampilan" : "View Preferences"}
-          </h2>
-        </div>
+      <SideSheetHeader
+        title={isId ? "Preferensi Tampilan" : "View Preferences"}
+        icon={<Sliders className="w-4 h-4 text-zinc-700" />}
+        onClose={() => setIsPreferencesOpen(false)}
+        className="py-3.5 border-zinc-100 dark:border-zinc-100"
+      />
 
-        <button
-          onClick={() => setIsPreferencesOpen(false)}
-          className="p-1.5 rounded-md hover:bg-zinc-100 text-zinc-400 hover:text-zinc-900 transition-colors cursor-pointer"
-          title={isId ? "Tutup" : "Close"}
-        >
-          <X className="w-4 h-4" />
-        </button>
-      </div>
-
-      {/* 2. Scrollable Body Content */}
-      <div className="flex-1 overflow-y-auto px-5 py-4 space-y-6 text-xs">
+      <SideSheetBody>
         {/* Section: Typography & Labels */}
         <section className="space-y-3">
           <div className="flex items-center gap-2 pb-1 border-b border-zinc-100">
@@ -234,14 +162,14 @@ export const PreferencesSheet: React.FC = React.memo(() => {
 
           {/* Checkboxes for Typography */}
           <div className="pt-2 border-t border-zinc-100 divide-y divide-zinc-100">
-            <CheckboxItem
+            <Checkbox
               id="pref-show-comment"
               checked={preferences.showCommentText}
               onChange={(checked) => updatePreferences({ showCommentText: checked })}
               label={isId ? "Tampilkan Deskripsi Komentar" : "Show Component Comments"}
               description={isId ? "Teks keterangan fungsi di bawah tag komponen" : "Display description notes below component tags"}
             />
-            <CheckboxItem
+            <Checkbox
               id="pref-high-contrast"
               checked={preferences.highContrastBadges}
               onChange={(checked) => updatePreferences({ highContrastBadges: checked })}
@@ -280,21 +208,21 @@ export const PreferencesSheet: React.FC = React.memo(() => {
 
           {/* Checkboxes for Wires */}
           <div className="pt-2 border-t border-zinc-100 divide-y divide-zinc-100">
-            <CheckboxItem
+            <Checkbox
               id="pref-terminal-pins"
               checked={preferences.showTerminalPinsAlways}
               onChange={(checked) => updatePreferences({ showTerminalPinsAlways: checked })}
               label={isId ? "Selalu Tampilkan Nomor Pin Terminal" : "Always Show Terminal Pin Numbers"}
               description={isId ? "Tampilkan nomor pin (A1/A2, 13/14) tanpa perlu hover" : "Keep terminal port numbers visible at all times"}
             />
-            <CheckboxItem
+            <Checkbox
               id="pref-highlight-crossings"
               checked={preferences.highlightCrossings}
               onChange={(checked) => updatePreferences({ highlightCrossings: checked })}
               label={isId ? "Lengkungan Jumper Persimpangan" : "Orthogonal Wire Crossing Arcs"}
               description={isId ? "Gambarkan busur lompatan saat 2 kawat bersilangan" : "Render bridge arc jump when wires cross"}
             />
-            <CheckboxItem
+            <Checkbox
               id="pref-blue-neutral-wires"
               checked={preferences.blueNeutralWires}
               onChange={(checked) => updatePreferences({ blueNeutralWires: checked })}
@@ -318,14 +246,14 @@ export const PreferencesSheet: React.FC = React.memo(() => {
           </div>
 
           <div className="divide-y divide-zinc-100">
-            <CheckboxItem
+            <Checkbox
               id="pref-show-grid"
               checked={preferences.showGrid}
               onChange={(checked) => updatePreferences({ showGrid: checked })}
               label={isId ? "Tampilkan Grid Kanvas" : "Show Canvas Grid"}
               description={isId ? "Aktifkan garis kisi utama pada kanvas" : "Display primary grid lines on the canvas"}
             />
-            <CheckboxItem
+            <Checkbox
               id="pref-show-major-grid"
               checked={preferences.showGrid && preferences.showMajorGrid}
               disabled={!preferences.showGrid}
@@ -333,7 +261,7 @@ export const PreferencesSheet: React.FC = React.memo(() => {
               label={isId ? "Garis Grid Utama (3×3)" : "Major Grid (3×3)"}
               description={isId ? "Tebalkan garis pembatas setiap 3 kotak grid" : "Highlight thicker divider lines every 3 grid cells"}
             />
-            <CheckboxItem
+            <Checkbox
               id="pref-show-sub-grid"
               checked={preferences.showGrid && preferences.showSubGrid}
               disabled={!preferences.showGrid}
@@ -343,23 +271,24 @@ export const PreferencesSheet: React.FC = React.memo(() => {
             />
           </div>
         </section>
-      </div>
+      </SideSheetBody>
 
-      {/* 3. Footer Reset to Default */}
-      <div className="p-4 border-t border-zinc-100 bg-zinc-50 flex items-center justify-between shrink-0">
+      <SideSheetFooter className="border-zinc-100 bg-zinc-50 dark:border-zinc-100 dark:bg-zinc-50">
         <span className="text-[11px] text-zinc-500">
           {isId ? "Tersimpan otomatis" : "Auto-saved to storage"}
         </span>
 
-        <button
+        <Button
+          variant="outline"
+          size="sm"
           onClick={resetPreferences}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 text-xs font-medium shadow-xs transition-colors cursor-pointer"
+          className="border-zinc-200 bg-white hover:bg-zinc-50 text-zinc-700 dark:border-zinc-200 dark:bg-white dark:text-zinc-700 dark:hover:bg-zinc-50"
         >
           <RotateCcw className="w-3.5 h-3.5 text-zinc-400" />
           <span>{isId ? "Kembalikan Bawaan" : "Reset Default"}</span>
-        </button>
-      </div>
-    </aside>
+        </Button>
+      </SideSheetFooter>
+    </SideSheet>
   );
 });
 

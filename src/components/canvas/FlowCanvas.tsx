@@ -593,7 +593,11 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     if (!draggingNodeState) return;
 
     if (draggingNodeState.hasMoved) {
-      // Commit final snapped positions with undo history
+      // Restore initial positions briefly so pushHistory captures pre-drag state, then commit final snapped positions
+      const initialUpdates = Array.from(draggingNodeState.initialPositions.entries()).map(([id, position]) => ({
+        id,
+        position,
+      }));
       const finalUpdates = Array.from(draggingNodeState.initialPositions.entries()).map(([id]) => {
         const n = nodes.find((node) => node.id === id);
         return {
@@ -601,6 +605,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
           position: n?.position || { x: 0, y: 0 },
         };
       });
+      updateNodesPositions(initialUpdates, false);
       updateNodesPositions(finalUpdates, true);
     } else {
       // Simple Click without movement
@@ -1245,10 +1250,12 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       } else if ((e.ctrlKey || e.metaKey) && (e.key === "v" || e.key === "V")) {
         e.preventDefault();
         pasteSelection();
-      } else if ((e.ctrlKey || e.metaKey) && e.key === "z") {
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
+        e.preventDefault();
         if (e.shiftKey) redo();
         else undo();
-      } else if ((e.ctrlKey || e.metaKey) && e.key === "y") {
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "y") {
+        e.preventDefault();
         redo();
       } else if ((e.ctrlKey || e.metaKey) && e.key === "d") {
         e.preventDefault();

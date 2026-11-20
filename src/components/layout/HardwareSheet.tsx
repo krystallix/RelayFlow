@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import { useCircuitStore } from "@/store/useCircuitStore";
 import {
   getCircuitComponentSummary,
@@ -17,6 +17,7 @@ import {
   FileSpreadsheet,
   Lightbulb,
 } from "lucide-react";
+import { SideSheet, SideSheetHeader } from "@/components/ui";
 
 interface HardwareSheetProps {
   onLocateNode?: (nodeId: string | number) => void;
@@ -33,17 +34,6 @@ export const HardwareSheet: React.FC<HardwareSheetProps> = React.memo(({ onLocat
   const [activeTab, setActiveTab] = useState<"telemetry" | "bom">("telemetry");
   const [searchQuery, setSearchQuery] = useState("");
   const [copiedBom, setCopiedBom] = useState(false);
-
-  useEffect(() => {
-    if (!isHardwareSheetOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setIsHardwareSheetOpen(false);
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isHardwareSheetOpen, setIsHardwareSheetOpen]);
 
   // Grouped Hardware Telemetry Items (only calculated when sheet is open to prevent idle background compute)
   const hardwareItems = useMemo(() => {
@@ -105,26 +95,19 @@ export const HardwareSheet: React.FC<HardwareSheetProps> = React.memo(({ onLocat
   };
 
   return (
-    <aside
-      aria-hidden={!isHardwareSheetOpen}
-      className={`fixed top-14 bottom-0 right-0 z-40 w-full sm:w-[350px] md:w-[380px] flex flex-col bg-white text-zinc-950 border-l border-zinc-200 shadow-xl transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] select-none pointer-events-auto ${
-        isHardwareSheetOpen ? "translate-x-0" : "translate-x-full pointer-events-none"
-      }`}
+    <SideSheet
+      isOpen={isHardwareSheetOpen}
+      onClose={() => setIsHardwareSheetOpen(false)}
+      side="right"
+      modal={false}
+      widthClassName="w-full sm:w-[350px] md:w-[380px]"
+      className="bg-white text-zinc-950 border-zinc-200 dark:bg-white dark:text-zinc-950 dark:border-zinc-200 select-none pointer-events-auto"
     >
-      {/* 1. Minimal Sheet Header (Title & Close Button only) */}
-      <div className="px-5 py-3.5 border-b border-zinc-100 flex items-center justify-between shrink-0">
-        <h2 className="text-sm font-semibold tracking-tight text-zinc-900">
-          {locale === "id" ? "Inspeksi Perangkat" : "Hardware Inspector"}
-        </h2>
-
-        <button
-          onClick={() => setIsHardwareSheetOpen(false)}
-          className="p-1.5 rounded-md hover:bg-zinc-100 text-zinc-400 hover:text-zinc-900 transition-colors cursor-pointer"
-          title="Close"
-        >
-          <X className="w-4 h-4" />
-        </button>
-      </div>
+      <SideSheetHeader
+        title={locale === "id" ? "Inspeksi Perangkat" : "Hardware Inspector"}
+        onClose={() => setIsHardwareSheetOpen(false)}
+        className="py-3.5 border-zinc-100 dark:border-zinc-100"
+      />
 
       {/* 2. shadcn-style Tabs with Icons */}
       <div className="px-5 pt-3 pb-2 shrink-0">
@@ -308,6 +291,6 @@ export const HardwareSheet: React.FC<HardwareSheetProps> = React.memo(({ onLocat
           </div>
         </div>
       )}
-    </aside>
+    </SideSheet>
   );
 });

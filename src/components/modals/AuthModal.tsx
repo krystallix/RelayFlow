@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { X, AlertCircle, CheckCircle2 } from "lucide-react";
 import { useAuthStore } from "@/store/useAuthStore";
 import { useCircuitStore } from "@/store/useCircuitStore";
 import { getTranslation } from "@/i18n/translations";
+import { Modal, Alert, Button } from "@/components/ui";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -38,19 +39,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
 
   const isDark = theme === "dark";
   const t = getTranslation(locale).auth;
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isOpen, onClose]);
-
-  if (!isOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -103,83 +91,62 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   };
 
   return (
-    <div
-      className="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 flex items-center justify-center p-4 animate-in fade-in duration-150"
-      onClick={onClose}
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      maxWidthClassName="max-w-[390px]"
+      className="p-7 relative dark:bg-[#11131a] dark:border-zinc-800 dark:text-zinc-100"
     >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className={`w-full max-w-[390px] rounded-2xl border p-7 shadow-2xl relative animate-in zoom-in-95 duration-150 ${
-          isDark
-            ? "bg-[#11131a] border-zinc-800 text-zinc-100"
-            : "bg-white border-zinc-200/90 text-zinc-900"
-        }`}
+      {/* Subtle close button */}
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        onClick={onClose}
+        className="absolute top-4 right-4 text-zinc-400"
+        title="Close"
+        aria-label="Close"
       >
-        {/* Subtle close button */}
-        <button
-          onClick={onClose}
-          className={`absolute top-4 right-4 p-1.5 rounded-lg transition-colors ${
-            isDark
-              ? "text-zinc-400 hover:text-white hover:bg-zinc-800/60"
-              : "text-zinc-400 hover:text-zinc-700 hover:bg-zinc-100"
-          }`}
-          title="Close"
-          aria-label="Close"
-        >
-          <X className="w-4 h-4" />
-        </button>
+        <X className="w-4 h-4" />
+      </Button>
 
-        {/* Header */}
-        <div className="text-center mb-6">
-          <h2 className="text-xl font-bold tracking-tight">
-            {mode === "signin"
-              ? t.welcomeBack
-              : mode === "signup"
-              ? t.createAccount
-              : t.resetTitle}
-          </h2>
-          <p
-            className={`text-xs mt-1.5 ${
-              isDark ? "text-zinc-400" : "text-zinc-500"
-            }`}
-          >
-            {mode === "signin"
-              ? t.loginSubtitle
-              : mode === "signup"
-              ? t.createAccountSubtitle
-              : t.resetSubtitle}
-          </p>
-        </div>
+      {/* Header */}
+      <div className="text-center mb-6">
+        <h2 className="text-xl font-bold tracking-tight">
+          {mode === "signin"
+            ? t.welcomeBack
+            : mode === "signup"
+            ? t.createAccount
+            : t.resetTitle}
+        </h2>
+        <p className={`text-xs mt-1.5 ${isDark ? "text-zinc-400" : "text-zinc-500"}`}>
+          {mode === "signin"
+            ? t.loginSubtitle
+            : mode === "signup"
+            ? t.createAccountSubtitle
+            : t.resetSubtitle}
+        </p>
+      </div>
 
-        {/* Custom Context Message (e.g. for Forking) */}
-        {customMessage && (
-          <div
-            className={`mb-4 px-3 py-2 rounded-xl text-xs flex items-center gap-2 border ${
-              isDark
-                ? "bg-zinc-800/60 border-zinc-700 text-zinc-300"
-                : "bg-slate-100 border-slate-200 text-slate-700"
-            }`}
-          >
-            <CheckCircle2 className="w-4 h-4 shrink-0 text-zinc-400" />
-            <span>{customMessage}</span>
-          </div>
-        )}
+      {/* Custom Context Message (e.g. for Forking) */}
+      {customMessage && (
+        <Alert variant="info" icon={<CheckCircle2 className="w-4 h-4 text-zinc-400" />} className="mb-4 py-2">
+          {customMessage}
+        </Alert>
+      )}
 
-        {/* Success message */}
-        {resetSuccessMessage && (
-          <div className="mb-4 px-3 py-2 rounded-xl text-xs bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 shrink-0" />
-            <span>{resetSuccessMessage}</span>
-          </div>
-        )}
+      {/* Success message */}
+      {resetSuccessMessage && (
+        <Alert variant="success" icon={<CheckCircle2 className="w-4 h-4" />} className="mb-4 py-2">
+          {resetSuccessMessage}
+        </Alert>
+      )}
 
-        {/* Error message */}
-        {(localError || authError) && (
-          <div className="mb-4 px-3 py-2 rounded-xl text-xs bg-red-500/10 border border-red-500/30 text-red-500 flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 shrink-0" />
-            <span>{localError || authError}</span>
-          </div>
-        )}
+      {/* Error message */}
+      {(localError || authError) && (
+        <Alert variant="error" icon={<AlertCircle className="w-4 h-4" />} className="mb-4 py-2">
+          {localError || authError}
+        </Alert>
+      )}
 
         {/* Social Logins: Google & GitHub (shown on signin & signup) */}
         {mode !== "forgot" && (
@@ -401,7 +368,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             </button>
           )}
         </div>
-      </div>
-    </div>
+      </Modal>
   );
 };
