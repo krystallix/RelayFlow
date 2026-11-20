@@ -132,6 +132,8 @@ function areWirePropsEqual(prev: FlowWireProps, next: FlowWireProps): boolean {
   return true;
 }
 
+const NEUTRAL_POTENTIALS = new Set(["N", "-24V", "PE", "-V"]);
+
 export const FlowWire: React.FC<FlowWireProps> = React.memo(({
   wire,
   label,
@@ -160,6 +162,7 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
   const theme = useCircuitStore((s) => s.theme);
   const wireThickness = useCircuitStore((s) => s.canvasPreferences.wireThickness);
   const highlightCrossings = useCircuitStore((s) => s.canvasPreferences.highlightCrossings);
+  const blueNeutralWires = useCircuitStore((s) => s.canvasPreferences.blueNeutralWires);
   const isDark = theme === "dark";
 
   const [hoverPos, setHoverPos] = useState<Point | null>(null);
@@ -354,10 +357,13 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
     );
   };
 
-  // Uniform Wire color (clean CAD standard, amber highlight for selection)
+  // Uniform Wire color (clean CAD standard, amber highlight for selection, optional blue for energized neutral/return)
+  const isNeutralReturn = Boolean(wire.potential && NEUTRAL_POTENTIALS.has(wire.potential));
   const getWireColor = () => {
     if (isSelected) return "#f59e0b"; // Highlight selection in clear visible amber
-    if (isHot) return "#ef4444"; // Uniform energized wire color across all potentials
+    if (isHot) {
+      return blueNeutralWires && isNeutralReturn ? "#3b82f6" : "#ef4444";
+    }
     return isDark ? "#94a3b8" : "#334155"; // Uniform idle schematic wire
   };
 

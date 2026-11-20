@@ -11,6 +11,7 @@ import {
   Check,
   Minus,
   Plus,
+  Grid,
 } from "lucide-react";
 
 interface CheckboxItemProps {
@@ -19,6 +20,7 @@ interface CheckboxItemProps {
   onChange: (checked: boolean) => void;
   label: string;
   description?: string;
+  disabled?: boolean;
 }
 
 const CheckboxItem: React.FC<CheckboxItemProps> = ({
@@ -27,18 +29,22 @@ const CheckboxItem: React.FC<CheckboxItemProps> = ({
   onChange,
   label,
   description,
+  disabled = false,
 }) => {
   return (
     <label
       htmlFor={id}
-      className="flex items-start gap-3 p-2.5 -mx-2 rounded-lg hover:bg-zinc-50 cursor-pointer transition-colors group select-none"
+      className={`flex items-start gap-3 p-2.5 -mx-2 rounded-lg transition-colors group select-none ${
+        disabled ? "opacity-40 cursor-not-allowed" : "hover:bg-zinc-50 cursor-pointer"
+      }`}
     >
       <div className="relative flex items-center justify-center mt-0.5">
         <input
           id={id}
           type="checkbox"
           checked={checked}
-          onChange={(e) => onChange(e.target.checked)}
+          disabled={disabled}
+          onChange={(e) => !disabled && onChange(e.target.checked)}
           className="peer sr-only"
         />
         <div
@@ -287,6 +293,53 @@ export const PreferencesSheet: React.FC = React.memo(() => {
               onChange={(checked) => updatePreferences({ highlightCrossings: checked })}
               label={isId ? "Lengkungan Jumper Persimpangan" : "Orthogonal Wire Crossing Arcs"}
               description={isId ? "Gambarkan busur lompatan saat 2 kawat bersilangan" : "Render bridge arc jump when wires cross"}
+            />
+            <CheckboxItem
+              id="pref-blue-neutral-wires"
+              checked={preferences.blueNeutralWires}
+              onChange={(checked) => updatePreferences({ blueNeutralWires: checked })}
+              label={isId ? "Warna Biru untuk Kawat Netral (Simulasi)" : "Blue Color for Neutral Return Wires"}
+              description={
+                isId
+                  ? "Tampilkan kabel jalur netral/return (N, -24V, PE) berwarna biru saat berarus"
+                  : "Render active neutral/return wires (N, -24V, PE) in blue during simulation"
+              }
+            />
+          </div>
+        </section>
+
+        {/* Section: Canvas Grid */}
+        <section className="space-y-3">
+          <div className="flex items-center gap-2 pb-1 border-b border-zinc-100">
+            <Grid className="w-3.5 h-3.5 text-zinc-500" />
+            <h3 className="font-semibold text-zinc-800 text-xs uppercase tracking-wider">
+              {isId ? "Kisi Kanvas (Grid)" : "Canvas Grid"}
+            </h3>
+          </div>
+
+          <div className="divide-y divide-zinc-100">
+            <CheckboxItem
+              id="pref-show-grid"
+              checked={preferences.showGrid}
+              onChange={(checked) => updatePreferences({ showGrid: checked })}
+              label={isId ? "Tampilkan Grid Kanvas" : "Show Canvas Grid"}
+              description={isId ? "Aktifkan garis kisi utama pada kanvas" : "Display primary grid lines on the canvas"}
+            />
+            <CheckboxItem
+              id="pref-show-major-grid"
+              checked={preferences.showGrid && preferences.showMajorGrid}
+              disabled={!preferences.showGrid}
+              onChange={(checked) => updatePreferences({ showMajorGrid: checked })}
+              label={isId ? "Garis Grid Utama (3×3)" : "Major Grid (3×3)"}
+              description={isId ? "Tebalkan garis pembatas setiap 3 kotak grid" : "Highlight thicker divider lines every 3 grid cells"}
+            />
+            <CheckboxItem
+              id="pref-show-sub-grid"
+              checked={preferences.showGrid && preferences.showSubGrid}
+              disabled={!preferences.showGrid}
+              onChange={(checked) => updatePreferences({ showSubGrid: checked })}
+              label={isId ? "Garis Sub-Grid" : "Sub-Grid Lines"}
+              description={isId ? "Tampilkan garis kisi lebih tipis di antara grid utama" : "Display finer sub-grid lines between main grid cells"}
             />
           </div>
         </section>

@@ -29,6 +29,12 @@ export interface CanvasPreferences {
   // Wires & Connections
   showTerminalPinsAlways: boolean;
   highlightCrossings: boolean;
+  blueNeutralWires: boolean;
+
+  // Canvas Grid
+  showGrid: boolean;
+  showMajorGrid: boolean;
+  showSubGrid: boolean;
 }
 
 export const DEFAULT_CANVAS_PREFERENCES: CanvasPreferences = {
@@ -40,6 +46,10 @@ export const DEFAULT_CANVAS_PREFERENCES: CanvasPreferences = {
   highContrastBadges: true,
   showTerminalPinsAlways: false,
   highlightCrossings: true,
+  blueNeutralWires: true,
+  showGrid: true,
+  showMajorGrid: true,
+  showSubGrid: true,
 };
 
 function syncDocumentTheme(theme: "dark" | "light") {
@@ -177,9 +187,6 @@ interface CircuitStoreState {
   wireRoutingMode: "orthogonal" | "bezier";
   theme: "dark" | "light";
   locale: "en" | "id";
-  showGrid: boolean;
-  showSubGrid: boolean;
-  showMajorGrid: boolean;
   showWireLabels: boolean;
   pageViewEnabled: boolean;
 
@@ -327,9 +334,6 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
     wireRoutingMode: "orthogonal",
     theme: initial.theme,
     locale: initial.locale,
-    showGrid: true,
-    showSubGrid: true,
-    showMajorGrid: true,
     showWireLabels: true,
     pageViewEnabled: false,
     isSimulating: false,
@@ -470,12 +474,20 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
         const wireNumberSize = typeof savedPreferences.wireNumberSize === "number" ? savedPreferences.wireNumberSize : DEFAULT_CANVAS_PREFERENCES.wireNumberSize;
         const componentTagSize = typeof savedPreferences.componentTagSize === "number" ? savedPreferences.componentTagSize : DEFAULT_CANVAS_PREFERENCES.componentTagSize;
         const wireThickness = typeof savedPreferences.wireThickness === "number" ? savedPreferences.wireThickness : DEFAULT_CANVAS_PREFERENCES.wireThickness;
+        const showGrid = typeof savedPreferences.showGrid === "boolean" ? savedPreferences.showGrid : DEFAULT_CANVAS_PREFERENCES.showGrid;
+        const showMajorGrid = typeof savedPreferences.showMajorGrid === "boolean" ? savedPreferences.showMajorGrid : DEFAULT_CANVAS_PREFERENCES.showMajorGrid;
+        const showSubGrid = typeof savedPreferences.showSubGrid === "boolean" ? savedPreferences.showSubGrid : DEFAULT_CANVAS_PREFERENCES.showSubGrid;
+        const blueNeutralWires = typeof savedPreferences.blueNeutralWires === "boolean" ? savedPreferences.blueNeutralWires : DEFAULT_CANVAS_PREFERENCES.blueNeutralWires;
         updates.canvasPreferences = {
           ...DEFAULT_CANVAS_PREFERENCES,
           ...savedPreferences,
           wireNumberSize,
           componentTagSize,
           wireThickness,
+          showGrid,
+          showMajorGrid,
+          showSubGrid,
+          blueNeutralWires,
         };
       }
       if (projectData.nodes && projectData.wires) {
@@ -540,9 +552,18 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
         } catch (e) {}
         return { locale: next };
       }),
-    toggleGrid: () => set((state) => ({ showGrid: !state.showGrid })),
-    toggleSubGrid: () => set((state) => ({ showSubGrid: !state.showSubGrid })),
-    toggleMajorGrid: () => set((state) => ({ showMajorGrid: !state.showMajorGrid })),
+    toggleGrid: () => {
+      const current = get().canvasPreferences.showGrid;
+      get().updateCanvasPreferences({ showGrid: !current });
+    },
+    toggleSubGrid: () => {
+      const current = get().canvasPreferences.showSubGrid;
+      get().updateCanvasPreferences({ showSubGrid: !current });
+    },
+    toggleMajorGrid: () => {
+      const current = get().canvasPreferences.showMajorGrid;
+      get().updateCanvasPreferences({ showMajorGrid: !current });
+    },
     togglePageView: () => set((state) => ({ pageViewEnabled: !state.pageViewEnabled })),
     setPageViewEnabled: (enabled: boolean) => set({ pageViewEnabled: enabled }),
     toggleWireLabels: () => set((state) => ({ showWireLabels: !state.showWireLabels })),

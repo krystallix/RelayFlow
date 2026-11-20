@@ -188,4 +188,37 @@ describe("Viewer Mode State & Forking (useCircuitStore)", () => {
     store.setProjectTitle("New Title");
     expect(useCircuitStore.getState().isCloudSynced).toBe(false);
   });
+
+  it("persists grid view settings in per-user canvasPreferences and resets to defaults", () => {
+    const store = useCircuitStore.getState();
+    expect(store.canvasPreferences.showGrid).toBe(true);
+    expect(store.canvasPreferences.showMajorGrid).toBe(true);
+    expect(store.canvasPreferences.showSubGrid).toBe(true);
+
+    store.toggleGrid();
+    store.toggleMajorGrid();
+    store.toggleSubGrid();
+
+    const updated = useCircuitStore.getState().canvasPreferences;
+    expect(updated.showGrid).toBe(false);
+    expect(updated.showMajorGrid).toBe(false);
+    expect(updated.showSubGrid).toBe(false);
+
+    store.resetCanvasPreferences();
+    const reset = useCircuitStore.getState().canvasPreferences;
+    expect(reset.showGrid).toBe(true);
+    expect(reset.showMajorGrid).toBe(true);
+    expect(reset.showSubGrid).toBe(true);
+  });
+
+  it("persists blueNeutralWires in per-user canvasPreferences and resets to default", () => {
+    const store = useCircuitStore.getState();
+    expect(store.canvasPreferences.blueNeutralWires).toBe(true);
+
+    store.updateCanvasPreferences({ blueNeutralWires: false });
+    expect(useCircuitStore.getState().canvasPreferences.blueNeutralWires).toBe(false);
+
+    store.resetCanvasPreferences();
+    expect(useCircuitStore.getState().canvasPreferences.blueNeutralWires).toBe(true);
+  });
 });

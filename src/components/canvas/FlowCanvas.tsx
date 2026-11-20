@@ -153,9 +153,9 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   const wireRoutingMode = useCircuitStore((s) => s.wireRoutingMode);
   const wireDraft = useCircuitStore((s) => s.wireDraft);
   const theme = useCircuitStore((s) => s.theme);
-  const showGrid = useCircuitStore((s) => s.showGrid);
-  const showSubGrid = useCircuitStore((s) => s.showSubGrid);
-  const showMajorGrid = useCircuitStore((s) => s.showMajorGrid);
+  const showGrid = useCircuitStore((s) => s.canvasPreferences.showGrid);
+  const showSubGrid = useCircuitStore((s) => s.canvasPreferences.showSubGrid);
+  const showMajorGrid = useCircuitStore((s) => s.canvasPreferences.showMajorGrid);
   const showWireLabels = useCircuitStore((s) => s.showWireLabels);
   const pageViewEnabled = useCircuitStore((s) => s.pageViewEnabled);
   const isSimulating = useCircuitStore((s) => s.isSimulating);

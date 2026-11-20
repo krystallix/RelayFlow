@@ -126,9 +126,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
     wireRoutingMode,
     theme,
     locale,
-    showGrid,
-    showSubGrid,
-    showMajorGrid,
+    canvasPreferences,
     showWireLabels,
     toggleWireLabels,
     renumberWires,
@@ -167,6 +165,8 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
     setIsCloudSynced,
     setIsReadOnlyViewer,
   } = useCircuitStore();
+
+  const { showGrid, showSubGrid, showMajorGrid } = canvasPreferences;
 
   const isDark = theme === "dark";
   const isMac = useIsMac();
