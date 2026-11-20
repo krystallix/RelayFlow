@@ -1,5 +1,5 @@
 import { supabase } from "./supabase";
-import { CircuitNode, CircuitWire } from "@/engine/types";
+import { CircuitNode, CircuitWire, CircuitSheet } from "@/engine/types";
 
 export interface CloudProjectRecord {
   id: string;
@@ -9,6 +9,8 @@ export interface CloudProjectRecord {
   data: {
     nodes: CircuitNode[];
     wires: CircuitWire[];
+    sheets?: CircuitSheet[];
+    activeSheetId?: string;
     settings?: Record<string, any>;
   };
   node_count?: number;
@@ -81,7 +83,9 @@ export const ProjectsService = {
     title: string,
     nodes: CircuitNode[],
     wires: CircuitWire[],
-    existingId?: string | null
+    existingId?: string | null,
+    sheets?: CircuitSheet[],
+    activeSheetId?: string
   ): Promise<CloudProjectRecord> {
     const cleanTitle = (title || "Untitled Circuit").trim();
     let projectId = existingId?.trim() || null;
@@ -121,15 +125,25 @@ export const ProjectsService = {
     }
 
     const now = new Date().toISOString();
+    const totalNodes = sheets?.length
+      ? sheets.reduce((acc, s) => acc + s.nodes.length, 0)
+      : nodes.length;
+    const totalWires = sheets?.length
+      ? sheets.reduce((acc, s) => acc + s.wires.length, 0)
+      : wires.length;
 
     const record: CloudProjectRecord = {
       id: projectId,
       title: cleanTitle,
       owner_id: userId,
       is_public: true,
-      data: { nodes, wires },
-      node_count: nodes.length,
-      wire_count: wires.length,
+      data: {
+        nodes,
+        wires,
+        ...(sheets?.length ? { sheets, activeSheetId } : {}),
+      },
+      node_count: totalNodes,
+      wire_count: totalWires,
       created_at: now,
       updated_at: now,
     };

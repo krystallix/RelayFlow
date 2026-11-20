@@ -61,6 +61,13 @@ export interface CircuitWire {
   label?: string | null;
 }
 
+export interface CircuitSheet {
+  id: string;
+  name: string;
+  nodes: CircuitNode[];
+  wires: CircuitWire[];
+}
+
 export interface RelayFlowProject {
   format: "relayflow";
   version: "1.0.0";
@@ -78,6 +85,8 @@ export interface RelayFlowProject {
   };
   nodes: CircuitNode[];
   wires: CircuitWire[];
+  sheets?: CircuitSheet[];
+  activeSheetId?: string;
 }
 
 // Simurelay legacy data types

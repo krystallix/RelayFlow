@@ -215,6 +215,10 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
     const effectiveTitle = storeState.projectTitle;
     const effectiveNodes = storeState.nodes;
     const effectiveWires = storeState.wires;
+    const effectiveSheets = storeState.sheets.map((s) =>
+      s.id === storeState.activeSheetId ? { ...s, nodes: effectiveNodes, wires: effectiveWires } : s
+    );
+    const effectiveActiveSheetId = storeState.activeSheetId;
 
     try {
       setIsSaving(true);
@@ -223,7 +227,9 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
         effectiveTitle,
         effectiveNodes,
         effectiveWires,
-        effectiveProjectId
+        effectiveProjectId,
+        effectiveSheets,
+        effectiveActiveSheetId
       );
       setCloudProjectId(record.id);
       setIsCloudSynced(true);
@@ -302,6 +308,10 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
     const effectiveTitle = storeState.projectTitle;
     const effectiveNodes = storeState.nodes;
     const effectiveWires = storeState.wires;
+    const effectiveSheets = storeState.sheets.map((s) =>
+      s.id === storeState.activeSheetId ? { ...s, nodes: effectiveNodes, wires: effectiveWires } : s
+    );
+    const effectiveActiveSheetId = storeState.activeSheetId;
 
     if (!effectiveProjectId) {
       try {
@@ -310,7 +320,9 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
           effectiveTitle,
           effectiveNodes,
           effectiveWires,
-          null
+          null,
+          effectiveSheets,
+          effectiveActiveSheetId
         );
         setCloudProjectId(record.id);
         setIsCloudSynced(true);
@@ -348,6 +360,10 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
     const effectiveTitle = storeState.projectTitle;
     const effectiveNodes = storeState.nodes;
     const effectiveWires = storeState.wires;
+    const effectiveSheets = storeState.sheets.map((s) =>
+      s.id === storeState.activeSheetId ? { ...s, nodes: effectiveNodes, wires: effectiveWires } : s
+    );
+    const effectiveActiveSheetId = storeState.activeSheetId;
 
     if (pendingAction === "save" && currentUser) {
       try {
@@ -357,7 +373,9 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
           effectiveTitle,
           effectiveNodes,
           effectiveWires,
-          effectiveProjectId
+          effectiveProjectId,
+          effectiveSheets,
+          effectiveActiveSheetId
         );
         setCloudProjectId(record.id);
         setIsCloudSynced(true);
@@ -375,7 +393,9 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
           effectiveTitle,
           effectiveNodes,
           effectiveWires,
-          effectiveProjectId
+          effectiveProjectId,
+          effectiveSheets,
+          effectiveActiveSheetId
         );
         setCloudProjectId(record.id);
         setIsCloudSynced(true);
@@ -410,6 +430,8 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
         settings: { gridSize: 30, wireRouting: "orthogonal", theme },
         nodes: proj.data.nodes,
         wires: proj.data.wires,
+        sheets: proj.data.sheets,
+        activeSheetId: proj.data.activeSheetId,
       });
       setCloudProjectId(proj.id);
       setIsCloudSynced(true);
@@ -450,6 +472,10 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
   };
 
   const handleExportRflow = () => {
+    const storeState = useCircuitStore.getState();
+    const syncedSheets = storeState.sheets.map((s) =>
+      s.id === storeState.activeSheetId ? { ...s, nodes, wires } : s
+    );
     const project = {
       format: "relayflow" as const,
       version: "1.0.0" as const,
@@ -466,6 +492,8 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
       },
       nodes,
       wires,
+      sheets: syncedSheets,
+      activeSheetId: storeState.activeSheetId,
     };
     const jsonStr = FileAdapter.toRflow(project);
     downloadFile(jsonStr, `${projectTitle.toLowerCase().replace(/\s+/g, "_")}.rflow`, "application/json");

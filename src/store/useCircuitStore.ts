@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { CircuitNode, CircuitWire, RelayFlowProject, Rotation, WireMargins } from "../engine/types";
+import { CircuitNode, CircuitWire, CircuitSheet, RelayFlowProject, Rotation, WireMargins } from "../engine/types";
 import { SimulationEngine } from "../engine/SimulationEngine";
 import { FileAdapter } from "../engine/serializer/FileAdapter";
 import { AutoLayoutEngine } from "../engine/layout/AutoLayoutEngine";
@@ -108,6 +108,8 @@ function saveToLocalStorage(
     projectTitle?: string;
     nodes?: CircuitNode[];
     wires?: CircuitWire[];
+    sheets?: CircuitSheet[];
+    activeSheetId?: string;
     currentProjectId?: string | null;
   },
   immediate = false
@@ -124,6 +126,13 @@ function saveToLocalStorage(
       const title = partial?.projectTitle ?? fullState?.projectTitle ?? "My Circuit";
       const nodes = partial?.nodes ?? fullState?.nodes ?? [];
       const wires = partial?.wires ?? fullState?.wires ?? [];
+      const activeSheetId = partial?.activeSheetId ?? fullState?.activeSheetId ?? "sheet_1";
+      const rawSheets: CircuitSheet[] = partial?.sheets ?? fullState?.sheets ?? [
+        { id: activeSheetId, name: "Sheet 1", nodes, wires },
+      ];
+      const sheets = rawSheets.map((s) =>
+        s.id === activeSheetId ? { ...s, nodes, wires } : s
+      );
       const currentProjectId =
         partial?.currentProjectId !== undefined
           ? partial.currentProjectId
@@ -140,6 +149,8 @@ function saveToLocalStorage(
         currentProjectId: currentProjectId || null,
         nodes,
         wires,
+        sheets,
+        activeSheetId,
       };
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
     } catch (e) {
@@ -177,11 +188,24 @@ interface HistorySnapshot {
   wires: CircuitWire[];
 }
 
+const sheetHistoryMap = new Map<string, { undoStack: HistorySnapshot[]; redoStack: HistorySnapshot[] }>();
+
+function syncSheetsWithActive(
+  sheets: CircuitSheet[],
+  activeSheetId: string,
+  nodes: CircuitNode[],
+  wires: CircuitWire[]
+): CircuitSheet[] {
+  return sheets.map((s) => (s.id === activeSheetId ? { ...s, nodes, wires } : s));
+}
+
 interface CircuitStoreState {
   projectTitle: string;
   fileFormat: "rflow" | "smrl";
   nodes: CircuitNode[];
   wires: CircuitWire[];
+  sheets: CircuitSheet[];
+  activeSheetId: string;
   selectedNodeIds: Set<string | number>;
   selectedWireIds: Set<string | number>;
   wireRoutingMode: "orthogonal" | "bezier";
@@ -249,6 +273,14 @@ interface CircuitStoreState {
   loadProject: (project: RelayFlowProject, format?: "rflow" | "smrl") => void;
   resetCanvas: () => void;
   autoLayout: () => void;
+
+  // Multi-Sheet Actions
+  switchSheet: (sheetId: string) => void;
+  addSheet: (name?: string) => void;
+  renameSheet: (sheetId: string, name: string) => void;
+  duplicateSheet: (sheetId: string) => void;
+  deleteSheet: (sheetId: string) => void;
+  reorderSheets: (fromId: string, toId: string) => void;
 
   // Selection
   selectNode: (id: string | number, multi?: boolean) => void;
@@ -329,6 +361,8 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
     fileFormat: "rflow",
     nodes: initial.nodes,
     wires: initial.wires,
+    sheets: [{ id: "sheet_1", name: "Sheet 1", nodes: initial.nodes, wires: initial.wires }],
+    activeSheetId: "sheet_1",
     selectedNodeIds: new Set(),
     selectedWireIds: new Set(),
     wireRoutingMode: "orthogonal",
@@ -447,17 +481,35 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
         currentProjectId?: string | null;
         nodes?: CircuitNode[];
         wires?: CircuitWire[];
+        sheets?: CircuitSheet[];
+        activeSheetId?: string;
       } = {};
       try {
         const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
         if (raw) {
           const parsed = JSON.parse(raw);
-          if (parsed && Array.isArray(parsed.nodes) && Array.isArray(parsed.wires)) {
+          if (parsed && Array.isArray(parsed.sheets) && parsed.sheets.length > 0) {
+            const activeId =
+              parsed.activeSheetId && parsed.sheets.some((s: CircuitSheet) => s.id === parsed.activeSheetId)
+                ? parsed.activeSheetId
+                : parsed.sheets[0].id;
+            const activeSheet = parsed.sheets.find((s: CircuitSheet) => s.id === activeId) || parsed.sheets[0];
+            projectData = {
+              projectTitle: parsed.metadata?.title || "My Circuit",
+              currentProjectId: parsed.currentProjectId || parsed.metadata?.id || null,
+              nodes: activeSheet.nodes || [],
+              wires: activeSheet.wires || [],
+              sheets: parsed.sheets,
+              activeSheetId: activeId,
+            };
+          } else if (parsed && Array.isArray(parsed.nodes) && Array.isArray(parsed.wires)) {
             projectData = {
               projectTitle: parsed.metadata?.title || "My Circuit",
               currentProjectId: parsed.currentProjectId || parsed.metadata?.id || null,
               nodes: parsed.nodes,
               wires: parsed.wires,
+              sheets: [{ id: "sheet_1", name: "Sheet 1", nodes: parsed.nodes, wires: parsed.wires }],
+              activeSheetId: "sheet_1",
             };
           }
         }
@@ -493,6 +545,8 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
       if (projectData.nodes && projectData.wires) {
         updates.nodes = projectData.nodes;
         updates.wires = projectData.wires;
+        if (projectData.sheets) updates.sheets = projectData.sheets;
+        if (projectData.activeSheetId) updates.activeSheetId = projectData.activeSheetId;
         if (projectData.projectTitle) updates.projectTitle = projectData.projectTitle;
         if (projectData.currentProjectId) {
           updates.currentProjectId = projectData.currentProjectId;
@@ -714,13 +768,26 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
 
     loadProject: (project, format = "rflow") => {
       const resolvedProjectId = (project.metadata as any)?.id || null;
+      sheetHistoryMap.clear();
+      const hasSheets = Array.isArray(project.sheets) && project.sheets.length > 0;
+      const loadedSheets: CircuitSheet[] = hasSheets
+        ? project.sheets!
+        : [{ id: "sheet_1", name: "Sheet 1", nodes: project.nodes, wires: project.wires }];
+      const resolvedActiveId =
+        project.activeSheetId && loadedSheets.some((s) => s.id === project.activeSheetId)
+          ? project.activeSheetId
+          : loadedSheets[0].id;
+      const activeSheet = loadedSheets.find((s) => s.id === resolvedActiveId) || loadedSheets[0];
+
       set({
         projectTitle: project.metadata.title,
         currentProjectId: resolvedProjectId,
         isCloudSynced: Boolean(resolvedProjectId),
         fileFormat: format,
-        nodes: project.nodes,
-        wires: project.wires,
+        nodes: activeSheet.nodes || [],
+        wires: activeSheet.wires || [],
+        sheets: loadedSheets,
+        activeSheetId: resolvedActiveId,
         selectedNodeIds: new Set(),
         selectedWireIds: new Set(),
         undoStack: [],
@@ -729,21 +796,30 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
         shortCircuit: false,
         shortCircuitMessage: null,
       });
-      saveToLocalStorage({
-        projectTitle: project.metadata.title,
-        nodes: project.nodes,
-        wires: project.wires,
-        currentProjectId: resolvedProjectId,
-      }, true);
+      saveToLocalStorage(
+        {
+          projectTitle: project.metadata.title,
+          nodes: activeSheet.nodes || [],
+          wires: activeSheet.wires || [],
+          sheets: loadedSheets,
+          activeSheetId: resolvedActiveId,
+          currentProjectId: resolvedProjectId,
+        },
+        true
+      );
     },
 
     resetCanvas: () => {
+      sheetHistoryMap.clear();
+      const emptySheets: CircuitSheet[] = [{ id: "sheet_1", name: "Sheet 1", nodes: [], wires: [] }];
       set({
         projectTitle: "My Circuit",
         currentProjectId: null,
         isCloudSynced: false,
         nodes: [],
         wires: [],
+        sheets: emptySheets,
+        activeSheetId: "sheet_1",
         selectedNodeIds: new Set(),
         selectedWireIds: new Set(),
         undoStack: [],
@@ -751,7 +827,303 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
         isSimulating: false,
         shortCircuit: false,
       });
-      saveToLocalStorage({ projectTitle: "My Circuit", nodes: [], wires: [], currentProjectId: null }, true);
+      saveToLocalStorage(
+        {
+          projectTitle: "My Circuit",
+          nodes: [],
+          wires: [],
+          sheets: emptySheets,
+          activeSheetId: "sheet_1",
+          currentProjectId: null,
+        },
+        true
+      );
+    },
+
+    switchSheet: (sheetId) => {
+      set((state) => {
+        if (sheetId === state.activeSheetId) return {};
+        const targetSheet = state.sheets.find((s) => s.id === sheetId);
+        if (!targetSheet) return {};
+
+        sheetHistoryMap.set(state.activeSheetId, {
+          undoStack: state.undoStack,
+          redoStack: state.redoStack,
+        });
+        const syncedSheets = syncSheetsWithActive(
+          state.sheets,
+          state.activeSheetId,
+          state.nodes,
+          state.wires
+        );
+        const targetHistory = sheetHistoryMap.get(sheetId) || { undoStack: [], redoStack: [] };
+
+        saveToLocalStorage(
+          {
+            projectTitle: state.projectTitle,
+            nodes: targetSheet.nodes,
+            wires: targetSheet.wires,
+            sheets: syncedSheets,
+            activeSheetId: sheetId,
+          },
+          true
+        );
+
+        return {
+          sheets: syncedSheets,
+          activeSheetId: sheetId,
+          nodes: targetSheet.nodes,
+          wires: targetSheet.wires,
+          selectedNodeIds: new Set(),
+          selectedWireIds: new Set(),
+          wireDraft: null,
+          undoStack: targetHistory.undoStack,
+          redoStack: targetHistory.redoStack,
+          isSimulating: false,
+          shortCircuit: false,
+          shortCircuitMessage: null,
+        };
+      });
+    },
+
+    addSheet: (name) => {
+      set((state) => {
+        sheetHistoryMap.set(state.activeSheetId, {
+          undoStack: state.undoStack,
+          redoStack: state.redoStack,
+        });
+        const syncedSheets = syncSheetsWithActive(
+          state.sheets,
+          state.activeSheetId,
+          state.nodes,
+          state.wires
+        );
+        const newId = `sheet_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 5)}`;
+        const newSheet: CircuitSheet = {
+          id: newId,
+          name: (name || "").trim() || `Sheet ${syncedSheets.length + 1}`,
+          nodes: [],
+          wires: [],
+        };
+        const nextSheets = [...syncedSheets, newSheet];
+
+        saveToLocalStorage(
+          {
+            projectTitle: state.projectTitle,
+            nodes: [],
+            wires: [],
+            sheets: nextSheets,
+            activeSheetId: newId,
+          },
+          true
+        );
+
+        return {
+          sheets: nextSheets,
+          activeSheetId: newId,
+          nodes: [],
+          wires: [],
+          selectedNodeIds: new Set(),
+          selectedWireIds: new Set(),
+          wireDraft: null,
+          undoStack: [],
+          redoStack: [],
+          isSimulating: false,
+          shortCircuit: false,
+          shortCircuitMessage: null,
+          isCloudSynced: false,
+        };
+      });
+    },
+
+    renameSheet: (sheetId, name) => {
+      const cleanName = name.trim();
+      if (!cleanName) return;
+      set((state) => {
+        const nextSheets = syncSheetsWithActive(
+          state.sheets,
+          state.activeSheetId,
+          state.nodes,
+          state.wires
+        ).map((s) => (s.id === sheetId ? { ...s, name: cleanName } : s));
+
+        saveToLocalStorage(
+          {
+            projectTitle: state.projectTitle,
+            nodes: state.nodes,
+            wires: state.wires,
+            sheets: nextSheets,
+            activeSheetId: state.activeSheetId,
+          },
+          true
+        );
+
+        return {
+          sheets: nextSheets,
+          isCloudSynced: false,
+        };
+      });
+    },
+
+    duplicateSheet: (sheetId) => {
+      set((state) => {
+        sheetHistoryMap.set(state.activeSheetId, {
+          undoStack: state.undoStack,
+          redoStack: state.redoStack,
+        });
+        const syncedSheets = syncSheetsWithActive(
+          state.sheets,
+          state.activeSheetId,
+          state.nodes,
+          state.wires
+        );
+        const idx = syncedSheets.findIndex((s) => s.id === sheetId);
+        if (idx === -1) return {};
+        const source = syncedSheets[idx];
+        const clonedNodes = source.nodes.map((n) => ({
+          ...n,
+          position: { ...n.position },
+          isEnergized: false,
+          isPressed: false,
+        }));
+        const clonedWires = source.wires.map((w) => ({
+          ...w,
+          margins: w.margins ? { ...w.margins } : { start: 0, center: 0, end: 0 },
+          tapPoint: w.tapPoint ? { ...w.tapPoint } : undefined,
+          isHot: false,
+          potential: null,
+        }));
+        const newId = `sheet_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 5)}`;
+        const copySheet: CircuitSheet = {
+          id: newId,
+          name: `${source.name} Copy`,
+          nodes: clonedNodes,
+          wires: clonedWires,
+        };
+        const nextSheets = [
+          ...syncedSheets.slice(0, idx + 1),
+          copySheet,
+          ...syncedSheets.slice(idx + 1),
+        ];
+
+        saveToLocalStorage(
+          {
+            projectTitle: state.projectTitle,
+            nodes: clonedNodes,
+            wires: clonedWires,
+            sheets: nextSheets,
+            activeSheetId: newId,
+          },
+          true
+        );
+
+        return {
+          sheets: nextSheets,
+          activeSheetId: newId,
+          nodes: clonedNodes,
+          wires: clonedWires,
+          selectedNodeIds: new Set(),
+          selectedWireIds: new Set(),
+          wireDraft: null,
+          undoStack: [],
+          redoStack: [],
+          isSimulating: false,
+          shortCircuit: false,
+          shortCircuitMessage: null,
+          isCloudSynced: false,
+        };
+      });
+    },
+
+    deleteSheet: (sheetId) => {
+      set((state) => {
+        if (state.sheets.length <= 1) return {};
+        const syncedSheets = syncSheetsWithActive(
+          state.sheets,
+          state.activeSheetId,
+          state.nodes,
+          state.wires
+        );
+        const idx = syncedSheets.findIndex((s) => s.id === sheetId);
+        if (idx === -1) return {};
+
+        sheetHistoryMap.delete(sheetId);
+        const nextSheets = syncedSheets.filter((s) => s.id !== sheetId);
+        const isDeletingActive = sheetId === state.activeSheetId;
+        const nextActiveSheet = isDeletingActive
+          ? nextSheets[Math.max(0, idx - 1)] || nextSheets[0]
+          : nextSheets.find((s) => s.id === state.activeSheetId) || nextSheets[0];
+
+        const nextHistory = isDeletingActive
+          ? sheetHistoryMap.get(nextActiveSheet.id) || { undoStack: [], redoStack: [] }
+          : { undoStack: state.undoStack, redoStack: state.redoStack };
+
+        saveToLocalStorage(
+          {
+            projectTitle: state.projectTitle,
+            nodes: nextActiveSheet.nodes,
+            wires: nextActiveSheet.wires,
+            sheets: nextSheets,
+            activeSheetId: nextActiveSheet.id,
+          },
+          true
+        );
+
+        return {
+          sheets: nextSheets,
+          activeSheetId: nextActiveSheet.id,
+          nodes: nextActiveSheet.nodes,
+          wires: nextActiveSheet.wires,
+          ...(isDeletingActive
+            ? {
+                selectedNodeIds: new Set(),
+                selectedWireIds: new Set(),
+                wireDraft: null,
+                isSimulating: false,
+                shortCircuit: false,
+                shortCircuitMessage: null,
+              }
+            : {}),
+          undoStack: nextHistory.undoStack,
+          redoStack: nextHistory.redoStack,
+          isCloudSynced: false,
+        };
+      });
+    },
+
+    reorderSheets: (fromId, toId) => {
+      if (fromId === toId) return;
+      set((state) => {
+        const syncedSheets = syncSheetsWithActive(
+          state.sheets,
+          state.activeSheetId,
+          state.nodes,
+          state.wires
+        );
+        const fromIdx = syncedSheets.findIndex((s) => s.id === fromId);
+        const toIdx = syncedSheets.findIndex((s) => s.id === toId);
+        if (fromIdx === -1 || toIdx === -1) return {};
+
+        const nextSheets = [...syncedSheets];
+        const [moved] = nextSheets.splice(fromIdx, 1);
+        nextSheets.splice(toIdx, 0, moved);
+
+        saveToLocalStorage(
+          {
+            projectTitle: state.projectTitle,
+            nodes: state.nodes,
+            wires: state.wires,
+            sheets: nextSheets,
+            activeSheetId: state.activeSheetId,
+          },
+          true
+        );
+
+        return {
+          sheets: nextSheets,
+          isCloudSynced: false,
+        };
+      });
     },
 
     autoLayout: () => {

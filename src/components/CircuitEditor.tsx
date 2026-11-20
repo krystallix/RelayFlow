@@ -7,6 +7,7 @@ import { NodePalette } from "@/components/sidebar/NodePalette";
 import { FlowCanvas } from "@/components/canvas/FlowCanvas";
 import { HardwareSheet } from "@/components/layout/HardwareSheet";
 import { PreferencesSheet } from "@/components/layout/PreferencesSheet";
+import { SheetTabsBar } from "@/components/layout/SheetTabsBar";
 import { useCircuitStore } from "@/store/useCircuitStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { ProjectsService } from "@/lib/projectsService";
@@ -55,6 +56,8 @@ export const CircuitEditor: React.FC<CircuitEditorProps> = ({ viewerProjectId })
               settings: { gridSize: 30, wireRouting: "orthogonal", theme },
               nodes: project.data.nodes || [],
               wires: project.data.wires || [],
+              sheets: project.data.sheets,
+              activeSheetId: project.data.activeSheetId,
             });
             setCloudProjectId(project.id);
             setProjectTitle(project.title);
@@ -199,6 +202,7 @@ export const CircuitEditor: React.FC<CircuitEditorProps> = ({ viewerProjectId })
             setZoomScale={setZoomScale}
             onOpenPalette={() => setIsPaletteOpen(true)}
           />
+          <SheetTabsBar />
         </div>
 
         {/* Hardware Inspector & BOM Side Sheet Drawer */}

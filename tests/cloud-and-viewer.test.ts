@@ -221,4 +221,51 @@ describe("Viewer Mode State & Forking (useCircuitStore)", () => {
     store.resetCanvasPreferences();
     expect(useCircuitStore.getState().canvasPreferences.blueNeutralWires).toBe(true);
   });
+
+  it("supports multiple sheets per project with isolated nodes, undo stacks, rename, duplicate, and delete", () => {
+    const store = useCircuitStore.getState();
+    store.resetCanvas();
+
+    const initialSheetId = useCircuitStore.getState().activeSheetId;
+    expect(useCircuitStore.getState().sheets).toHaveLength(1);
+
+    // Add node on Sheet 1
+    store.addNode("lamp", { x: 90, y: 90 });
+    expect(useCircuitStore.getState().nodes).toHaveLength(1);
+    expect(useCircuitStore.getState().undoStack).toHaveLength(1);
+
+    // Add Sheet 2 (empty canvas, isolated undoStack)
+    store.addSheet("Power Circuit");
+    const sheet2Id = useCircuitStore.getState().activeSheetId;
+    expect(sheet2Id).not.toBe(initialSheetId);
+    expect(useCircuitStore.getState().sheets).toHaveLength(2);
+    expect(useCircuitStore.getState().nodes).toHaveLength(0);
+    expect(useCircuitStore.getState().undoStack).toHaveLength(0);
+
+    // Add 2 nodes on Sheet 2 and rename it
+    store.addNode("switchNO", { x: 120, y: 120 });
+    store.addNode("coil", { x: 180, y: 180 });
+    store.renameSheet(sheet2Id, "Control Logic");
+    expect(useCircuitStore.getState().sheets.find((s) => s.id === sheet2Id)?.name).toBe("Control Logic");
+
+    // Switch back to Sheet 1 — its 1 node and 1 undoStack entry are preserved
+    store.switchSheet(initialSheetId);
+    expect(useCircuitStore.getState().activeSheetId).toBe(initialSheetId);
+    expect(useCircuitStore.getState().nodes).toHaveLength(1);
+    expect(useCircuitStore.getState().undoStack).toHaveLength(1);
+
+    // Duplicate Sheet 1
+    store.duplicateSheet(initialSheetId);
+    expect(useCircuitStore.getState().sheets).toHaveLength(3);
+    expect(useCircuitStore.getState().nodes).toHaveLength(1);
+
+    // Delete duplicated sheet & Sheet 2, verify cannot delete the last remaining sheet
+    const dupId = useCircuitStore.getState().activeSheetId;
+    store.deleteSheet(dupId);
+    expect(useCircuitStore.getState().sheets).toHaveLength(2);
+    store.deleteSheet(sheet2Id);
+    expect(useCircuitStore.getState().sheets).toHaveLength(1);
+    store.deleteSheet(initialSheetId);
+    expect(useCircuitStore.getState().sheets).toHaveLength(1);
+  });
 });

@@ -211,10 +211,11 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
   }));
 
   const isHorizontal = node.rotation === 1 || node.rotation === 3;
+  const isTextSymbol = node.componentId === "text" || comp?.type === "text";
   const isTagVisible = node.tagVisibility !== false;
-  const showTag = isTagVisible && Boolean(node.tag);
-  const showComment = (Boolean(node.comment) && showCommentText) || Boolean(isEditingComment);
-  const hasLabel = showTag || showComment || isTimer || Boolean(isEditingComment);
+  const showTag = !isTextSymbol && isTagVisible && Boolean(node.tag);
+  const showComment = !isTextSymbol && ((Boolean(node.comment) && showCommentText) || Boolean(isEditingComment));
+  const hasLabel = showTag || showComment || isTimer || (!isTextSymbol && Boolean(isEditingComment));
 
   // Smart CAD label placement:
   // - For vertical symbols (rotation 0°/180°), ports are top & bottom. Place label on RIGHT (or LEFT if right ports).
@@ -336,6 +337,12 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
       onClick={handleClick}
+      onDoubleClick={(e) => {
+        if (!isSimulating && !isReadOnlyViewer && isTextSymbol) {
+          e.stopPropagation();
+          onStartEditComment?.(node.id);
+        }
+      }}
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -775,6 +782,65 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
                   </svg>
                 );
               })()}
+            </div>
+          ) : isTextSymbol ? (
+            <div
+              style={{
+                transform: `rotate(${node.rotation * 90}deg)`,
+              }}
+              className="w-full h-full flex items-center justify-center px-2 py-1"
+            >
+              {isEditingComment ? (
+                <input
+                  ref={commentInputRef}
+                  type="text"
+                  value={commentEditValue}
+                  onChange={(e) => setCommentEditValue(e.target.value)}
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onClick={(e) => e.stopPropagation()}
+                  onDoubleClick={(e) => e.stopPropagation()}
+                  onBlur={() => {
+                    const trimmed = commentEditValue.trim();
+                    if (trimmed !== (node.comment || "")) {
+                      updateNodeData(node.id, { comment: trimmed || null }, true);
+                    }
+                    onEndEditComment?.();
+                  }}
+                  onKeyDown={(e) => {
+                    e.stopPropagation();
+                    if (e.key === "Enter") {
+                      const trimmed = commentEditValue.trim();
+                      if (trimmed !== (node.comment || "")) {
+                        updateNodeData(node.id, { comment: trimmed || null }, true);
+                      }
+                      onEndEditComment?.();
+                    } else if (e.key === "Escape") {
+                      setCommentEditValue(node.comment || "");
+                      onEndEditComment?.();
+                    }
+                  }}
+                  placeholder="Text..."
+                  className={`w-full min-w-[80px] text-center text-sm font-sans font-semibold px-2 py-1 rounded-md border outline-none shadow-sm ${
+                    isDark
+                      ? "bg-zinc-900 text-zinc-100 border-amber-400"
+                      : "bg-white text-slate-900 border-amber-500"
+                  }`}
+                />
+              ) : (
+                <span
+                  className={`text-sm font-sans font-semibold text-center leading-snug break-words select-none pointer-events-none ${
+                    node.comment
+                      ? isDark
+                        ? "text-zinc-100"
+                        : "text-slate-900"
+                      : isDark
+                      ? "text-zinc-500 italic"
+                      : "text-slate-400 italic"
+                  }`}
+                >
+                  {node.comment || "Text"}
+                </span>
+              )}
             </div>
           ) : comp?.svgPath ? (
             <SymbolRenderer
