@@ -425,8 +425,12 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   const handleMouseDown = (e: React.MouseEvent) => {
     if (contextMenu) setContextMenu(null);
     if (editingCommentNodeId) {
-      setEditingCommentNodeId(null);
-      setInitialCommentChar(null);
+      if (typeof document !== "undefined" && document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      } else {
+        setEditingCommentNodeId(null);
+        setInitialCommentChar(null);
+      }
     }
 
     // If drawing a wire and clicking empty area, cancel draft
@@ -621,11 +625,17 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   // Node Mouse Down (initiates drag or click)
   const handleNodeMouseDown = useCallback((nodeId: string | number, e: React.MouseEvent) => {
     e.stopPropagation();
-    setEditingCommentNodeId((prev) => (prev && prev !== nodeId ? null : prev));
-    setInitialCommentChar(null);
+    if (editingCommentNodeId && editingCommentNodeId !== nodeId) {
+      if (typeof document !== "undefined" && document.activeElement instanceof HTMLElement) {
+        document.activeElement.blur();
+      } else {
+        setEditingCommentNodeId(null);
+        setInitialCommentChar(null);
+      }
+    }
     if (e.button !== 0) return;
     startDraggingNode(nodeId, e.clientX, e.clientY, e.shiftKey);
-  }, [startDraggingNode]);
+  }, [startDraggingNode, editingCommentNodeId]);
 
   // Node Touch Start (mobile node touch & drag)
   const handleNodeTouchStart = useCallback((nodeId: string | number, e: React.TouchEvent) => {
