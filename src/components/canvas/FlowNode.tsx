@@ -309,8 +309,8 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
-    e.stopPropagation();
     if (isSimulating && isInteractive) {
+      e.stopPropagation();
       e.preventDefault();
       toggleComponentState(node.id);
     }

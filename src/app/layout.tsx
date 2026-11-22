@@ -63,7 +63,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="antialiased bg-[#f8fafc] dark:bg-[#090b10] text-slate-900 dark:text-slate-100 min-h-screen overflow-hidden overscroll-none touch-none">
+      <body className="antialiased bg-[#f8fafc] dark:bg-[#090b10] text-slate-900 dark:text-slate-100 h-dvh w-full overflow-hidden overscroll-none touch-none">
         {children}
       </body>
     </html>

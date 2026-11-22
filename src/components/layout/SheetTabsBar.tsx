@@ -103,8 +103,9 @@ export const SheetTabsBar: React.FC = () => {
   );
 
   return (
-    <div className="h-9 shrink-0 border-t border-slate-200 bg-white text-slate-700 dark:border-white/10 dark:bg-[#11141c] dark:text-zinc-300 flex items-center px-2 gap-1.5 select-none z-20">
-      {/* Add Sheet Button */}
+    <div className="shrink-0 border-t border-slate-200 bg-white text-slate-700 dark:border-white/10 dark:bg-[#11141c] dark:text-zinc-300 select-none z-20 pb-[env(safe-area-inset-bottom)]">
+      <div className="h-9 flex items-center px-2 gap-1.5">
+        {/* Add Sheet Button */}
       {!isReadOnlyViewer && (
         <button
           type="button"
@@ -232,6 +233,7 @@ export const SheetTabsBar: React.FC = () => {
         <span>
           {activeIndex + 1} / {sheets.length}
         </span>
+      </div>
       </div>
 
       {/* Sheet Tab Popover Menu */}

@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 const CircuitEditor = dynamic(() => import("@/components/CircuitEditor"), {
   ssr: false,
   loading: () => (
-    <div className="flex h-screen w-screen items-center justify-center bg-[#f8fafc] dark:bg-[#090b10]" />
+    <div className="flex h-dvh w-full items-center justify-center bg-[#f8fafc] dark:bg-[#090b10]" />
   ),
 });
 

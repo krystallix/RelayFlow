@@ -119,7 +119,7 @@ export const NodePalette: React.FC<NodePaletteProps> = ({
       )}
 
       <aside
-        className={`fixed md:relative top-0 bottom-0 left-0 z-50 md:z-20 w-[85vw] max-w-[320px] md:w-64 border-r flex flex-col select-none h-full md:h-[calc(100vh-3.5rem)] transition-all duration-300 ease-out shadow-2xl md:shadow-none ${
+        className={`fixed md:relative top-0 bottom-0 left-0 z-50 md:z-20 w-[85vw] max-w-[320px] md:w-64 border-r flex flex-col select-none h-dvh md:h-full transition-all duration-300 ease-out shadow-2xl md:shadow-none ${
           isDark
             ? "border-white/10 bg-[#0c0e14]/98 md:bg-[#0c0e14]/90 backdrop-blur-xl text-white"
             : "border-slate-200 bg-white/98 md:bg-white/95 backdrop-blur-xl text-slate-800"

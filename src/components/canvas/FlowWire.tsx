@@ -29,7 +29,6 @@ interface FlowWireProps {
   onContextMenu?: (wire: CircuitWire, e: React.MouseEvent) => void;
   onWireHover?: (wire: CircuitWire, e: React.MouseEvent) => void;
   onWireLeave?: () => void;
-  onStartDragSegment?: (wire: CircuitWire, orientation: "horizontal" | "vertical", defaultMid: number) => void;
   onStartDragCorner?: (
     wire: CircuitWire,
     cornerIndex: number,
@@ -151,7 +150,6 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
   onContextMenu,
   onWireHover,
   onWireLeave,
-  onStartDragSegment,
   onStartDragCorner,
   onStartDragTapPoint,
 }) => {
@@ -217,35 +215,6 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
 
   const isHot = wire.isHot;
 
-  // Extract the middle segment for draw.io dragging
-  let midHandle: Point | null = null;
-  let segmentOrientation: "horizontal" | "vertical" = "horizontal";
-  let defaultMid = 0;
-  let segStart: Point | null = null;
-  let segEnd: Point | null = null;
-
-  if (routingMode === "orthogonal" && routed.points && routed.points.length >= 4) {
-    const pStart = routed.points.length >= 6 ? routed.points[2] : routed.points[1];
-    const pEnd = routed.points.length >= 6 ? routed.points[3] : routed.points[routed.points.length - 2];
-    segStart = pStart;
-    segEnd = pEnd;
-
-    const isHoriz = Math.abs(pStart.y - pEnd.y) < 2;
-    segmentOrientation = isHoriz ? "horizontal" : "vertical";
-
-    if (isHoriz) {
-      midHandle = { x: (pStart.x + pEnd.x) / 2, y: pStart.y };
-      const stubStart = routed.points.length >= 6 ? routed.points[1] : pStart;
-      const stubEnd = routed.points.length >= 6 ? routed.points[4] : pEnd;
-      defaultMid = (stubStart.y + stubEnd.y) / 2;
-    } else {
-      midHandle = { x: pStart.x, y: (pStart.y + pEnd.y) / 2 };
-      const stubStart = routed.points.length >= 6 ? routed.points[1] : pStart;
-      const stubEnd = routed.points.length >= 6 ? routed.points[4] : pEnd;
-      defaultMid = (stubStart.x + stubEnd.x) / 2;
-    }
-  }
-
   // Wire number label placement (Dual Ferrule on long wire, Single Midpoint on short wire)
   const effectiveLabel = label || wire.label;
   const labelPlacements =
@@ -302,23 +271,6 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
     e.stopPropagation();
     if (useCircuitStore.getState().wireDraft) return;
     selectWire(wire.id, e.shiftKey);
-  };
-
-  const handleStartDragSegment = (e: React.MouseEvent) => {
-    e.stopPropagation();
-
-    const currentWireDraft = useCircuitStore.getState().wireDraft;
-    if (currentWireDraft) {
-      e.preventDefault();
-      const world = screenToWorld(e.clientX, e.clientY);
-      const { point } = ManhattanRouter.getNearestPointOnSegments(world, routed.points);
-      connectWireToWire(wire.id, point);
-      return;
-    }
-
-    if (isSimulating || !midHandle) return;
-    e.preventDefault();
-    onStartDragSegment?.(wire, segmentOrientation, defaultMid);
   };
 
   // Extract all corners (sudut garis)
@@ -417,27 +369,7 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
         }}
       />
 
-      {/* 2. Middle Segment Line Drag Hit Target (draw.io style drag directly on line) */}
-      {segStart && segEnd && !isSimulating && (
-        <line
-          x1={segStart.x}
-          y1={segStart.y}
-          x2={segEnd.x}
-          y2={segEnd.y}
-          stroke="transparent"
-          strokeWidth={18}
-          className={`pointer-events-auto ${
-            hasWireDraft
-              ? "cursor-crosshair"
-              : segmentOrientation === "horizontal"
-              ? "cursor-ns-resize"
-              : "cursor-ew-resize"
-          }`}
-          onMouseDown={handleStartDragSegment}
-        />
-      )}
-
-      {/* 3. Glow Layer (when Hot, Selected, or Hovered) */}
+      {/* 2. Glow Layer (when Hot, Selected, or Hovered) */}
       {(isHot || isSelected || isHovered) && (
         <path
           d={displaySvgPath}

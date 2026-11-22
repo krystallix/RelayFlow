@@ -128,6 +128,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   const touchStateRef = useRef<{
     mode: "none" | "pan" | "pinch" | "nodeDrag" | "marquee";
     lastTapTime: number;
+    lastTouchTimestamp: number;
     startDistance: number;
     startZoom: number;
     startCentroidScreen: { x: number; y: number };
@@ -139,6 +140,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   }>({
     mode: "none",
     lastTapTime: 0,
+    lastTouchTimestamp: 0,
     startDistance: 0,
     startZoom: 1,
     startCentroidScreen: { x: 0, y: 0 },
@@ -211,12 +213,6 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   const [editingCommentNodeId, setEditingCommentNodeId] = useState<string | number | null>(null);
   const [popoverEditingNodeId, setPopoverEditingNodeId] = useState<string | number | null>(null);
   const [initialCommentChar, setInitialCommentChar] = useState<string | null>(null);
-  const [draggingWireSegment, setDraggingWireSegment] = useState<{
-    wireId: string | number;
-    orientation: "horizontal" | "vertical";
-    defaultMid: number;
-    initialMargins: WireMargins;
-  } | null>(null);
   const [draggingCornerState, setDraggingCornerState] = useState<{
     wireId: string | number;
     cornerIndex: number;
@@ -432,6 +428,9 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
 
   // Canvas Mouse Down
   const handleMouseDown = (e: React.MouseEvent) => {
+    // Ignore synthetic mouse events fired right after touch interactions on mobile
+    if (Date.now() - touchStateRef.current.lastTouchTimestamp < 500) return;
+
     if (contextMenu) setContextMenu(null);
     if (editingCommentNodeId) {
       if (typeof document !== "undefined" && document.activeElement instanceof HTMLElement) {
@@ -484,7 +483,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
         currentWorldX: worldPos.x,
         currentWorldY: worldPos.y,
       });
-      if (!e.shiftKey) clearSelection();
+      if (!e.shiftKey && !mobileSelectMode) clearSelection();
     }
   };
 
@@ -634,6 +633,9 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   // Node Mouse Down (initiates drag or click)
   const handleNodeMouseDown = useCallback((nodeId: string | number, e: React.MouseEvent) => {
     e.stopPropagation();
+    // Ignore synthetic mouse events fired right after touch interactions on mobile
+    if (Date.now() - touchStateRef.current.lastTouchTimestamp < 500) return;
+
     if (editingCommentNodeId && editingCommentNodeId !== nodeId) {
       if (typeof document !== "undefined" && document.activeElement instanceof HTMLElement) {
         document.activeElement.blur();
@@ -643,12 +645,13 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       }
     }
     if (e.button !== 0) return;
-    startDraggingNode(nodeId, e.clientX, e.clientY, e.shiftKey);
-  }, [startDraggingNode, editingCommentNodeId]);
+    startDraggingNode(nodeId, e.clientX, e.clientY, e.shiftKey || mobileSelectMode);
+  }, [startDraggingNode, editingCommentNodeId, mobileSelectMode]);
 
   // Node Touch Start (mobile node touch & drag)
   const handleNodeTouchStart = useCallback((nodeId: string | number, e: React.TouchEvent) => {
     e.stopPropagation();
+    touchStateRef.current.lastTouchTimestamp = Date.now();
     setContextMenu(null);
 
     const touch = e.touches[0];
@@ -787,32 +790,6 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       return;
     }
 
-    // 0. Live Wire Segment Dragging (draw.io style - aligned to 30px grid)
-    if (draggingWireSegment) {
-      const currentWire = wires.find((w) => w.id === draggingWireSegment.wireId);
-      const curCenter = currentWire?.margins?.center || 0;
-      if (draggingWireSegment.orientation === "horizontal") {
-        const newCenter = Math.round((worldPos.y - draggingWireSegment.defaultMid) / 30) * 30;
-        if (curCenter !== newCenter) {
-          updateWireMargins(
-            draggingWireSegment.wireId,
-            { ...draggingWireSegment.initialMargins, center: newCenter },
-            false
-          );
-        }
-      } else {
-        const newCenter = Math.round((worldPos.x - draggingWireSegment.defaultMid) / 30) * 30;
-        if (curCenter !== newCenter) {
-          updateWireMargins(
-            draggingWireSegment.wireId,
-            { ...draggingWireSegment.initialMargins, center: newCenter },
-            false
-          );
-        }
-      }
-      return;
-    }
-
     // 1. Handle active node dragging (120 FPS live update) with Magnetic Alignment Smart Guides
     if (draggingNodeState) {
       moveDraggingNode(worldPos);
@@ -909,22 +886,13 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       return;
     }
 
-    if (draggingWireSegment) {
-      const currentWire = wires.find((w) => w.id === draggingWireSegment.wireId);
-      if (currentWire) {
-        updateWireMargins(draggingWireSegment.wireId, currentWire.margins || {}, true);
-      }
-      setDraggingWireSegment(null);
-      return;
-    }
-
     if (draggingNodeState) {
       finishDraggingNode();
     }
 
     // Process Marquee Selection
     if (marquee) {
-      commitMarqueeSelection(marquee, e.shiftKey);
+      commitMarqueeSelection(marquee, e.shiftKey || mobileSelectMode);
     }
 
     setIsPanning(false);
@@ -932,6 +900,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
 
   // Canvas Touch Start
   const handleTouchStart = (e: React.TouchEvent) => {
+    touchStateRef.current.lastTouchTimestamp = Date.now();
     if (contextMenu) setContextMenu(null);
 
     if (touchStateRef.current.longPressTimer) {
@@ -941,6 +910,9 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
 
     // 2-Finger Touch: Smooth Anchored Pinch Zoom & 2-finger Pan
     if (e.touches.length === 2) {
+      // Cancel any in-progress 1-finger marquee or node drag when transitioning to 2-finger pan/zoom
+      if (marquee) setMarquee(null);
+      if (draggingNodeState) setDraggingNodeState(null);
       const t1 = e.touches[0];
       const t2 = e.touches[1];
       const dist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
@@ -1142,6 +1114,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
 
   // Canvas Touch End
   const handleTouchEnd = (e: React.TouchEvent) => {
+    touchStateRef.current.lastTouchTimestamp = Date.now();
     if (touchStateRef.current.longPressTimer) {
       clearTimeout(touchStateRef.current.longPressTimer);
       touchStateRef.current.longPressTimer = null;
@@ -1160,7 +1133,13 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     }
 
     if (marquee) {
-      commitMarqueeSelection(marquee, false);
+      commitMarqueeSelection(marquee, mobileSelectMode);
+    } else if (
+      touchStateRef.current.mode === "pan" &&
+      !touchStateRef.current.hasMoved &&
+      !mobileSelectMode
+    ) {
+      clearSelection();
     }
 
     touchStateRef.current.mode = "none";
@@ -1646,16 +1625,6 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     };
   }, [pageViewEnabled, nodes, wires]);
 
-  const handleStartDragSegment = useCallback((targetWire: CircuitWire, orientation: "horizontal" | "vertical", defaultMid: number) => {
-    if (useCircuitStore.getState().isReadOnlyViewer) return;
-    setDraggingWireSegment({
-      wireId: targetWire.id,
-      orientation,
-      defaultMid,
-      initialMargins: targetWire.margins || { start: 0, center: 0, end: 0 },
-    });
-  }, []);
-
   const handleStartDragCorner = useCallback((targetWire: CircuitWire, cornerIndex: number, cornerPoint: Point, points: Point[], dir1: number, dir2: number) => {
     if (useCircuitStore.getState().isReadOnlyViewer) return;
     setDraggingCornerState({
@@ -1795,7 +1764,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
           target: { type: "canvas", worldPos },
         });
       }}
-      className={`flex-1 h-[calc(100vh-3.5rem)] relative overflow-hidden select-none transition-colors duration-150 ${
+      className={`flex-1 min-h-0 relative overflow-hidden select-none transition-colors duration-150 ${
         pageViewEnabled
           ? isDark
             ? "bg-[#141824]"
@@ -1806,10 +1775,6 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       } ${
         draggingTapPointState || draggingCornerState
           ? "cursor-move"
-          : draggingWireSegment
-          ? draggingWireSegment.orientation === "horizontal"
-            ? "cursor-ns-resize"
-            : "cursor-ew-resize"
           : probeActive
           ? "cursor-crosshair"
           : draggingNodeState?.hasMoved
@@ -2010,7 +1975,6 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
                 onContextMenu={handleWireContextMenu}
                 onWireHover={handleWireHover}
                 onWireLeave={handleWireLeave}
-                onStartDragSegment={handleStartDragSegment}
                 onStartDragCorner={handleStartDragCorner}
                 onStartDragTapPoint={handleStartDragTapPoint}
               />
@@ -2388,7 +2352,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       </div>
 
       {/* MOBILE Floating Bottom CAD Control Dock (Compact & Thumb-Friendly) */}
-      <div className="flex md:hidden absolute bottom-3 left-3 right-3 z-30 items-center justify-between pointer-events-none pb-[env(safe-area-inset-bottom)]">
+      <div className="flex md:hidden absolute bottom-3 left-3 right-3 z-30 items-center justify-between pointer-events-none">
         <div
           className={`w-full flex items-center justify-between gap-1 p-1.5 rounded-2xl border backdrop-blur-xl shadow-2xl pointer-events-auto transition-colors ${
             isDark

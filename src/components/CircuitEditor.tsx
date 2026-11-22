@@ -121,7 +121,7 @@ export const CircuitEditor: React.FC<CircuitEditorProps> = ({ viewerProjectId })
   if (loadingViewerProject) {
     return (
       <div
-        className={`flex flex-col items-center justify-center h-screen w-screen ${
+        className={`flex flex-col items-center justify-center h-dvh w-full ${
           isDark ? "bg-[#090b10] text-slate-100" : "bg-[#f8fafc] text-slate-900"
         }`}
       >
@@ -136,7 +136,7 @@ export const CircuitEditor: React.FC<CircuitEditorProps> = ({ viewerProjectId })
   if (projectNotFound) {
     return (
       <div
-        className={`flex flex-col items-center justify-center h-screen w-screen p-6 text-center select-none ${
+        className={`flex flex-col items-center justify-center h-dvh w-full p-6 text-center select-none ${
           isDark ? "bg-[#090b10] text-slate-100" : "bg-[#f8fafc] text-slate-900"
         }`}
       >
@@ -168,7 +168,7 @@ export const CircuitEditor: React.FC<CircuitEditorProps> = ({ viewerProjectId })
 
   return (
     <div
-      className={`flex flex-col h-screen w-screen overflow-hidden ${
+      className={`flex flex-col h-dvh w-full overflow-hidden ${
         isDark ? "bg-[#090b10] text-slate-100" : "bg-[#f8fafc] text-slate-900"
       }`}
     >
@@ -183,7 +183,7 @@ export const CircuitEditor: React.FC<CircuitEditorProps> = ({ viewerProjectId })
       />
 
       {/* Main Workspace (Sidebar on the left + Right Column: SubToolbar & Canvas) */}
-      <div className="flex flex-1 overflow-hidden relative">
+      <div className="flex flex-1 min-h-0 overflow-hidden relative">
         {!isReadOnlyViewer && (
           <NodePalette
             zoomScale={zoomScale}
@@ -192,7 +192,7 @@ export const CircuitEditor: React.FC<CircuitEditorProps> = ({ viewerProjectId })
             onClose={() => setIsPaletteOpen(false)}
           />
         )}
-        <div className="flex flex-col flex-1 h-full overflow-hidden relative">
+        <div className="flex flex-col flex-1 h-full min-h-0 overflow-hidden relative">
           {/* SubToolbar positioned to the right of Sidebar, above the Canvas */}
           <SubToolbar />
           <FlowCanvas
