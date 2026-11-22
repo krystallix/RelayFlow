@@ -328,6 +328,7 @@ interface CircuitStoreState {
   splitWireAtJunction: (wireId: string | number, clickPoint: { x: number; y: number }, startDraft?: boolean) => void;
   connectWireToWire: (targetWireId: string | number, tapPoint: { x: number; y: number }) => void;
   updateWireMargins: (wireId: string | number, margins: WireMargins, commit?: boolean) => void;
+  updateWireWaypoints: (wireId: string | number, waypoints: { x: number; y: number }[] | undefined, commit?: boolean) => void;
   updateWireTapPoint: (wireId: string | number, tapPoint: { x: number; y: number }, commit?: boolean) => void;
   updateWireLabel: (wireId: string | number, label: string | null) => void;
   toggleWireLabels: () => void;
@@ -1308,12 +1309,20 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
           return state;
         }
 
+        const nextWires = hasChanged
+          ? state.wires.map((w) =>
+              w.waypoints && (updateMap.has(w.fromNodeId) || updateMap.has(w.toNodeId))
+                ? { ...w, waypoints: undefined }
+                : w
+            )
+          : state.wires;
+
         if (commitToHistory) {
-          saveToLocalStorage({ projectTitle: state.projectTitle, nodes: updatedNodes, wires: state.wires });
+          saveToLocalStorage({ projectTitle: state.projectTitle, nodes: updatedNodes, wires: nextWires });
         }
 
         if (state.isSimulating) {
-          const simRes = SimulationEngine.step(updatedNodes, state.wires);
+          const simRes = SimulationEngine.step(updatedNodes, nextWires);
           return {
             nodes: updatedNodes,
             wires: simRes.wires,
@@ -1324,7 +1333,7 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
           };
         }
 
-        return { nodes: updatedNodes, wires: state.wires, ...history };
+        return { nodes: updatedNodes, wires: nextWires, ...history };
       });
     },
 
@@ -2119,6 +2128,33 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
         nextWires[wireIndex] = {
           ...nextWires[wireIndex],
           margins: { ...nextWires[wireIndex].margins, ...margins },
+        };
+
+        if (commit) {
+          saveToLocalStorage({ projectTitle: state.projectTitle, nodes: state.nodes, wires: nextWires });
+        }
+
+        return {
+          wires: nextWires,
+          ...history,
+        };
+      });
+    },
+
+    updateWireWaypoints: (wireId, waypoints, commit = true) => {
+      set((state) => {
+        const wireIndex = state.wires.findIndex((w) => w.id === wireId);
+        if (wireIndex === -1) return {};
+
+        let history = {};
+        if (commit) {
+          history = pushHistory(state);
+        }
+
+        const nextWires = [...state.wires];
+        nextWires[wireIndex] = {
+          ...nextWires[wireIndex],
+          waypoints,
         };
 
         if (commit) {

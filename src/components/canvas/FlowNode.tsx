@@ -920,12 +920,27 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
 
       {/* Connection Ports (Magnetic Pins - Only Glow on Hover) */}
       {transformedPorts.map((transformed: any, idx: number) => {
+        const isCompactCircleNode =
+          node.componentId.startsWith("source") ||
+          node.componentId === "lamp" ||
+          node.componentId === "lampBlink" ||
+          node.componentId === "buzzer" ||
+          node.componentId === "ring" ||
+          node.componentId === "siren";
+        const outwardOffset = isCompactCircleNode ? 14 : 0;
+        const displayX =
+          transformed.x +
+          (transformed.direction === 1 ? outwardOffset : transformed.direction === 3 ? -outwardOffset : 0);
+        const displayY =
+          transformed.y +
+          (transformed.direction === 2 ? outwardOffset : transformed.direction === 0 ? -outwardOffset : 0);
+
         return (
           <div
             key={`${transformed.id}-${idx}`}
             style={{
-              left: `${transformed.x}px`,
-              top: `${transformed.y}px`,
+              left: `${displayX}px`,
+              top: `${displayY}px`,
               touchAction: "none",
             }}
             onMouseDown={(e) => {
@@ -956,7 +971,9 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
             }}
             onMouseEnter={(e) => onPortHover?.(node, transformed.id, e)}
             onMouseLeave={() => onPortLeave?.()}
-            className={`absolute -translate-x-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center group/port z-30 ${
+            className={`absolute -translate-x-1/2 -translate-y-1/2 flex items-center justify-center group/port z-30 ${
+              hasWireDraft ? "w-8 h-8" : "w-5 h-5"
+            } ${
               isReadOnlyViewer ? "cursor-default" : "cursor-crosshair"
             }`}
             title={`Terminal ${transformed.tag || transformed.id} (${transformed.type})`}

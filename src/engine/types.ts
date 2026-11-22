@@ -53,6 +53,7 @@ export interface CircuitWire {
   toNodeId: string | number;
   toPortId: number;
   margins: WireMargins;
+  waypoints?: Point[];
   potential?: string | null;
   isHot?: boolean;
   flowDirection?: "forward" | "reverse";

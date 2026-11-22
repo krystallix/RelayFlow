@@ -29,6 +29,7 @@ import {
   Redo2,
   Sparkles,
   Boxes,
+  BoxSelect,
   X,
 } from "lucide-react";
 import { ManhattanRouter } from "@/engine/router/ManhattanRouter";
@@ -120,9 +121,12 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   const cursorXRef = useRef<HTMLElement>(null);
   const cursorYRef = useRef<HTMLElement>(null);
 
+  // Mobile Multi-Select Mode (toggles 1-finger marquee box select & tap-to-add selection)
+  const [mobileSelectMode, setMobileSelectMode] = useState(false);
+
   // Touch gesture state ref for silky-smooth mobile multi-touch
   const touchStateRef = useRef<{
-    mode: "none" | "pan" | "pinch" | "nodeDrag";
+    mode: "none" | "pan" | "pinch" | "nodeDrag" | "marquee";
     lastTapTime: number;
     startDistance: number;
     startZoom: number;
@@ -192,6 +196,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   const tickTimerSimulation = useCircuitStore((s) => s.tickTimerSimulation);
   const splitWireAtJunction = useCircuitStore((s) => s.splitWireAtJunction);
   const updateWireMargins = useCircuitStore((s) => s.updateWireMargins);
+  const updateWireWaypoints = useCircuitStore((s) => s.updateWireWaypoints);
   const updateWireTapPoint = useCircuitStore((s) => s.updateWireTapPoint);
   const undo = useCircuitStore((s) => s.undo);
   const redo = useCircuitStore((s) => s.redo);
@@ -332,8 +337,11 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     setPanOffset({ x: 100, y: 50 });
   };
 
+  const [hoveredWireId, setHoveredWireId] = useState<string | number | null>(null);
+
   // Virtual Multimeter Probe Handlers
   const handleWireHover = useCallback((wire: CircuitWire, e: React.MouseEvent) => {
+    setHoveredWireId(wire.id);
     if (!probeActiveRef.current) return;
     setProbeReading({
       potential: wire.potential || null,
@@ -344,6 +352,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   }, []);
 
   const handleWireLeave = useCallback(() => {
+    setHoveredWireId(null);
     if (probeActiveRef.current) setProbeReading(null);
   }, []);
 
@@ -671,8 +680,43 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     touchStateRef.current.startTouchPos = { x: touch.clientX, y: touch.clientY };
     touchStateRef.current.hasMoved = false;
 
-    startDraggingNode(nodeId, touch.clientX, touch.clientY, false);
-  }, [screenToWorld, startDraggingNode]);
+    startDraggingNode(nodeId, touch.clientX, touch.clientY, mobileSelectMode);
+  }, [screenToWorld, startDraggingNode, mobileSelectMode]);
+
+  const updateDraggingCorner = (worldPos: Point) => {
+    if (!draggingCornerState) return;
+    const { wireId, cornerIndex, points } = draggingCornerState;
+    const target: Point = {
+      x: Math.round(worldPos.x / 30) * 30,
+      y: Math.round(worldPos.y / 30) * 30,
+    };
+
+    let nextWaypoints: Point[];
+    if (points.length === 2) {
+      // Straight wire: pulling in any direction creates an orthogonal bend through target
+      nextWaypoints = [target];
+    } else {
+      const corners = points.slice(1, -1).map((p) => ({ ...p }));
+      const cIdx = Math.max(0, Math.min(corners.length - 1, cornerIndex - 1));
+      const oldCorner = corners[cIdx];
+      corners[cIdx] = target;
+
+      if (cIdx > 0) {
+        const prev = corners[cIdx - 1];
+        if (Math.abs(prev.x - oldCorner.x) < 2) prev.x = target.x;
+        else if (Math.abs(prev.y - oldCorner.y) < 2) prev.y = target.y;
+      }
+      if (cIdx < corners.length - 1) {
+        const next = corners[cIdx + 1];
+        if (Math.abs(next.x - oldCorner.x) < 2) next.x = target.x;
+        else if (Math.abs(next.y - oldCorner.y) < 2) next.y = target.y;
+      }
+
+      nextWaypoints = corners;
+    }
+
+    updateWireWaypoints(wireId, nextWaypoints, false);
+  };
 
   // Canvas Mouse Move
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -704,97 +748,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
 
     // 0. Live Wire Corner Dragging (Corner Handles on hover)
     if (draggingCornerState) {
-      const {
-        wireId,
-        cornerIndex,
-        cornerCount,
-        initialPoint,
-        initialMargins,
-        dir1,
-        dir2,
-        points,
-        isVerticalRouting,
-      } = draggingCornerState;
-
-      const deltaX = worldPos.x - initialPoint.x;
-      const deltaY = worldPos.y - initialPoint.y;
-
-      const nextMargins = { ...initialMargins };
-
-      if (points.length === 2 || cornerCount === 1) {
-        const delta = isVerticalRouting ? deltaY : deltaX;
-        nextMargins.center = Math.round((initialMargins.center + delta) / 30) * 30;
-      } else if (cornerCount === 2) {
-        const isMiddleHoriz = Math.abs(points[1].y - points[2].y) < 2;
-
-        if (isMiddleHoriz) {
-          nextMargins.center = Math.round((initialMargins.center + deltaY) / 30) * 30;
-
-          if (cornerIndex === 1) {
-            if (dir1 === 1) {
-              nextMargins.start = Math.round((initialMargins.start + deltaX) / 30) * 30;
-            } else if (dir1 === 3) {
-              nextMargins.start = Math.round((initialMargins.start - deltaX) / 30) * 30;
-            }
-          } else if (cornerIndex === 2) {
-            if (dir2 === 1) {
-              nextMargins.end = Math.round((initialMargins.end + deltaX) / 30) * 30;
-            } else if (dir2 === 3) {
-              nextMargins.end = Math.round((initialMargins.end - deltaX) / 30) * 30;
-            }
-          }
-        } else {
-          nextMargins.center = Math.round((initialMargins.center + deltaX) / 30) * 30;
-
-          if (cornerIndex === 1) {
-            if (dir1 === 2) {
-              nextMargins.start = Math.round((initialMargins.start + deltaY) / 30) * 30;
-            } else if (dir1 === 0) {
-              nextMargins.start = Math.round((initialMargins.start - deltaY) / 30) * 30;
-            }
-          } else if (cornerIndex === 2) {
-            if (dir2 === 2) {
-              nextMargins.end = Math.round((initialMargins.end + deltaY) / 30) * 30;
-            } else if (dir2 === 0) {
-              nextMargins.end = Math.round((initialMargins.end - deltaY) / 30) * 30;
-            }
-          }
-        }
-      } else {
-        const isFirstCorner = cornerIndex === 1;
-        const isLastCorner = cornerIndex === points.length - 2;
-
-        if (isFirstCorner) {
-          let deltaStart = 0;
-          if (dir1 === 0) deltaStart = -deltaY;
-          else if (dir1 === 2) deltaStart = +deltaY;
-          else if (dir1 === 1) deltaStart = +deltaX;
-          else if (dir1 === 3) deltaStart = -deltaX;
-
-          nextMargins.start = Math.round((initialMargins.start + deltaStart) / 30) * 30;
-        } else if (isLastCorner) {
-          let deltaEnd = 0;
-          if (dir2 === 0) deltaEnd = -deltaY;
-          else if (dir2 === 2) deltaEnd = +deltaY;
-          else if (dir2 === 1) deltaEnd = +deltaX;
-          else if (dir2 === 3) deltaEnd = -deltaX;
-
-          nextMargins.end = Math.round((initialMargins.end + deltaEnd) / 30) * 30;
-        } else {
-          const delta = isVerticalRouting ? deltaY : deltaX;
-          nextMargins.center = Math.round((initialMargins.center + delta) / 30) * 30;
-        }
-      }
-
-      const currentWire = wires.find((w) => w.id === wireId);
-      const curMargins = currentWire?.margins;
-      if (
-        curMargins?.start !== nextMargins.start ||
-        curMargins?.center !== nextMargins.center ||
-        curMargins?.end !== nextMargins.end
-      ) {
-        updateWireMargins(wireId, nextMargins, false);
-      }
+      updateDraggingCorner(worldPos);
       return;
     }
 
@@ -863,6 +817,41 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     }
   };
 
+  const commitMarqueeSelection = (m: MarqueeSelectionState, additive: boolean) => {
+    const minX = Math.min(m.startWorldX, m.currentWorldX);
+    const maxX = Math.max(m.startWorldX, m.currentWorldX);
+    const minY = Math.min(m.startWorldY, m.currentWorldY);
+    const maxY = Math.max(m.startWorldY, m.currentWorldY);
+
+    if (maxX - minX > 5 || maxY - minY > 5) {
+      const newlySelected = new Set(additive ? selectedNodeIds : []);
+      for (const node of nodes) {
+        const comp = catalog[node.componentId];
+        const w = comp?.width || 120;
+        const h = comp?.height || 120;
+        const nodeLeft = node.position.x - w / 2;
+        const nodeRight = node.position.x + w / 2;
+        const nodeTop = node.position.y - h / 2;
+        const nodeBottom = node.position.y + h / 2;
+
+        if (
+          nodeLeft <= maxX &&
+          nodeRight >= minX &&
+          nodeTop <= maxY &&
+          nodeBottom >= minY
+        ) {
+          newlySelected.add(node.id);
+        }
+      }
+
+      useCircuitStore.setState({
+        selectedNodeIds: newlySelected,
+        selectedWireIds: new Set(),
+      });
+    }
+    setMarquee(null);
+  };
+
   // Canvas Mouse Up
   const handleMouseUp = (e: React.MouseEvent) => {
     setSmartGuidelines([]);
@@ -879,7 +868,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     if (draggingCornerState) {
       const currentWire = wires.find((w) => w.id === draggingCornerState.wireId);
       if (currentWire) {
-        updateWireMargins(draggingCornerState.wireId, currentWire.margins || {}, true);
+        updateWireWaypoints(draggingCornerState.wireId, currentWire.waypoints, true);
       }
       setDraggingCornerState(null);
       return;
@@ -900,39 +889,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
 
     // Process Marquee Selection
     if (marquee) {
-      const minX = Math.min(marquee.startWorldX, marquee.currentWorldX);
-      const maxX = Math.max(marquee.startWorldX, marquee.currentWorldX);
-      const minY = Math.min(marquee.startWorldY, marquee.currentWorldY);
-      const maxY = Math.max(marquee.startWorldY, marquee.currentWorldY);
-
-      if (maxX - minX > 5 || maxY - minY > 5) {
-        const newlySelected = new Set(e.shiftKey ? selectedNodeIds : []);
-        for (const node of nodes) {
-          const comp = catalog[node.componentId];
-          const w = comp?.width || 120;
-          const h = comp?.height || 120;
-          const nodeLeft = node.position.x - w / 2;
-          const nodeRight = node.position.x + w / 2;
-          const nodeTop = node.position.y - h / 2;
-          const nodeBottom = node.position.y + h / 2;
-
-          // Check bounding box intersection
-          if (
-            nodeLeft <= maxX &&
-            nodeRight >= minX &&
-            nodeTop <= maxY &&
-            nodeBottom >= minY
-          ) {
-            newlySelected.add(node.id);
-          }
-        }
-
-        useCircuitStore.setState({
-          selectedNodeIds: newlySelected,
-          selectedWireIds: new Set(),
-        });
-      }
-      setMarquee(null);
+      commitMarqueeSelection(marquee, e.shiftKey);
     }
 
     setIsPanning(false);
@@ -1002,16 +959,37 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       const worldPos = screenToWorld(touch.clientX, touch.clientY);
       mouseWorldPosRef.current = worldPos;
 
+      const startMarqueeMode = mobileSelectMode && !isSimulating && !isReadOnlyViewer && !draggingNodeState;
+
       touchStateRef.current = {
         ...touchStateRef.current,
-        mode: draggingNodeState ? "nodeDrag" : "pan",
+        mode: draggingNodeState ? "nodeDrag" : startMarqueeMode ? "marquee" : "pan",
         startTouchPos: { x: touch.clientX, y: touch.clientY },
         startPan: { ...panOffsetRef.current },
         hasMoved: false,
       };
 
+      if (startMarqueeMode) {
+        if (containerRef.current) {
+          cachedRectRef.current = containerRef.current.getBoundingClientRect();
+        }
+        const rect = cachedRectRef.current || { left: 0, top: 0 };
+        const screenX = touch.clientX - rect.left;
+        const screenY = touch.clientY - rect.top;
+        setMarquee({
+          startScreenX: screenX,
+          startScreenY: screenY,
+          currentScreenX: screenX,
+          currentScreenY: screenY,
+          startWorldX: worldPos.x,
+          startWorldY: worldPos.y,
+          currentWorldX: worldPos.x,
+          currentWorldY: worldPos.y,
+        });
+      }
+
       // Long press (500ms) on empty canvas opens Context Menu
-      if (!draggingNodeState) {
+      if (!draggingNodeState && !startMarqueeMode) {
         const clientX = touch.clientX;
         const clientY = touch.clientY;
         touchStateRef.current.longPressTimer = setTimeout(() => {
@@ -1078,6 +1056,12 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       if (cursorXRef.current) cursorXRef.current.textContent = String(rx);
       if (cursorYRef.current) cursorYRef.current.textContent = String(ry);
 
+      // Dragging a wire corner handle with touch
+      if (draggingCornerState) {
+        updateDraggingCorner(worldPos);
+        return;
+      }
+
       // Dragging a node with touch
       if (draggingNodeState) {
         moveDraggingNode(worldPos);
@@ -1087,6 +1071,25 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       // Updating wire draft with touch
       if (wireDraft) {
         updateWireDraft(worldPos);
+        return;
+      }
+
+      // Marquee selection box with touch
+      if (touchStateRef.current.mode === "marquee") {
+        const rect = cachedRectRef.current || { left: 0, top: 0 };
+        const screenX = touch.clientX - rect.left;
+        const screenY = touch.clientY - rect.top;
+        setMarquee((prev) =>
+          prev
+            ? {
+                ...prev,
+                currentScreenX: screenX,
+                currentScreenY: screenY,
+                currentWorldX: worldPos.x,
+                currentWorldY: worldPos.y,
+              }
+            : null
+        );
         return;
       }
 
@@ -1109,8 +1112,20 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       touchStateRef.current.longPressTimer = null;
     }
 
+    if (draggingCornerState) {
+      const currentWire = wires.find((w) => w.id === draggingCornerState.wireId);
+      if (currentWire) {
+        updateWireWaypoints(draggingCornerState.wireId, currentWire.waypoints, true);
+      }
+      setDraggingCornerState(null);
+    }
+
     if (draggingNodeState) {
       finishDraggingNode();
+    }
+
+    if (marquee) {
+      commitMarqueeSelection(marquee, false);
     }
 
     touchStateRef.current.mode = "none";
@@ -1489,7 +1504,8 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
         dir2,
         effectiveMargins,
         nodeObstacles,
-        ignoreObstacleIds
+        ignoreObstacleIds,
+        wire.waypoints
       );
       routesMap.set(wire.id, routed);
     }
@@ -2029,6 +2045,78 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
             />
           ))}
         </div>
+
+        {/* Top SVG Overlay for Active Wire Corner Handles (never blocked by FlowNode 120x120 boxes) */}
+        {!isSimulating && !wireDraft && wireRoutingMode === "orthogonal" && (
+          <svg className="w-full h-full absolute inset-0 pointer-events-none overflow-visible z-20">
+            {wires
+              .filter((w) => selectedWireIds.has(w.id) || hoveredWireId === w.id || draggingCornerState?.wireId === w.id)
+              .map((w) => {
+                const route = wireRoutesMap.get(w.id);
+                if (!route || !route.points || route.points.length < 2) return null;
+                const fromNode = nodeMap.get(w.fromNodeId);
+                const toNode = nodeMap.get(w.toNodeId);
+                if (!fromNode || !toNode) return null;
+                const comp1 = catalog[fromNode.componentId];
+                const port1Def = comp1?.nodes?.find((p: any) => p.id === w.fromPortId);
+                const dir1 = port1Def ? (port1Def.direction + fromNode.rotation) % 4 : 2;
+                const comp2 = catalog[toNode.componentId];
+                const port2Def = comp2?.nodes?.find((p: any) => p.id === w.toPortId);
+                const dir2 = port2Def ? (port2Def.direction + toNode.rotation) % 4 : 0;
+
+                const corners: Array<{ index: number; point: Point }> = [];
+                if (route.points.length >= 3) {
+                  for (let i = 1; i < route.points.length - 1; i++) {
+                    corners.push({ index: i, point: route.points[i] });
+                  }
+                } else if (route.points.length === 2) {
+                  corners.push({
+                    index: 1,
+                    point: {
+                      x: (route.points[0].x + route.points[1].x) / 2,
+                      y: (route.points[0].y + route.points[1].y) / 2,
+                    },
+                  });
+                }
+
+                return corners.map((corner, idx) => (
+                  <g
+                    key={`top-corner-${w.id}-${corner.index}-${idx}`}
+                    transform={`translate(${corner.point.x}, ${corner.point.y})`}
+                    className="cursor-move pointer-events-auto group/handle"
+                    onMouseEnter={() => setHoveredWireId(w.id)}
+                    onMouseLeave={() => {
+                      if (!draggingCornerState) setHoveredWireId(null);
+                    }}
+                    onMouseDown={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      handleStartDragCorner(w, corner.index, corner.point, route.points, dir1, dir2);
+                    }}
+                    onTouchStart={(e) => {
+                      e.stopPropagation();
+                      handleStartDragCorner(w, corner.index, corner.point, route.points, dir1, dir2);
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <circle r={15} fill="transparent" />
+                    <circle
+                      r={6}
+                      fill={isDark ? "#111827" : "#ffffff"}
+                      stroke="#f59e0b"
+                      strokeWidth={2}
+                      className="drop-shadow-sm transition-colors group-hover/handle:stroke-amber-300"
+                    />
+                    <circle
+                      r={2.5}
+                      fill="#f59e0b"
+                      className="transition-colors group-hover/handle:fill-amber-300"
+                    />
+                  </g>
+                ));
+              })}
+          </svg>
+        )}
       </div>
 
       {/* Marquee Selection Rectangle (Amber CAD Selection) - Screen Space Rendered for 100% exact cursor alignment */}
@@ -2285,6 +2373,23 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
             >
               <Plus className="w-3.5 h-3.5" />
               <span>Add</span>
+            </button>
+          )}
+
+          {/* Mobile Multi-Select Mode Toggle (Editor Only) */}
+          {!isReadOnlyViewer && (
+            <button
+              onClick={() => setMobileSelectMode((prev) => !prev)}
+              className={`p-2 rounded-xl transition-all active:scale-95 border ${
+                mobileSelectMode
+                  ? "bg-amber-500 text-slate-950 border-amber-400 shadow-sm"
+                  : isDark
+                  ? "border-transparent hover:bg-white/10 text-zinc-300"
+                  : "border-transparent hover:bg-slate-100 text-slate-700"
+              }`}
+              title="Multi-Select Mode (Box Select & Tap to Add)"
+            >
+              <BoxSelect className="w-4 h-4" />
             </button>
           )}
 

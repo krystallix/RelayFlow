@@ -601,7 +601,11 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
         {/* Top-Left Menubar Popovers (File, Edit, View, Help) */}
         <nav ref={menuBarRef} className="flex items-center text-xs font-medium relative">
           {/* File Menu */}
-          <div className="relative">
+          <div
+            className="relative"
+            onMouseEnter={() => setActiveMenu("file")}
+            onMouseLeave={() => setActiveMenu(null)}
+          >
             <button
               onClick={() => toggleMenu("file")}
               className={`px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1 ${
@@ -615,13 +619,14 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
             </button>
 
             {activeMenu === "file" && (
-              <div
-                className={`absolute left-0 top-full mt-1.5 w-56 rounded-xl border p-1 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100 ${
-                  isDark
-                    ? "bg-[#161a23] border-white/15 text-zinc-200"
-                    : "bg-white border-slate-200 text-slate-700"
-                }`}
-              >
+              <div className="absolute left-0 top-full pt-1.5 z-50">
+                <div
+                  className={`w-56 rounded-xl border p-1 shadow-2xl animate-in fade-in zoom-in-95 duration-100 ${
+                    isDark
+                      ? "bg-[#161a23] border-white/15 text-zinc-200"
+                      : "bg-white border-slate-200 text-slate-700"
+                  }`}
+                >
                 <button
                   onClick={handleNewCircuit}
                   className={`w-full text-left px-3 py-2 rounded-lg flex items-center gap-2.5 text-xs transition-colors ${
@@ -731,12 +736,17 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                     <span className="text-[10px] font-mono bg-white/10 text-zinc-300 px-1 py-0.5 rounded">PDF/SVG</span>
                   </div>
                 </button>
+                </div>
               </div>
             )}
           </div>
 
           {/* Edit Menu */}
-          <div className="relative">
+          <div
+            className="relative"
+            onMouseEnter={() => setActiveMenu("edit")}
+            onMouseLeave={() => setActiveMenu(null)}
+          >
             <button
               onClick={() => toggleMenu("edit")}
               className={`px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1 ${
@@ -750,13 +760,14 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
             </button>
 
             {activeMenu === "edit" && (
-              <div
-                className={`absolute left-0 top-full mt-1.5 w-52 rounded-xl border p-1 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100 ${
-                  isDark
-                    ? "bg-[#161a23] border-white/15 text-zinc-200"
-                    : "bg-white border-slate-200 text-slate-700"
-                }`}
-              >
+              <div className="absolute left-0 top-full pt-1.5 z-50">
+                <div
+                  className={`w-52 rounded-xl border p-1 shadow-2xl animate-in fade-in zoom-in-95 duration-100 ${
+                    isDark
+                      ? "bg-[#161a23] border-white/15 text-zinc-200"
+                      : "bg-white border-slate-200 text-slate-700"
+                  }`}
+                >
                 <button
                   onClick={() => { undo(); setActiveMenu(null); }}
                   disabled={undoStack.length === 0}
@@ -852,12 +863,17 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                     <span>{t.navbar.renumberWires}</span>
                   </div>
                 </button>
+                </div>
               </div>
             )}
           </div>
 
           {/* View Menu */}
-          <div className="relative">
+          <div
+            className="relative"
+            onMouseEnter={() => setActiveMenu("view")}
+            onMouseLeave={() => setActiveMenu(null)}
+          >
             <button
               onClick={() => toggleMenu("view")}
               className={`px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1 ${
@@ -871,13 +887,14 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
             </button>
 
             {activeMenu === "view" && (
-              <div
-                className={`absolute left-0 top-full mt-1.5 w-56 rounded-xl border p-1 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100 ${
-                  isDark
-                    ? "bg-[#161a23] border-white/15 text-zinc-200"
-                    : "bg-white border-slate-200 text-slate-700"
-                }`}
-              >
+              <div className="absolute left-0 top-full pt-1.5 z-50">
+                <div
+                  className={`w-56 rounded-xl border p-1 shadow-2xl animate-in fade-in zoom-in-95 duration-100 ${
+                    isDark
+                      ? "bg-[#161a23] border-white/15 text-zinc-200"
+                      : "bg-white border-slate-200 text-slate-700"
+                  }`}
+                >
                 <button
                   onClick={() => { toggleTheme(); setActiveMenu(null); }}
                   className={`w-full text-left px-3 py-2 rounded-lg flex items-center justify-between text-xs transition-colors ${
@@ -964,12 +981,17 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                   <span>{t.navbar.resetZoom}</span>
                   <span className="text-[10px] text-zinc-400 font-mono">{modKey}+0</span>
                 </button>
+                </div>
               </div>
             )}
           </div>
 
           {/* Help Menu */}
-          <div className="relative">
+          <div
+            className="relative"
+            onMouseEnter={() => setActiveMenu("help")}
+            onMouseLeave={() => setActiveMenu(null)}
+          >
             <button
               onClick={() => toggleMenu("help")}
               className={`px-2.5 py-1.5 rounded-lg transition-colors flex items-center gap-1 ${
@@ -983,13 +1005,14 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
             </button>
 
             {activeMenu === "help" && (
-              <div
-                className={`absolute left-0 top-full mt-1.5 w-52 rounded-xl border p-1 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-100 ${
-                  isDark
-                    ? "bg-[#161a23] border-white/15 text-zinc-200"
-                    : "bg-white border-slate-200 text-slate-700"
-                }`}
-              >
+              <div className="absolute left-0 top-full pt-1.5 z-50">
+                <div
+                  className={`w-52 rounded-xl border p-1 shadow-2xl animate-in fade-in zoom-in-95 duration-100 ${
+                    isDark
+                      ? "bg-[#161a23] border-white/15 text-zinc-200"
+                      : "bg-white border-slate-200 text-slate-700"
+                  }`}
+                >
                 <button
                   onClick={() => { setShowHelpModal(true); setActiveMenu(null); }}
                   className={`w-full text-left px-3 py-2 rounded-lg flex items-center gap-2 text-xs transition-colors ${
@@ -1005,6 +1028,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                 <div className="px-3 py-1.5 text-[11px] text-zinc-400">
                   <div className="font-semibold text-zinc-200">RelayFlow v1.0.0</div>
                   <div className="text-[10px] text-zinc-500">Dual .rflow & .smrl engine</div>
+                </div>
                 </div>
               </div>
             )}

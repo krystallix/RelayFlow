@@ -203,9 +203,10 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
           dir2,
           effectiveMargins,
           obstacles,
-          ignoreObstacleIds
+          ignoreObstacleIds,
+          wire.waypoints
         );
-  }, [precomputedRoute, routingMode, p1, dir1, p2, dir2, effectiveMargins, obstacles, ignoreObstacleIds]);
+  }, [precomputedRoute, routingMode, p1, dir1, p2, dir2, effectiveMargins, obstacles, ignoreObstacleIds, wire.waypoints]);
 
   const displaySvgPath = React.useMemo(() => {
     if (highlightCrossings && routingMode === "orthogonal" && crossings && crossings.length > 0 && routed.points) {
@@ -336,10 +337,12 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
   const handleStartDragCorner = (
     cornerIndex: number,
     cornerPoint: Point,
-    e: React.MouseEvent
+    e: React.MouseEvent | React.TouchEvent
   ) => {
     e.stopPropagation();
-    e.preventDefault();
+    if ("button" in e) {
+      e.preventDefault();
+    }
     const currentWireDraft = useCircuitStore.getState().wireDraft;
     if (currentWireDraft) {
       connectWireToWire(wire.id, cornerPoint);
@@ -353,7 +356,7 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
       routed.points,
       dir1,
       dir2,
-      e
+      e as React.MouseEvent
     );
   };
 
@@ -553,6 +556,7 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
               transform={`translate(${corner.point.x}, ${corner.point.y})`}
               className="cursor-move pointer-events-auto group/handle"
               onMouseDown={(e) => handleStartDragCorner(corner.index, corner.point, e)}
+              onTouchStart={(e) => handleStartDragCorner(corner.index, corner.point, e)}
               onClick={(e) => e.stopPropagation()}
             >
               {/* Invisible touch/mouse hit area (generous 30px target) */}

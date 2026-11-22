@@ -111,12 +111,46 @@ export class ManhattanRouter {
     dir2: number,
     margins: WireMargins = { start: 0, center: 0, end: 0 },
     obstacles: Box[] = [],
-    ignoreIds?: (string | number)[]
+    ignoreIds?: (string | number)[],
+    waypoints?: Point[]
   ): RoutedWire {
     const ignoreKey = ignoreIds ? `${ignoreIds[0] || ""}_${ignoreIds[1] || ""}` : "";
-    const cacheKey = `${p1.x},${p1.y},${dir1}_${p2.x},${p2.y},${dir2}_${margins?.start || 0},${margins?.center || 0},${margins?.end || 0}_${obstacles.length}_${ignoreKey}`;
+    const waypointsKey = waypoints && waypoints.length > 0 ? waypoints.map((w) => `${w.x},${w.y}`).join(";") : "";
+    const cacheKey = `${p1.x},${p1.y},${dir1}_${p2.x},${p2.y},${dir2}_${margins?.start || 0},${margins?.center || 0},${margins?.end || 0}_${obstacles.length}_${ignoreKey}_${waypointsKey}`;
     const cached = orthogonalRouteCache.get(cacheKey);
     if (cached) return cached;
+
+    if (waypoints && waypoints.length > 0) {
+      const rawPoints: Point[] = [p1];
+      const allTargets = [...waypoints, p2];
+      for (let i = 0; i < allTargets.length; i++) {
+        const prev = rawPoints[rawPoints.length - 1];
+        const next = allTargets[i];
+        if (Math.abs(prev.x - next.x) > 1 && Math.abs(prev.y - next.y) > 1) {
+          // Use port direction on first and last segment for clean orthogonal entry/exit
+          const preferVertical =
+            i === 0
+              ? dir1 === 0 || dir1 === 2
+              : i === allTargets.length - 1
+              ? dir2 === 1 || dir2 === 3
+              : Math.abs(next.y - prev.y) >= Math.abs(next.x - prev.x);
+          rawPoints.push(
+            preferVertical ? { x: prev.x, y: next.y } : { x: next.x, y: prev.y }
+          );
+        }
+        rawPoints.push(next);
+      }
+      const simplified = this.simplifyPoints(rawPoints);
+      const result: RoutedWire = {
+        svgPath: simplified.map((pt, idx) => (idx === 0 ? `M ${pt.x} ${pt.y}` : `L ${pt.x} ${pt.y}`)).join(" "),
+        points: simplified,
+      };
+      if (orthogonalRouteCache.size >= MAX_ROUTE_CACHE) {
+        orthogonalRouteCache.clear();
+      }
+      orthogonalRouteCache.set(cacheKey, result);
+      return result;
+    }
 
     const STUB_LENGTH = 30; // standard 30px CAD grid step
 
@@ -154,13 +188,38 @@ export class ManhattanRouter {
       (dir1 === 2 && dir2 === 0 && p2.y >= p1.y) ||
       (dir1 === 0 && dir2 === 2 && p1.y >= p2.y);
 
-    if (isVerticalOpposing && Math.abs(p1.x - p2.x) < 2 && !hasCenterMargin) {
-      const minY = Math.min(p1.y, p2.y);
-      const maxY = Math.max(p1.y, p2.y);
-      if (!verticalSegmentCollides(p1.x, minY, maxY)) {
-        const points = [p1, p2];
+    if (isVerticalOpposing && Math.abs(p1.x - p2.x) < 2) {
+      if (!hasCenterMargin) {
+        const minY = Math.min(p1.y, p2.y);
+        const maxY = Math.max(p1.y, p2.y);
+        if (!verticalSegmentCollides(p1.x, minY, maxY)) {
+          const points = [p1, p2];
+          return {
+            svgPath: `M ${p1.x} ${p1.y} L ${p2.x} ${p2.y}`,
+            points,
+          };
+        }
+      } else {
+        // User pulled the straight vertical wire sideways -> create a clean 4-corner detour channel
+        const channelX = Math.round((p1.x + (margins.center || 0)) / 30) * 30;
+        const step1Y =
+          dir1 === 2
+            ? Math.round((p1.y + STUB_LENGTH + (margins.start || 0)) / 30) * 30
+            : Math.round((p1.y - STUB_LENGTH - (margins.start || 0)) / 30) * 30;
+        const step2Y =
+          dir2 === 0
+            ? Math.round((p2.y - STUB_LENGTH - (margins.end || 0)) / 30) * 30
+            : Math.round((p2.y + STUB_LENGTH + (margins.end || 0)) / 30) * 30;
+        const points = this.simplifyPoints([
+          p1,
+          { x: p1.x, y: step1Y },
+          { x: channelX, y: step1Y },
+          { x: channelX, y: step2Y },
+          { x: p2.x, y: step2Y },
+          p2,
+        ]);
         return {
-          svgPath: `M ${p1.x} ${p1.y} L ${p2.x} ${p2.y}`,
+          svgPath: points.map((pt, i) => (i === 0 ? `M ${pt.x} ${pt.y}` : `L ${pt.x} ${pt.y}`)).join(" "),
           points,
         };
       }
@@ -171,13 +230,38 @@ export class ManhattanRouter {
       (dir1 === 1 && dir2 === 3 && p2.x >= p1.x) ||
       (dir1 === 3 && dir2 === 1 && p1.x >= p2.x);
 
-    if (isHorizontalOpposing && Math.abs(p1.y - p2.y) < 2 && !hasCenterMargin) {
-      const minX = Math.min(p1.x, p2.x);
-      const maxX = Math.max(p1.x, p2.x);
-      if (!horizontalSegmentCollides(p1.y, minX, maxX)) {
-        const points = [p1, p2];
+    if (isHorizontalOpposing && Math.abs(p1.y - p2.y) < 2) {
+      if (!hasCenterMargin) {
+        const minX = Math.min(p1.x, p2.x);
+        const maxX = Math.max(p1.x, p2.x);
+        if (!horizontalSegmentCollides(p1.y, minX, maxX)) {
+          const points = [p1, p2];
+          return {
+            svgPath: `M ${p1.x} ${p1.y} L ${p2.x} ${p2.y}`,
+            points,
+          };
+        }
+      } else {
+        // User pulled the straight horizontal wire vertically -> create a clean 4-corner detour channel
+        const channelY = Math.round((p1.y + (margins.center || 0)) / 30) * 30;
+        const step1X =
+          dir1 === 1
+            ? Math.round((p1.x + STUB_LENGTH + (margins.start || 0)) / 30) * 30
+            : Math.round((p1.x - STUB_LENGTH - (margins.start || 0)) / 30) * 30;
+        const step2X =
+          dir2 === 3
+            ? Math.round((p2.x - STUB_LENGTH - (margins.end || 0)) / 30) * 30
+            : Math.round((p2.x + STUB_LENGTH + (margins.end || 0)) / 30) * 30;
+        const points = this.simplifyPoints([
+          p1,
+          { x: step1X, y: p1.y },
+          { x: step1X, y: channelY },
+          { x: step2X, y: channelY },
+          { x: step2X, y: p2.y },
+          p2,
+        ]);
         return {
-          svgPath: `M ${p1.x} ${p1.y} L ${p2.x} ${p2.y}`,
+          svgPath: points.map((pt, i) => (i === 0 ? `M ${pt.x} ${pt.y}` : `L ${pt.x} ${pt.y}`)).join(" "),
           points,
         };
       }

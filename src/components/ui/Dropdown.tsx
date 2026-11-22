@@ -143,15 +143,16 @@ export const DropdownSubmenu: React.FC<DropdownSubmenuProps> = ({
         <ChevronRight className="w-3.5 h-3.5 opacity-60" />
       </div>
     </button>
-    <div
-      className={cn(
-        "hidden group-hover/submenu:block absolute left-full top-0 ml-1 rounded-xl border p-1 shadow-2xl z-50",
-        "bg-white border-slate-200 text-slate-700",
-        "dark:bg-[#161a23] dark:border-white/15 dark:text-zinc-200",
-        widthClassName
-      )}
-    >
-      {children}
+    <div className={cn("hidden group-hover/submenu:block absolute left-full top-0 pl-1 z-50", widthClassName)}>
+      <div
+        className={cn(
+          "rounded-xl border p-1 shadow-2xl",
+          "bg-white border-slate-200 text-slate-700",
+          "dark:bg-[#161a23] dark:border-white/15 dark:text-zinc-200"
+        )}
+      >
+        {children}
+      </div>
     </div>
   </div>
 );
