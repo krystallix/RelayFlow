@@ -11,10 +11,11 @@ import {
   Sparkles,
   GitCommit,
   Hash,
-  Sliders,
   Undo2,
   Redo2,
+  MoreVertical,
 } from "lucide-react";
+import { Dropdown, DropdownItem } from "@/components/ui";
 
 interface SubToolbarProps {
   onAutoLayout?: () => void;
@@ -105,13 +106,13 @@ export const SubToolbar: React.FC<SubToolbarProps> = ({ onAutoLayout }) => {
     theme,
     locale,
     nodes,
-    isPreferencesOpen,
-    togglePreferences,
     undo,
     redo,
     undoStack,
     redoStack,
   } = useCircuitStore();
+
+  const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
 
   const isDark = theme === "dark";
   const t = getTranslation(locale).subtoolbar;
@@ -122,10 +123,10 @@ export const SubToolbar: React.FC<SubToolbarProps> = ({ onAutoLayout }) => {
   };
 
   return (
-    <div className="absolute top-4 left-4 right-4 sm:right-auto z-30 pointer-events-none select-none">
+    <div className="absolute top-4 left-4 z-30 pointer-events-none select-none">
       {/* Floating Island / Capsule Container */}
       <div
-        className={`inline-flex max-w-full overflow-x-auto pointer-events-auto items-center gap-1.5 px-2 py-1.5 rounded-2xl border shadow-2xl backdrop-blur-md transition-all duration-200 ${
+        className={`inline-flex pointer-events-auto items-center gap-1 sm:gap-1.5 px-2 py-1.5 rounded-2xl border shadow-2xl backdrop-blur-md transition-all duration-200 ${
           isDark
             ? "bg-[#11141c]/80 border-white/15 text-zinc-300 shadow-black/60"
             : "bg-white/85 border-slate-200/90 text-slate-700 shadow-slate-900/15"
@@ -179,11 +180,11 @@ export const SubToolbar: React.FC<SubToolbarProps> = ({ onAutoLayout }) => {
           <RotateCcw className="w-4 h-4" />
         </TooltipButton>
 
-        {/* Undo, Redo & Auto Layout (Editor only) */}
+        {/* Undo & Redo (Editor only) */}
         {!isReadOnlyViewer && (
           <>
             <div
-              className={`h-4 w-[1px] mx-1 shrink-0 ${
+              className={`h-4 w-[1px] mx-0.5 sm:mx-1 shrink-0 ${
                 isDark ? "bg-white/10" : "bg-slate-200"
               }`}
             />
@@ -205,6 +206,12 @@ export const SubToolbar: React.FC<SubToolbarProps> = ({ onAutoLayout }) => {
             >
               <Redo2 className="w-4 h-4" />
             </TooltipButton>
+          </>
+        )}
+
+        {/* Desktop Secondary Tools (Inline on sm+) */}
+        <div className="hidden sm:flex items-center gap-1.5">
+          {!isReadOnlyViewer && (
             <TooltipButton
               onClick={handleAutoLayout}
               disabled={nodes.length === 0}
@@ -214,46 +221,96 @@ export const SubToolbar: React.FC<SubToolbarProps> = ({ onAutoLayout }) => {
             >
               <Sparkles className="w-4 h-4" />
             </TooltipButton>
-          </>
-        )}
+          )}
 
-        {/* Subtle Divider */}
-        <div
-          className={`h-4 w-[1px] mx-1 ${
-            isDark ? "bg-white/10" : "bg-slate-200"
-          }`}
-        />
+          <div
+            className={`h-4 w-[1px] mx-1 ${
+              isDark ? "bg-white/10" : "bg-slate-200"
+            }`}
+          />
 
-        {/* Wire Labels Toggle */}
-        <TooltipButton
-          onClick={toggleWireLabels}
-          tooltip={showWireLabels ? t.wireLabelsHideTooltip : t.wireLabelsShowTooltip}
-          active={showWireLabels}
-          isDark={isDark}
-        >
-          <Hash className="w-4 h-4" />
-        </TooltipButton>
-
-        {/* Renumber All Wires (Editor only) */}
-        {!isReadOnlyViewer && (
           <TooltipButton
-            onClick={renumberWires}
-            tooltip={t.renumberTooltip}
+            onClick={toggleWireLabels}
+            tooltip={showWireLabels ? t.wireLabelsHideTooltip : t.wireLabelsShowTooltip}
+            active={showWireLabels}
             isDark={isDark}
           >
-            <GitCommit className="w-4 h-4" />
+            <Hash className="w-4 h-4" />
           </TooltipButton>
-        )}
 
-        {/* View Preferences Drawer Toggle */}
-        <TooltipButton
-          onClick={togglePreferences}
-          tooltip={locale === "id" ? "Preferensi Tampilan" : "View Preferences"}
-          active={isPreferencesOpen}
-          isDark={isDark}
-        >
-          <Sliders className="w-4 h-4" />
-        </TooltipButton>
+          {!isReadOnlyViewer && (
+            <TooltipButton
+              onClick={renumberWires}
+              tooltip={t.renumberTooltip}
+              isDark={isDark}
+            >
+              <GitCommit className="w-4 h-4" />
+            </TooltipButton>
+          )}
+        </div>
+
+        {/* Mobile Overflow Menu (3-dot button collapsing secondary tools) */}
+        <div className="flex sm:hidden items-center">
+          <Dropdown
+            isOpen={mobileMoreOpen}
+            onClose={() => setMobileMoreOpen(false)}
+            align="right"
+            widthClassName="w-52"
+            trigger={
+              <button
+                type="button"
+                onClick={() => setMobileMoreOpen((prev) => !prev)}
+                className={`p-2 rounded-xl transition-all cursor-pointer ${
+                  mobileMoreOpen
+                    ? isDark
+                      ? "bg-white/15 text-white"
+                      : "bg-slate-200 text-slate-900"
+                    : isDark
+                    ? "text-zinc-300 hover:text-white hover:bg-white/10"
+                    : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                }`}
+                title={locale === "id" ? "Menu Lainnya" : "More Tools"}
+              >
+                <MoreVertical className="w-4 h-4" />
+              </button>
+            }
+          >
+            {!isReadOnlyViewer && (
+              <DropdownItem
+                icon={<Sparkles className="w-4 h-4" />}
+                disabled={nodes.length === 0}
+                shortcut="Alt+L"
+                onClick={() => {
+                  handleAutoLayout();
+                  setMobileMoreOpen(false);
+                }}
+              >
+                {t.autoLayoutTooltip}
+              </DropdownItem>
+            )}
+            <DropdownItem
+              icon={<Hash className="w-4 h-4" />}
+              checked={showWireLabels}
+              onClick={() => {
+                toggleWireLabels();
+                setMobileMoreOpen(false);
+              }}
+            >
+              {showWireLabels ? t.wireLabelsHideTooltip : t.wireLabelsShowTooltip}
+            </DropdownItem>
+            {!isReadOnlyViewer && (
+              <DropdownItem
+                icon={<GitCommit className="w-4 h-4" />}
+                onClick={() => {
+                  renumberWires();
+                  setMobileMoreOpen(false);
+                }}
+              >
+                {t.renumberTooltip}
+              </DropdownItem>
+            )}
+          </Dropdown>
+        </div>
       </div>
     </div>
   );

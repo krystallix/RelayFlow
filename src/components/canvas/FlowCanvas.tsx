@@ -693,8 +693,43 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
 
     let nextWaypoints: Point[];
     if (points.length === 2) {
-      // Straight wire: pulling in any direction creates an orthogonal bend through target
-      nextWaypoints = [target];
+      // Straight wire: pulling sideways/vertically creates a clean 4-bend U-detour channel
+      const p1 = points[0];
+      const p2 = points[1];
+      const isStraightVert = Math.abs(p1.x - p2.x) < 2;
+      const isStraightHoriz = Math.abs(p1.y - p2.y) < 2;
+
+      if (isStraightVert) {
+        if (Math.abs(target.x - p1.x) < 2) {
+          nextWaypoints = [];
+        } else {
+          const dirSign = p2.y >= p1.y ? 1 : -1;
+          const halfSpan = Math.abs(p2.y - p1.y) / 2;
+          const offset = Math.min(30, Math.floor(halfSpan / 30) * 30 || halfSpan);
+          const y1 = Math.round((p1.y + dirSign * offset) / 30) * 30;
+          const y2 = Math.round((p2.y - dirSign * offset) / 30) * 30;
+          nextWaypoints = [
+            { x: target.x, y: y1 },
+            { x: target.x, y: y2 },
+          ];
+        }
+      } else if (isStraightHoriz) {
+        if (Math.abs(target.y - p1.y) < 2) {
+          nextWaypoints = [];
+        } else {
+          const dirSign = p2.x >= p1.x ? 1 : -1;
+          const halfSpan = Math.abs(p2.x - p1.x) / 2;
+          const offset = Math.min(30, Math.floor(halfSpan / 30) * 30 || halfSpan);
+          const x1 = Math.round((p1.x + dirSign * offset) / 30) * 30;
+          const x2 = Math.round((p2.x - dirSign * offset) / 30) * 30;
+          nextWaypoints = [
+            { x: x1, y: target.y },
+            { x: x2, y: target.y },
+          ];
+        }
+      } else {
+        nextWaypoints = [target];
+      }
     } else {
       const corners = points.slice(1, -1).map((p) => ({ ...p }));
       const cIdx = Math.max(0, Math.min(corners.length - 1, cornerIndex - 1));
