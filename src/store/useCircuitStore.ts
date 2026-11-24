@@ -306,6 +306,8 @@ interface CircuitStoreState {
   updateNodesPositions: (updates: Array<{ id: string | number; position: { x: number; y: number } }>, commitToHistory?: boolean) => void;
   rotateSelectedNodes: (direction?: "cw" | "ccw") => void;
   rotateNode: (nodeId: string | number, direction?: "cw" | "ccw") => void;
+  flipSelectedNodes: (axis: "x" | "y") => void;
+  flipNode: (nodeId: string | number, axis: "x" | "y") => void;
   deleteSelection: () => void;
   deleteNode: (nodeId: string | number) => void;
   deleteWire: (wireId: string | number) => void;
@@ -1410,6 +1412,33 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
           return { ...n, rotation: nextRot };
         });
 
+        return { nodes: updatedNodes, ...history };
+      });
+    },
+
+    flipSelectedNodes: (axis) => {
+      set((state) => {
+        if (state.selectedNodeIds.size === 0) return {};
+        const history = pushHistory(state);
+        const updatedNodes = state.nodes.map((n) => {
+          if (!state.selectedNodeIds.has(n.id)) return n;
+          return axis === "x"
+            ? { ...n, flipX: !n.flipX }
+            : { ...n, flipY: !n.flipY };
+        });
+        return { nodes: updatedNodes, ...history };
+      });
+    },
+
+    flipNode: (nodeId, axis) => {
+      set((state) => {
+        const history = pushHistory(state);
+        const updatedNodes = state.nodes.map((n) => {
+          if (n.id !== nodeId) return n;
+          return axis === "x"
+            ? { ...n, flipX: !n.flipX }
+            : { ...n, flipY: !n.flipY };
+        });
         return { nodes: updatedNodes, ...history };
       });
     },

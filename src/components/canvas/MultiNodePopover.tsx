@@ -10,6 +10,8 @@ import {
   AlignEndHorizontal,
   RotateCw,
   RotateCcw,
+  FlipHorizontal2,
+  FlipVertical2,
   Copy,
   Trash2,
   Check,
@@ -26,6 +28,8 @@ interface MultiNodePopoverProps {
   placement?: "top" | "bottom";
   onRotateRight: () => void;
   onRotateLeft: () => void;
+  onFlipHorizontal?: () => void;
+  onFlipVertical?: () => void;
   onCopy: () => void;
   onDelete: () => void;
 }
@@ -36,6 +40,8 @@ export const MultiNodePopover: React.FC<MultiNodePopoverProps> = ({
   placement = "top",
   onRotateRight,
   onRotateLeft,
+  onFlipHorizontal,
+  onFlipVertical,
   onCopy,
   onDelete,
 }) => {
@@ -228,6 +234,34 @@ export const MultiNodePopover: React.FC<MultiNodePopoverProps> = ({
         >
           <RotateCw className="w-4 h-4" />
         </button>
+
+        {/* FLIP HORIZONTAL */}
+        {onFlipHorizontal && (
+          <button
+            type="button"
+            onClick={onFlipHorizontal}
+            title="Flip Selection Horizontal"
+            className={`p-1.5 rounded-xl transition-all hover:scale-105 active:scale-95 cursor-pointer ${
+              isDark ? "hover:bg-white/10 hover:text-white text-zinc-300" : "hover:bg-slate-100 hover:text-slate-900 text-slate-700"
+            }`}
+          >
+            <FlipHorizontal2 className="w-4 h-4" />
+          </button>
+        )}
+
+        {/* FLIP VERTICAL */}
+        {onFlipVertical && (
+          <button
+            type="button"
+            onClick={onFlipVertical}
+            title="Flip Selection Vertical"
+            className={`p-1.5 rounded-xl transition-all hover:scale-105 active:scale-95 cursor-pointer ${
+              isDark ? "hover:bg-white/10 hover:text-white text-zinc-300" : "hover:bg-slate-100 hover:text-slate-900 text-slate-700"
+            }`}
+          >
+            <FlipVertical2 className="w-4 h-4" />
+          </button>
+        )}
 
         {/* COPY */}
         <button

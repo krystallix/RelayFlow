@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { CircuitNode, CircuitWire, Point } from "@/engine/types";
 import { ManhattanRouter } from "@/engine/router/ManhattanRouter";
 import { WireIntersectionResolver } from "@/engine/router/WireIntersectionResolver";
@@ -27,6 +27,8 @@ interface FlowWireProps {
   precomputedRoute?: { points: Point[]; svgPath: string };
   screenToWorld: (clientX: number, clientY: number) => { x: number; y: number };
   onContextMenu?: (wire: CircuitWire, e: React.MouseEvent) => void;
+  onWireLongPress?: (wire: CircuitWire, clientX: number, clientY: number) => void;
+  onWireTouchSelect?: () => void;
   onWireHover?: (wire: CircuitWire, e: React.MouseEvent) => void;
   onWireLeave?: () => void;
   onStartDragCorner?: (
@@ -66,7 +68,9 @@ function areWirePropsEqual(prev: FlowWireProps, next: FlowWireProps): boolean {
     if (
       prev.fromNode.position.x !== next.fromNode.position.x ||
       prev.fromNode.position.y !== next.fromNode.position.y ||
-      prev.fromNode.rotation !== next.fromNode.rotation
+      prev.fromNode.rotation !== next.fromNode.rotation ||
+      prev.fromNode.flipX !== next.fromNode.flipX ||
+      prev.fromNode.flipY !== next.fromNode.flipY
     )
       return false;
   }
@@ -76,7 +80,9 @@ function areWirePropsEqual(prev: FlowWireProps, next: FlowWireProps): boolean {
     if (
       prev.toNode.position.x !== next.toNode.position.x ||
       prev.toNode.position.y !== next.toNode.position.y ||
-      prev.toNode.rotation !== next.toNode.rotation
+      prev.toNode.rotation !== next.toNode.rotation ||
+      prev.toNode.flipX !== next.toNode.flipX ||
+      prev.toNode.flipY !== next.toNode.flipY
     )
       return false;
   }
@@ -148,6 +154,8 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
   precomputedRoute,
   screenToWorld,
   onContextMenu,
+  onWireLongPress,
+  onWireTouchSelect,
   onWireHover,
   onWireLeave,
   onStartDragCorner,
@@ -165,6 +173,8 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
 
   const [hoverPos, setHoverPos] = useState<Point | null>(null);
   const [isHovered, setIsHovered] = useState(false);
+  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const touchStartPosRef = useRef<{ x: number; y: number } | null>(null);
 
   // Use parent-provided memoized maps for optimal O(1) resolution without reallocating
   const effectiveNodeMap = React.useMemo(
@@ -355,9 +365,10 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
         onMouseDown={handleWireMouseDown}
         onTouchStart={(e) => {
           e.stopPropagation();
+          onWireTouchSelect?.();
+          const touch = e.touches[0];
           const currentWireDraft = useCircuitStore.getState().wireDraft;
           if (currentWireDraft) {
-            const touch = e.touches[0];
             if (touch) {
               const world = screenToWorld(touch.clientX, touch.clientY);
               const { point } = ManhattanRouter.getNearestPointOnSegments(world, routed.points);
@@ -366,6 +377,32 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
             return;
           }
           selectWire(wire.id, false);
+
+          if (touch && onWireLongPress) {
+            touchStartPosRef.current = { x: touch.clientX, y: touch.clientY };
+            if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
+            const cx = touch.clientX;
+            const cy = touch.clientY;
+            longPressTimerRef.current = setTimeout(() => {
+              onWireLongPress(wire, cx, cy);
+            }, 500);
+          }
+        }}
+        onTouchMove={(e) => {
+          if (longPressTimerRef.current && touchStartPosRef.current && e.touches[0]) {
+            const dx = e.touches[0].clientX - touchStartPosRef.current.x;
+            const dy = e.touches[0].clientY - touchStartPosRef.current.y;
+            if (Math.hypot(dx, dy) > 8) {
+              clearTimeout(longPressTimerRef.current);
+              longPressTimerRef.current = null;
+            }
+          }
+        }}
+        onTouchEnd={() => {
+          if (longPressTimerRef.current) {
+            clearTimeout(longPressTimerRef.current);
+            longPressTimerRef.current = null;
+          }
         }}
       />
 
@@ -491,8 +528,8 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
               onTouchStart={(e) => handleStartDragCorner(corner.index, corner.point, e)}
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Invisible touch/mouse hit area (generous 30px target) */}
-              <circle r={15} fill="transparent" />
+              {/* Invisible touch/mouse hit area (generous 44px target for mobile fingers) */}
+              <circle r={22} fill="transparent" style={{ touchAction: "none" }} />
 
               {/* Outer ring */}
               <circle

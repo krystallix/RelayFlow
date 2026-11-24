@@ -3,6 +3,8 @@
 import React, { useEffect, useRef } from "react";
 import {
   RotateCw,
+  FlipHorizontal2,
+  FlipVertical2,
   Copy,
   Trash2,
   Edit3,
@@ -35,6 +37,7 @@ interface ContextMenuProps {
   probeActive: boolean;
   onClose: () => void;
   onRotateNode?: (nodeId: string | number) => void;
+  onFlipNode?: (nodeId: string | number, axis: "x" | "y") => void;
   onDuplicate?: () => void;
   onDeleteNode?: (nodeId: string | number) => void;
   onDeleteWire?: (wireId: string | number) => void;
@@ -62,6 +65,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
   probeActive,
   onClose,
   onRotateNode,
+  onFlipNode,
   onDuplicate,
   onDeleteNode,
   onDeleteWire,
@@ -242,6 +246,38 @@ export const ContextMenu: React.FC<ContextMenuProps> = ({
               <div className="flex items-center gap-2.5">
                 <RotateCw className="w-3.5 h-3.5 text-zinc-400" />
                 <span>Rotate 90° CW</span>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                onFlipNode?.(target.node.id, "x");
+                onClose();
+              }}
+              className={`w-full px-2.5 py-1.5 rounded-lg flex items-center justify-between text-xs text-left font-medium transition-colors cursor-pointer ${
+                isDark ? "hover:bg-white/10" : "hover:bg-slate-100"
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <FlipHorizontal2 className="w-3.5 h-3.5 text-zinc-400" />
+                <span>Flip Horizontal</span>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                onFlipNode?.(target.node.id, "y");
+                onClose();
+              }}
+              className={`w-full px-2.5 py-1.5 rounded-lg flex items-center justify-between text-xs text-left font-medium transition-colors cursor-pointer ${
+                isDark ? "hover:bg-white/10" : "hover:bg-slate-100"
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <FlipVertical2 className="w-3.5 h-3.5 text-zinc-400" />
+                <span>Flip Vertical</span>
               </div>
             </button>
 

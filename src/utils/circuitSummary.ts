@@ -5,6 +5,21 @@ export interface SummaryItem {
   total: number;
 }
 
+export interface BomVariantItem {
+  key: string;
+  label: string;
+  description: string;
+  quantity: number;
+  tags: string[];
+  warning?: string;
+}
+
+export interface BomCategoryGroup {
+  type: string;
+  total: number;
+  variants: BomVariantItem[];
+}
+
 export interface DetailedHardwareItem {
   id: string; // group tag or node id
   tag: string;
@@ -19,10 +34,11 @@ export interface DetailedHardwareItem {
   timerPreset?: number;
   timerType?: string;
   motorDirection?: "cw" | "ccw" | "off";
+  contactSummary?: string;
   subElements: Array<{
     nodeId: string | number;
     name: string;
-    role: "coil" | "main-contact" | "aux-no" | "aux-nc" | "overload" | "element";
+    role: "coil" | "main-contact" | "aux-no" | "aux-nc" | "aux-nonc" | "aux-co" | "overload" | "element";
     state: string;
     isEnergized?: boolean;
     isClosed?: boolean;
@@ -38,16 +54,123 @@ export function isVirtualSymbol(cid: string): boolean {
 }
 
 /**
- * Classifies a single independent component by its category/componentId.
+ * Strictly checks if a node is a Power Contactor main contact block (e.g. contactor1p..4p, contactorNC1p..4p).
+ * Auxiliary contacts (category === "auxiliaries") such as "On-Delay Contact NO for Contactors" are NOT power contactors.
+ */
+export function isPowerContactorNode(n: CircuitNode): boolean {
+  const cid = (n.componentId || "").toLowerCase();
+  return n.category === "contactors" || cid.startsWith("contactor");
+}
+
+export function isOverloadNode(n: CircuitNode): boolean {
+  const cid = (n.componentId || "").toLowerCase();
+  const name = (n.name || "").toLowerCase();
+  return cid.includes("overload") || name.includes("overload");
+}
+
+export function isTimerCoilNode(n: CircuitNode): boolean {
+  const cid = (n.componentId || "").toLowerCase();
+  return (
+    cid === "coildelayon" ||
+    cid === "coildelayoff" ||
+    cid === "coildelayonoff" ||
+    cid === "coilflasher"
+  );
+}
+
+export function isRelayCoilNode(n: CircuitNode): boolean {
+  const cid = (n.componentId || "").toLowerCase();
+  return (
+    (n.category === "coils" || cid.startsWith("coil")) &&
+    !isTimerCoilNode(n) &&
+    !cid.includes("solenoid")
+  );
+}
+
+export function isAuxiliaryContactNode(n: CircuitNode): boolean {
+  const cid = (n.componentId || "").toLowerCase();
+  return (
+    n.category === "auxiliaries" ||
+    (cid.startsWith("contact") && !cid.startsWith("contactor"))
+  );
+}
+
+export function extractContactorPoles(n: CircuitNode): string {
+  const cid = (n.componentId || "").toLowerCase();
+  const match = cid.match(/(\d)p$/);
+  return match ? `${match[1]}P` : "3P";
+}
+
+export function getTimerSubtypeLabel(n: CircuitNode): string {
+  const cid = (n.componentId || "").toLowerCase();
+  if (cid === "coildelayon") return "On-Delay Timer";
+  if (cid === "coildelayoff") return "Off-Delay Timer";
+  if (cid === "coildelayonoff") return "On-Off-Delay Timer";
+  if (cid === "coilflasher") return "Flasher Timer";
+  return "Timer";
+}
+
+export interface AuxContactCounts {
+  no: number;
+  nc: number;
+  co: number;
+  totalContacts: number;
+}
+
+/**
+ * Counts auxiliary contacts (NO, NC, NO+NC, Changeover) in a coupled component group.
+ */
+export function countAuxiliaryContacts(group: CircuitNode[]): AuxContactCounts {
+  let no = 0;
+  let nc = 0;
+  let co = 0;
+  let totalContacts = 0;
+
+  for (const n of group) {
+    if (!isAuxiliaryContactNode(n)) continue;
+    const cid = (n.componentId || "").toLowerCase();
+    if (cid.startsWith("contactnonc")) {
+      no += 1;
+      nc += 1;
+      totalContacts += 2;
+    } else if (cid.startsWith("contactcon")) {
+      co += 1;
+      totalContacts += 1;
+    } else if (cid.startsWith("contactnc")) {
+      nc += 1;
+      totalContacts += 1;
+    } else if (cid.startsWith("contactno")) {
+      no += 1;
+      totalContacts += 1;
+    }
+  }
+
+  return { no, nc, co, totalContacts };
+}
+
+export function formatAuxContactDescription(counts: AuxContactCounts): string {
+  const parts: string[] = [];
+  if (counts.no > 0) parts.push(`${counts.no} NO`);
+  if (counts.nc > 0) parts.push(`${counts.nc} NC`);
+  if (counts.co > 0) parts.push(`${counts.co} CO (NO/NC)`);
+  return parts.join(" ");
+}
+
+/**
+ * Classifies a single independent (untagged or non-coupled) component by its category/componentId.
  */
 export function classifyDeviceType(cid: string, name: string, cat: string): string {
   const c = cid.toLowerCase();
   const n = (name || "").toLowerCase();
 
   if (c.includes("overload")) return "Thermal Overload";
-  if (c.includes("delay") || c.includes("flasher") || n.includes("timer")) return "Timer";
-  if (cat === "contactors" || c.includes("contactor")) return "Contactor";
-  if (cat === "coils" || cat === "auxiliaries") return "Relay";
+  if (c === "coildelayon" || c === "coildelayoff" || c === "coildelayonoff" || c === "coilflasher") return "Timer";
+  if (c.includes("solenoid")) return "Solenoid";
+  if (cat === "contactors" || c.startsWith("contactor")) return "Contactor";
+  if (cat === "coils" || c.startsWith("coil")) return "Relay";
+  if (cat === "auxiliaries" || (c.startsWith("contact") && !c.startsWith("contactor"))) {
+    return "Auxiliary Contact (Untagged)";
+  }
   if (c.includes("phasefailure")) return "Phase Failure Relay";
 
   if (cat === "protections" || c.includes("breaker") || c.includes("fuse") || c.includes("isolator")) {
@@ -85,30 +208,24 @@ export function classifyDeviceType(cid: string, name: string, cat: string): stri
   return name || "Other";
 }
 
-/**
- * Calculates a concise summary of physical components present in the circuit.
- * Coupled contacts, coils, contactors, and overloads sharing the same tag are
- * grouped into a single physical component (Contactor, Relay, Thermal Overload, or Timer).
- * Virtual symbols (junctions, text annotations, destination arrows) are excluded.
- */
-export function getCircuitComponentSummary(nodes: CircuitNode[]): [string, number][] {
+function partitionNodesForBom(nodes: CircuitNode[]) {
   const coupledGroups = new Map<string, CircuitNode[]>();
   const independentNodes: CircuitNode[] = [];
 
   for (const n of nodes) {
     const cid = (n.componentId || "").toLowerCase();
-    const cat = n.category || "";
-    const name = (n.name || "").toLowerCase();
-
     if (isVirtualSymbol(cid)) continue;
 
-    const isOverload = cid.includes("overload") || name.includes("overload");
-    const isContactor = cat === "contactors" || cid.includes("contactor") || name.includes("contactor");
-    const isCoilOrContact = cat === "coils" || cat === "auxiliaries" || isContactor || isOverload;
+    const isCouplable =
+      isPowerContactorNode(n) ||
+      isOverloadNode(n) ||
+      isTimerCoilNode(n) ||
+      isRelayCoilNode(n) ||
+      isAuxiliaryContactNode(n);
 
     const tag = n.tag ? n.tag.trim().toUpperCase() : "";
 
-    if (isCoilOrContact && tag) {
+    if (isCouplable && tag) {
       if (!coupledGroups.has(tag)) coupledGroups.set(tag, []);
       coupledGroups.get(tag)!.push(n);
     } else {
@@ -116,116 +233,221 @@ export function getCircuitComponentSummary(nodes: CircuitNode[]): [string, numbe
     }
   }
 
-  const counts = new Map<string, number>();
-  const inc = (type: string) => counts.set(type, (counts.get(type) || 0) + 1);
+  return { coupledGroups, independentNodes };
+}
 
-  // Group coupled elements (contacts & coils) sharing the same tag into 1 physical component
-  for (const [, group] of coupledGroups.entries()) {
-    const hasOverload = group.some(
-      (n) => (n.componentId || "").toLowerCase().includes("overload") || (n.name || "").toLowerCase().includes("overload")
-    );
-    const hasTimer = group.some((n) => {
-      const c = (n.componentId || "").toLowerCase();
-      const nm = (n.name || "").toLowerCase();
-      return c.includes("delay") || c.includes("flasher") || nm.includes("timer");
-    });
-    const hasContactor = group.some(
-      (n) => n.category === "contactors" || (n.componentId || "").toLowerCase().includes("contactor") || (n.name || "").toLowerCase().includes("contactor")
-    );
+/**
+ * Generates structured BOM categories with expandable sub-variants for Relays, Contactors, and Timers.
+ * - Power Contactor: requires a power contactor block (category === "contactors") coupled with its coil (same tag).
+ * - Relay: relay coil + auxiliary contacts sharing the same tag, grouped by contact count & NO/NC configuration.
+ * - Timer: timer coil + timed/aux contacts sharing the same tag.
+ */
+export function getDetailedBomGroups(nodes: CircuitNode[]): BomCategoryGroup[] {
+  const { coupledGroups, independentNodes } = partitionNodesForBom(nodes);
+  const categoryMap = new Map<string, { total: number; variantMap: Map<string, BomVariantItem> }>();
+
+  const addEntry = (
+    type: string,
+    variant?: { key: string; label: string; description: string; tag?: string; warning?: string }
+  ) => {
+    if (!categoryMap.has(type)) {
+      categoryMap.set(type, { total: 0, variantMap: new Map() });
+    }
+    const entry = categoryMap.get(type)!;
+    entry.total += 1;
+
+    if (variant) {
+      const existing = entry.variantMap.get(variant.key);
+      if (existing) {
+        existing.quantity += 1;
+        if (variant.tag && !existing.tags.includes(variant.tag)) {
+          existing.tags.push(variant.tag);
+        }
+      } else {
+        entry.variantMap.set(variant.key, {
+          key: variant.key,
+          label: variant.label,
+          description: variant.description,
+          quantity: 1,
+          tags: variant.tag ? [variant.tag] : [],
+          warning: variant.warning,
+        });
+      }
+    }
+  };
+
+  for (const [tag, group] of coupledGroups.entries()) {
+    const hasOverload = group.some(isOverloadNode);
+    const timerNode = group.find(isTimerCoilNode);
+    const powerContactorNodes = group.filter(isPowerContactorNode);
+    const hasPowerContactor = powerContactorNodes.length > 0;
+    const hasCoil = group.some((n) => isRelayCoilNode(n) || isTimerCoilNode(n));
+    const auxCounts = countAuxiliaryContacts(group);
+    const auxDesc = formatAuxContactDescription(auxCounts);
 
     if (hasOverload) {
-      inc("Thermal Overload");
-    } else if (hasTimer) {
-      inc("Timer");
-    } else if (hasContactor) {
-      inc("Contactor");
+      const desc = auxDesc ? `Overload · ${auxDesc}` : "Thermal Overload";
+      addEntry("Thermal Overload", {
+        key: `overload|${desc}`,
+        label: auxCounts.totalContacts > 0 ? `Thermal Overload + ${auxCounts.totalContacts} Contact` : "Thermal Overload",
+        description: auxDesc || "Main Protection",
+        tag,
+      });
+    } else if (timerNode) {
+      const subtype = getTimerSubtypeLabel(timerNode);
+      const label =
+        auxCounts.totalContacts > 0
+          ? `${subtype} ${auxCounts.totalContacts} Contact`
+          : `${subtype} (Coil Only)`;
+      const desc = auxDesc || "No auxiliary contacts";
+      addEntry("Timer", {
+        key: `timer|${subtype}|${auxCounts.no}|${auxCounts.nc}|${auxCounts.co}`,
+        label,
+        description: desc,
+        tag,
+      });
+    } else if (hasPowerContactor) {
+      const poles = extractContactorPoles(powerContactorNodes[0]);
+      const label =
+        auxCounts.totalContacts > 0
+          ? `Contactor ${poles} + ${auxCounts.totalContacts} Aux`
+          : `Contactor ${poles}`;
+      const descParts = [`${poles} Main`];
+      if (auxDesc) descParts.push(auxDesc);
+      const warning = !hasCoil ? "Missing Coil" : undefined;
+      addEntry("Contactor", {
+        key: `contactor|${poles}|${auxCounts.no}|${auxCounts.nc}|${auxCounts.co}|${hasCoil ? "1" : "0"}`,
+        label,
+        description: descParts.join(" · "),
+        tag,
+        warning,
+      });
     } else {
-      inc("Relay");
+      // Relay (coil + auxiliary contacts sharing the same tag)
+      const label =
+        auxCounts.totalContacts > 0
+          ? `Relay ${auxCounts.totalContacts} Contact`
+          : "Relay (Coil Only)";
+      const desc = auxDesc || "Coil only (0 Aux)";
+      const warning = !hasCoil ? "Missing Coil" : undefined;
+      addEntry("Relay", {
+        key: `relay|${auxCounts.no}|${auxCounts.nc}|${auxCounts.co}|${hasCoil ? "1" : "0"}`,
+        label,
+        description: desc,
+        tag,
+        warning,
+      });
     }
   }
 
   for (const n of independentNodes) {
     const type = classifyDeviceType(n.componentId || "", n.name || "", n.category || "");
-    inc(type);
+    if (type === "Contactor") {
+      const poles = extractContactorPoles(n);
+      addEntry("Contactor", {
+        key: `contactor|${poles}|0|0|0|0`,
+        label: `Contactor ${poles}`,
+        description: `${poles} Main`,
+        tag: n.tag?.trim() || undefined,
+        warning: "Missing Coil",
+      });
+    } else if (type === "Relay") {
+      addEntry("Relay", {
+        key: "relay|0|0|0|1",
+        label: "Relay (Coil Only)",
+        description: "Coil only (0 Aux)",
+        tag: n.tag?.trim() || undefined,
+      });
+    } else if (type === "Timer") {
+      const subtype = getTimerSubtypeLabel(n);
+      addEntry("Timer", {
+        key: `timer|${subtype}|0|0|0`,
+        label: `${subtype} (Coil Only)`,
+        description: "No auxiliary contacts",
+        tag: n.tag?.trim() || undefined,
+      });
+    } else {
+      addEntry(type);
+    }
   }
 
-  return Array.from(counts.entries());
+  return Array.from(categoryMap.entries()).map(([type, data]) => ({
+    type,
+    total: data.total,
+    variants: Array.from(data.variantMap.values()).sort((a, b) => b.quantity - a.quantity || a.label.localeCompare(b.label)),
+  }));
+}
+
+/**
+ * Calculates a concise summary of physical components present in the circuit.
+ * Derived directly from getDetailedBomGroups to guarantee 100% consistency.
+ */
+export function getCircuitComponentSummary(nodes: CircuitNode[]): [string, number][] {
+  return getDetailedBomGroups(nodes).map((g) => [g.type, g.total]);
 }
 
 /**
  * Returns detailed hardware telemetry and sub-elements breakdown for the Hardware Sheet Drawer.
  */
 export function getDetailedHardwareList(nodes: CircuitNode[]): DetailedHardwareItem[] {
-  const coupledGroups = new Map<string, CircuitNode[]>();
-  const independentNodes: CircuitNode[] = [];
-
-  for (const n of nodes) {
-    const cid = (n.componentId || "").toLowerCase();
-    const cat = n.category || "";
-    const name = (n.name || "").toLowerCase();
-
-    if (isVirtualSymbol(cid)) continue;
-
-    const isOverload = cid.includes("overload") || name.includes("overload");
-    const isContactor = cat === "contactors" || cid.includes("contactor") || name.includes("contactor");
-    const isCoilOrContact = cat === "coils" || cat === "auxiliaries" || isContactor || isOverload;
-
-    const tag = n.tag ? n.tag.trim().toUpperCase() : "";
-
-    if (isCoilOrContact && tag) {
-      if (!coupledGroups.has(tag)) coupledGroups.set(tag, []);
-      coupledGroups.get(tag)!.push(n);
-    } else {
-      independentNodes.push(n);
-    }
-  }
-
+  const { coupledGroups, independentNodes } = partitionNodesForBom(nodes);
   const items: DetailedHardwareItem[] = [];
 
   // 1. Process Coupled Groups
   for (const [tag, group] of coupledGroups.entries()) {
-    const hasOverload = group.some(
-      (n) => (n.componentId || "").toLowerCase().includes("overload") || (n.name || "").toLowerCase().includes("overload")
-    );
-    const timerNode = group.find((n) => {
-      const c = (n.componentId || "").toLowerCase();
-      const nm = (n.name || "").toLowerCase();
-      return c.includes("delay") || c.includes("flasher") || nm.includes("timer");
-    });
-    const hasContactor = group.some(
-      (n) => n.category === "contactors" || (n.componentId || "").toLowerCase().includes("contactor") || (n.name || "").toLowerCase().includes("contactor")
-    );
+    const hasOverload = group.some(isOverloadNode);
+    const timerNode = group.find(isTimerCoilNode);
+    const powerContactorNodes = group.filter(isPowerContactorNode);
+    const hasPowerContactor = powerContactorNodes.length > 0;
+    const hasCoil = group.some((n) => isRelayCoilNode(n) || isTimerCoilNode(n));
+    const auxCounts = countAuxiliaryContacts(group);
+    const auxDesc = formatAuxContactDescription(auxCounts);
 
     let type = "Relay";
     let category = "coils";
+    let contactSummary = auxDesc || undefined;
+
     if (hasOverload) {
       type = "Thermal Overload";
       category = "protections";
     } else if (timerNode) {
       type = "Timer";
       category = "coils";
-    } else if (hasContactor) {
+    } else if (hasPowerContactor) {
+      const poles = extractContactorPoles(powerContactorNodes[0]);
       type = "Contactor";
       category = "contactors";
+      contactSummary = [`${poles} Main`, auxDesc, !hasCoil ? "Missing Coil" : ""].filter(Boolean).join(" · ");
+    } else {
+      type = "Relay";
+      category = "coils";
+      contactSummary = [auxDesc || "Coil Only", !hasCoil ? "Missing Coil" : ""].filter(Boolean).join(" · ");
     }
 
-    const coilNode = group.find((n) => n.category === "coils" || n.componentId.toLowerCase().includes("coil"));
     const isEnergized = group.some((n) => n.isEnergized);
     const comment = group.find((n) => n.comment?.trim())?.comment || null;
 
     const subElements = group.map((n) => {
-      const cid = n.componentId.toLowerCase();
+      const cid = (n.componentId || "").toLowerCase();
       let role: DetailedHardwareItem["subElements"][0]["role"] = "element";
-      if (cid.includes("coil")) role = "coil";
-      else if (n.category === "contactors" || cid.includes("contactor")) role = "main-contact";
-      else if (cid.includes("overload")) role = "overload";
-      else if (cid.includes("nc")) role = "aux-nc";
-      else if (cid.includes("no")) role = "aux-no";
+      if (isRelayCoilNode(n) || isTimerCoilNode(n)) role = "coil";
+      else if (isPowerContactorNode(n)) role = "main-contact";
+      else if (isOverloadNode(n)) role = "overload";
+      else if (cid.startsWith("contactnonc")) role = "aux-nonc";
+      else if (cid.startsWith("contactcon")) role = "aux-co";
+      else if (cid.startsWith("contactnc")) role = "aux-nc";
+      else if (cid.startsWith("contactno")) role = "aux-no";
 
       let state = "Normal";
       if (role === "coil") {
         state = n.isEnergized ? "Energized" : "De-energized";
-      } else if (role === "main-contact" || role === "aux-no" || role === "aux-nc") {
+      } else if (
+        role === "main-contact" ||
+        role === "aux-no" ||
+        role === "aux-nc" ||
+        role === "aux-nonc" ||
+        role === "aux-co"
+      ) {
         state = n.isClosed ? "Closed" : "Open";
       } else if (role === "overload") {
         state = n.isClosed ? "Tripped" : "Normal";
@@ -252,6 +474,7 @@ export function getDetailedHardwareList(nodes: CircuitNode[]): DetailedHardwareI
       timerElapsed: timerNode?.timerElapsed,
       timerPreset: timerNode?.valueTimeOn || timerNode?.valueTimeOff || 3,
       timerType: timerNode?.timerType,
+      contactSummary,
       subElements,
     });
   }
@@ -260,7 +483,6 @@ export function getDetailedHardwareList(nodes: CircuitNode[]): DetailedHardwareI
   for (const n of independentNodes) {
     const type = classifyDeviceType(n.componentId || "", n.name || "", n.category || "");
     const tag = n.tag ? n.tag.trim() : "";
-    const cid = n.componentId.toLowerCase();
 
     let state = "Normal";
     if (n.category === "motors") {

@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from "react";
 import { useCircuitStore } from "@/store/useCircuitStore";
 import {
-  getCircuitComponentSummary,
+  getDetailedBomGroups,
   getDetailedHardwareList,
 } from "@/utils/circuitSummary";
 import { BomExporter } from "@/engine/export/BomExporter";
@@ -16,6 +16,9 @@ import {
   Activity,
   FileSpreadsheet,
   Lightbulb,
+  ChevronRight,
+  ChevronDown,
+  AlertTriangle,
 } from "lucide-react";
 import { SideSheet, SideSheetHeader } from "@/components/ui";
 
@@ -34,6 +37,16 @@ export const HardwareSheet: React.FC<HardwareSheetProps> = React.memo(({ onLocat
   const [activeTab, setActiveTab] = useState<"telemetry" | "bom">("telemetry");
   const [searchQuery, setSearchQuery] = useState("");
   const [copiedBom, setCopiedBom] = useState(false);
+  const [expandedBomTypes, setExpandedBomTypes] = useState<Set<string>>(() => new Set(["Relay", "Contactor"]));
+
+  const toggleBomType = (type: string) => {
+    setExpandedBomTypes((prev) => {
+      const next = new Set(prev);
+      if (next.has(type)) next.delete(type);
+      else next.add(type);
+      return next;
+    });
+  };
 
   // Grouped Hardware Telemetry Items (only calculated when sheet is open to prevent idle background compute)
   const hardwareItems = useMemo(() => {
@@ -41,10 +54,10 @@ export const HardwareSheet: React.FC<HardwareSheetProps> = React.memo(({ onLocat
     return getDetailedHardwareList(nodes);
   }, [nodes, isHardwareSheetOpen]);
 
-  // Concise Component Summary (Type : Total) (only calculated when sheet is open)
-  const summaryItems = useMemo(() => {
+  // Detailed BOM Categories with expandable sub-variants (Relay, Contactor, Timer, etc.)
+  const bomGroups = useMemo(() => {
     if (!isHardwareSheetOpen) return [];
-    return getCircuitComponentSummary(nodes);
+    return getDetailedBomGroups(nodes);
   }, [nodes, isHardwareSheetOpen]);
 
   // Filtered Hardware Items based on search
@@ -234,7 +247,7 @@ export const HardwareSheet: React.FC<HardwareSheetProps> = React.memo(({ onLocat
           {/* Actions Bar */}
           <div className="flex items-center justify-between mb-3 pb-2 border-b border-zinc-100 shrink-0">
             <span className="text-xs text-zinc-500 font-mono">
-              {summaryItems.length} categories
+              {bomGroups.length} {locale === "id" ? "kategori" : "categories"}
             </span>
 
             <div className="flex items-center gap-1.5 shrink-0">
@@ -258,26 +271,82 @@ export const HardwareSheet: React.FC<HardwareSheetProps> = React.memo(({ onLocat
             </div>
           </div>
 
-          {/* Borderless BOM List with Divider & Hover */}
+          {/* Expandable BOM List with Detailed Relay / Contactor / Timer Dropdowns */}
           <div className="flex-1 overflow-y-auto text-xs">
-            {summaryItems.length === 0 ? (
+            {bomGroups.length === 0 ? (
               <div className="py-12 text-center text-xs text-zinc-400">
                 {locale === "id" ? "Tidak ada komponen di kanvas" : "No components on canvas"}
               </div>
             ) : (
               <div className="divide-y divide-zinc-100">
-                {summaryItems.map(([type, total]) => (
-                  <div
-                    key={type}
-                    className="flex items-center justify-between py-2.5 px-2 -mx-2 rounded-md hover:bg-zinc-50 transition-colors"
-                  >
-                    <span className="font-medium text-zinc-900 truncate">{type}</span>
-                    <div className="flex items-center gap-2 font-mono shrink-0 ml-2">
-                      <span className="text-zinc-400">:</span>
-                      <strong className="text-zinc-950 font-bold">{total}</strong>
+                {bomGroups.map((group) => {
+                  const hasVariants = group.variants.length > 0;
+                  const isExpanded = hasVariants && expandedBomTypes.has(group.type);
+
+                  return (
+                    <div key={group.type} className="py-1">
+                      <button
+                        type="button"
+                        onClick={() => hasVariants && toggleBomType(group.type)}
+                        className={`w-full flex items-center justify-between py-2 px-2 -mx-2 rounded-md transition-colors text-left ${
+                          hasVariants ? "hover:bg-zinc-50 cursor-pointer" : "cursor-default"
+                        }`}
+                      >
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          {hasVariants ? (
+                            isExpanded ? (
+                              <ChevronDown className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                            ) : (
+                              <ChevronRight className="w-3.5 h-3.5 text-zinc-400 shrink-0" />
+                            )
+                          ) : (
+                            <span className="w-3.5 shrink-0" />
+                          )}
+                          <span className="font-medium text-zinc-900 truncate">{group.type}</span>
+                        </div>
+                        <div className="flex items-center gap-2 font-mono shrink-0 ml-2">
+                          <span className="text-zinc-400">:</span>
+                          <strong className="text-zinc-950 font-bold">{group.total}</strong>
+                        </div>
+                      </button>
+
+                      {/* Expanded Sub-Variants Dropdown */}
+                      {isExpanded && (
+                        <div className="mt-0.5 mb-1.5 ml-4 pl-2.5 border-l border-zinc-200 space-y-1.5">
+                          {group.variants.map((variant) => (
+                            <div
+                              key={variant.key}
+                              className="py-1.5 px-2 rounded-md bg-zinc-50/80 border border-zinc-100"
+                            >
+                              <div className="flex items-center justify-between gap-2">
+                                <span className="font-semibold text-[11.5px] text-zinc-800 truncate">
+                                  {variant.label}
+                                </span>
+                                <span className="font-mono text-[11px] font-bold text-zinc-900 shrink-0">
+                                  ×{variant.quantity}
+                                </span>
+                              </div>
+                              <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[10.5px] text-zinc-500">
+                                <span>{variant.description}</span>
+                                {variant.tags.length > 0 && (
+                                  <span className="font-mono text-[10px] text-zinc-400">
+                                    ({variant.tags.join(", ")})
+                                  </span>
+                                )}
+                                {variant.warning && (
+                                  <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-amber-600">
+                                    <AlertTriangle className="w-2.5 h-2.5" />
+                                    {variant.warning}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
@@ -286,7 +355,7 @@ export const HardwareSheet: React.FC<HardwareSheetProps> = React.memo(({ onLocat
           <div className="mt-3 p-3 rounded-lg border border-zinc-200 bg-zinc-50 text-xs flex items-center justify-between shrink-0">
             <span className="text-zinc-600 font-medium">Total Physical Devices</span>
             <strong className="font-mono text-zinc-950 font-bold">
-              {summaryItems.reduce((acc, [, total]) => acc + total, 0)}
+              {bomGroups.reduce((acc, g) => acc + g.total, 0)}
             </strong>
           </div>
         </div>

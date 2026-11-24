@@ -153,8 +153,8 @@ export const NodePalette: React.FC<NodePaletteProps> = ({
         </div>
 
         {/* Search Header */}
-        <div className={`p-3 border-b ${isDark ? "border-white/10" : "border-slate-200"}`}>
-          <div className="relative">
+        <div className={`p-3 border-b flex items-center gap-1.5 ${isDark ? "border-white/10" : "border-slate-200"}`}>
+          <div className="relative flex-1 min-w-0">
             <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400" />
             <input
               type="text"
@@ -168,6 +168,21 @@ export const NodePalette: React.FC<NodePaletteProps> = ({
               }`}
             />
           </div>
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              className={`hidden md:flex p-2 rounded-xl border transition-colors shrink-0 cursor-pointer ${
+                isDark
+                  ? "bg-[#151922] border-white/10 text-zinc-400 hover:text-white hover:bg-white/10"
+                  : "bg-slate-100 border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-200"
+              }`}
+              title={locale === "id" ? "Sembunyikan Sidebar (Ctrl+B)" : "Hide Sidebar (Ctrl+B)"}
+              aria-label="Hide Component Library"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
 
         {/* Component Groups List */}

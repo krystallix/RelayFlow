@@ -517,7 +517,9 @@ export class ManhattanRouter {
       portFrom.dx,
       portFrom.dy,
       portFrom.direction,
-      fromNode.rotation
+      fromNode.rotation,
+      Boolean(fromNode.flipX),
+      Boolean(fromNode.flipY)
     );
     const p1: Point = { x: pFromTransformed.x, y: pFromTransformed.y };
     const dir1 = pFromTransformed.direction;
@@ -590,7 +592,9 @@ export class ManhattanRouter {
       portTo.dx,
       portTo.dy,
       portTo.direction,
-      toNode.rotation
+      toNode.rotation,
+      Boolean(toNode.flipX),
+      Boolean(toNode.flipY)
     );
     const p2: Point = { x: pToTransformed.x, y: pToTransformed.y };
     const dir2 = pToTransformed.direction;

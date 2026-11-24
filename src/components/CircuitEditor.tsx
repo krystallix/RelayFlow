@@ -90,6 +90,22 @@ export const CircuitEditor: React.FC<CircuitEditorProps> = ({ viewerProjectId })
     setProjectTitle,
   ]);
 
+  // Keyboard shortcut Ctrl+B / Cmd+B to toggle Component Library Sidebar on desktop
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "b") {
+        const tag = (e.target as HTMLElement)?.tagName;
+        if (tag === "INPUT" || tag === "TEXTAREA" || (e.target as HTMLElement)?.isContentEditable) {
+          return;
+        }
+        e.preventDefault();
+        setIsPaletteOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
   const handleZoomIn = () => {
     setZoomScale((prev) => Math.min(3, prev * 1.15));
   };

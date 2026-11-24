@@ -14,13 +14,17 @@ export interface SimulationResult {
 export class SimulationEngine {
   /**
    * Transforms port relative (dx, dy) and direction based on node rotation (0, 1, 2, 3)
+   * and optional screen-space horizontal/vertical flip (flipX, flipY).
+   * Matches CSS: transform: scale(flipX ? -1 : 1, flipY ? -1 : 1) rotate(rotation * 90deg)
    */
   static getTransformedPort(
     nodePos: Point,
     dx: number,
     dy: number,
     direction: number,
-    rotation: Rotation
+    rotation: Rotation,
+    flipX: boolean = false,
+    flipY: boolean = false
   ): { x: number; y: number; direction: number } {
     let tdx = dx;
     let tdy = dy;
@@ -39,7 +43,20 @@ export class SimulationEngine {
       tdy = -dx;
     }
 
-    const transformedDir = (direction + rotation) % 4;
+    let transformedDir = (direction + rotation) % 4;
+
+    if (flipX) {
+      tdx = -tdx;
+      if (transformedDir === 1) transformedDir = 3;
+      else if (transformedDir === 3) transformedDir = 1;
+    }
+
+    if (flipY) {
+      tdy = -tdy;
+      if (transformedDir === 0) transformedDir = 2;
+      else if (transformedDir === 2) transformedDir = 0;
+    }
+
     return {
       x: nodePos.x + tdx,
       y: nodePos.y + tdy,

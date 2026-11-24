@@ -30,9 +30,11 @@ import {
   Sparkles,
   Boxes,
   BoxSelect,
+  Trash2,
   X,
 } from "lucide-react";
 import { ManhattanRouter } from "@/engine/router/ManhattanRouter";
+import { SimulationEngine } from "@/engine/SimulationEngine";
 import { Point, WireMargins, CircuitNode, CircuitWire } from "@/engine/types";
 import catalogData from "@/constants/components-catalog.json";
 
@@ -126,7 +128,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
 
   // Touch gesture state ref for silky-smooth mobile multi-touch
   const touchStateRef = useRef<{
-    mode: "none" | "pan" | "pinch" | "nodeDrag" | "marquee";
+    mode: "none" | "pan" | "pinch" | "nodeDrag" | "marquee" | "cornerDrag";
     lastTapTime: number;
     lastTouchTimestamp: number;
     startDistance: number;
@@ -178,6 +180,8 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   const addNode = useCircuitStore((s) => s.addNode);
   const rotateSelectedNodes = useCircuitStore((s) => s.rotateSelectedNodes);
   const rotateNode = useCircuitStore((s) => s.rotateNode);
+  const flipSelectedNodes = useCircuitStore((s) => s.flipSelectedNodes);
+  const flipNode = useCircuitStore((s) => s.flipNode);
   const deleteSelection = useCircuitStore((s) => s.deleteSelection);
   const deleteNode = useCircuitStore((s) => s.deleteNode);
   const deleteWire = useCircuitStore((s) => s.deleteWire);
@@ -226,6 +230,8 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
     points: Point[];
     isVerticalRouting: boolean;
   } | null>(null);
+  const draggingCornerRef = useRef<typeof draggingCornerState>(null);
+  draggingCornerRef.current = draggingCornerState;
   const [draggingTapPointState, setDraggingTapPointState] = useState<{
     wireId: string | number;
     initialTapPoint: Point;
@@ -687,8 +693,9 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
   }, [screenToWorld, startDraggingNode, mobileSelectMode]);
 
   const updateDraggingCorner = (worldPos: Point) => {
-    if (!draggingCornerState) return;
-    const { wireId, cornerIndex, points } = draggingCornerState;
+    const activeCorner = draggingCornerRef.current || draggingCornerState;
+    if (!activeCorner) return;
+    const { wireId, cornerIndex, points } = activeCorner;
     const target: Point = {
       x: Math.round(worldPos.x / 30) * 30,
       y: Math.round(worldPos.y / 30) * 30,
@@ -910,9 +917,13 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
 
     // 2-Finger Touch: Smooth Anchored Pinch Zoom & 2-finger Pan
     if (e.touches.length === 2) {
-      // Cancel any in-progress 1-finger marquee or node drag when transitioning to 2-finger pan/zoom
+      // Cancel any in-progress 1-finger marquee, node drag, or wire corner drag when transitioning to 2-finger pan/zoom
       if (marquee) setMarquee(null);
       if (draggingNodeState) setDraggingNodeState(null);
+      if (draggingCornerRef.current || draggingCornerState) {
+        draggingCornerRef.current = null;
+        setDraggingCornerState(null);
+      }
       const t1 = e.touches[0];
       const t2 = e.touches[1];
       const dist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
@@ -946,6 +957,10 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
 
     // 1-Finger Touch on Canvas Background
     if (e.touches.length === 1) {
+      // Do not start panning/marquee if a wire corner drag just started synchronously
+      if (draggingCornerRef.current || touchStateRef.current.mode === "cornerDrag") {
+        return;
+      }
       const touch = e.touches[0];
       const now = Date.now();
       const isDoubleTap = now - touchStateRef.current.lastTapTime < 300;
@@ -1064,7 +1079,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       if (cursorYRef.current) cursorYRef.current.textContent = String(ry);
 
       // Dragging a wire corner handle with touch
-      if (draggingCornerState) {
+      if (draggingCornerRef.current || draggingCornerState || touchStateRef.current.mode === "cornerDrag") {
         updateDraggingCorner(worldPos);
         return;
       }
@@ -1120,11 +1135,13 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       touchStateRef.current.longPressTimer = null;
     }
 
-    if (draggingCornerState) {
-      const currentWire = wires.find((w) => w.id === draggingCornerState.wireId);
+    const activeCorner = draggingCornerRef.current || draggingCornerState;
+    if (activeCorner) {
+      const currentWire = wires.find((w) => w.id === activeCorner.wireId);
       if (currentWire) {
-        updateWireWaypoints(draggingCornerState.wireId, currentWire.waypoints, true);
+        updateWireWaypoints(activeCorner.wireId, currentWire.waypoints, true);
       }
+      draggingCornerRef.current = null;
       setDraggingCornerState(null);
     }
 
@@ -1627,7 +1644,13 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
 
   const handleStartDragCorner = useCallback((targetWire: CircuitWire, cornerIndex: number, cornerPoint: Point, points: Point[], dir1: number, dir2: number) => {
     if (useCircuitStore.getState().isReadOnlyViewer) return;
-    setDraggingCornerState({
+    touchStateRef.current.lastTouchTimestamp = Date.now();
+    touchStateRef.current.mode = "cornerDrag";
+    if (touchStateRef.current.longPressTimer) {
+      clearTimeout(touchStateRef.current.longPressTimer);
+      touchStateRef.current.longPressTimer = null;
+    }
+    const nextState = {
       wireId: targetWire.id,
       cornerIndex,
       cornerCount: points.length >= 3 ? points.length - 2 : 1,
@@ -1639,7 +1662,9 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
       dir2,
       points,
       isVerticalRouting: dir1 === 0 || dir1 === 2,
-    });
+    };
+    draggingCornerRef.current = nextState;
+    setDraggingCornerState(nextState);
   }, []);
 
   const handleStartDragTapPoint = useCallback((targetWire: CircuitWire, currentTapPoint: Point) => {
@@ -1973,6 +1998,17 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
                 obstacles={nodeObstacles}
                 screenToWorld={screenToWorld}
                 onContextMenu={handleWireContextMenu}
+                onWireLongPress={(targetWire, clientX, clientY) => {
+                  const worldPos = screenToWorld(clientX, clientY);
+                  setContextMenu({
+                    x: clientX,
+                    y: clientY,
+                    target: { type: "wire", wire: targetWire, worldPos },
+                  });
+                }}
+                onWireTouchSelect={() => {
+                  touchStateRef.current.lastTouchTimestamp = Date.now();
+                }}
                 onWireHover={handleWireHover}
                 onWireLeave={handleWireLeave}
                 onStartDragCorner={handleStartDragCorner}
@@ -2058,10 +2094,30 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
                 if (!fromNode || !toNode) return null;
                 const comp1 = catalog[fromNode.componentId];
                 const port1Def = comp1?.nodes?.find((p: any) => p.id === w.fromPortId);
-                const dir1 = port1Def ? (port1Def.direction + fromNode.rotation) % 4 : 2;
+                const dir1 = port1Def
+                  ? SimulationEngine.getTransformedPort(
+                      fromNode.position,
+                      port1Def.dx,
+                      port1Def.dy,
+                      port1Def.direction,
+                      fromNode.rotation,
+                      Boolean(fromNode.flipX),
+                      Boolean(fromNode.flipY)
+                    ).direction
+                  : 2;
                 const comp2 = catalog[toNode.componentId];
                 const port2Def = comp2?.nodes?.find((p: any) => p.id === w.toPortId);
-                const dir2 = port2Def ? (port2Def.direction + toNode.rotation) % 4 : 0;
+                const dir2 = port2Def
+                  ? SimulationEngine.getTransformedPort(
+                      toNode.position,
+                      port2Def.dx,
+                      port2Def.dy,
+                      port2Def.direction,
+                      toNode.rotation,
+                      Boolean(toNode.flipX),
+                      Boolean(toNode.flipY)
+                    ).direction
+                  : 0;
 
                 const corners: Array<{ index: number; point: Point }> = [];
                 if (route.points.length >= 3) {
@@ -2098,7 +2154,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
                     }}
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <circle r={15} fill="transparent" />
+                    <circle r={22} fill="transparent" style={{ touchAction: "none" }} />
                     <circle
                       r={6}
                       fill={isDark ? "#111827" : "#ffffff"}
@@ -2152,6 +2208,8 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
             }}
             onRotateRight={() => rotateSelectedNodes("cw")}
             onRotateLeft={() => rotateSelectedNodes("ccw")}
+            onFlipHorizontal={() => flipSelectedNodes("x")}
+            onFlipVertical={() => flipSelectedNodes("y")}
             onCopy={() => copySelection()}
             onPaste={() =>
               pasteSelection({
@@ -2163,6 +2221,95 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
           />
         </div>
       )}
+
+      {/* Selected Wire Action Popover (Mobile & Desktop quick delete / reset path) */}
+      {!isReadOnlyViewer &&
+        !isSimulating &&
+        selectedWireIds.size >= 1 &&
+        selectedNodeIds.size === 0 &&
+        !draggingCornerState &&
+        (() => {
+          const firstWireId = Array.from(selectedWireIds)[0];
+          const selectedWire = wires.find((w) => w.id === firstWireId);
+          if (!selectedWire) return null;
+          const route = wireRoutesMap.get(selectedWire.id);
+          if (!route || !route.points || route.points.length < 2) return null;
+          const midIdx = Math.floor(route.points.length / 2);
+          const pA = route.points[Math.max(0, midIdx - 1)];
+          const pB = route.points[Math.min(route.points.length - 1, midIdx)];
+          const midWorldX = (pA.x + pB.x) / 2;
+          const midWorldY = (pA.y + pB.y) / 2;
+          const screenX = midWorldX * zoomScale + panOffset.x;
+          const screenY = Math.max(76, midWorldY * zoomScale + panOffset.y - 24);
+          const hasCustomRoute = Boolean(
+            (selectedWire.waypoints && selectedWire.waypoints.length > 0) ||
+              selectedWire.margins?.center
+          );
+          const netLabel = wireNetMap?.get(selectedWire.id)?.label || selectedWire.label;
+
+          return (
+            <div
+              onMouseDown={(e) => e.stopPropagation()}
+              onTouchStart={(e) => e.stopPropagation()}
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                left: `${screenX}px`,
+                top: `${screenY}px`,
+                transform: "translate(-50%, -100%)",
+              }}
+              className="absolute z-40 pointer-events-auto"
+            >
+              <div
+                className={`flex items-center gap-1 p-1.5 rounded-2xl shadow-2xl backdrop-blur-md border select-none animate-in fade-in zoom-in-95 duration-100 ${
+                  isDark
+                    ? "bg-[#0d111a]/95 border-white/15 text-zinc-200 shadow-[0_12px_32px_rgba(0,0,0,0.65)]"
+                    : "bg-white/95 border-slate-200 text-slate-700 shadow-xl shadow-slate-300/60"
+                }`}
+              >
+                <span
+                  className={`px-2 py-0.5 rounded-lg text-[11px] font-mono font-semibold ${
+                    isDark ? "bg-white/5 text-zinc-300" : "bg-slate-100 text-slate-700"
+                  }`}
+                >
+                  {selectedWireIds.size > 1
+                    ? `${selectedWireIds.size} Wires`
+                    : netLabel
+                    ? `Wire ${netLabel}`
+                    : "Wire"}
+                </span>
+
+                {selectedWireIds.size === 1 && hasCustomRoute && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      updateWireWaypoints(selectedWire.id, undefined, true);
+                      updateWireMargins(selectedWire.id, { start: 0, center: 0, end: 0 }, true);
+                    }}
+                    className={`p-1.5 rounded-lg text-xs transition-colors cursor-pointer ${
+                      isDark
+                        ? "text-zinc-300 hover:text-white hover:bg-white/10"
+                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+                    }`}
+                    title="Reset Wire Path"
+                    aria-label="Reset Wire Path"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => deleteSelection()}
+                  className="p-1.5 rounded-lg text-xs text-red-500 hover:text-red-400 hover:bg-red-500/15 transition-colors cursor-pointer"
+                  title="Delete Wire"
+                  aria-label="Delete Wire"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          );
+        })()}
 
       {/* Multi-Node Alignment & Distribution Popover (when 2 or more symbols are selected) */}
       {!isReadOnlyViewer && selectedNodesList.length >= 2 && !draggingNodeState?.hasMoved && (
@@ -2183,6 +2330,8 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
             placement={multiIsNearTop ? "bottom" : "top"}
             onRotateRight={() => rotateSelectedNodes("cw")}
             onRotateLeft={() => rotateSelectedNodes("ccw")}
+            onFlipHorizontal={() => flipSelectedNodes("x")}
+            onFlipVertical={() => flipSelectedNodes("y")}
             onCopy={() => copySelection()}
             onDelete={() => deleteSelection()}
           />
@@ -2528,6 +2677,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
           probeActive={probeActive}
           onClose={() => setContextMenu(null)}
           onRotateNode={(id) => rotateNode(id, "cw")}
+          onFlipNode={(id, axis) => flipNode(id, axis)}
           onDuplicate={() => duplicateSelection()}
           onDeleteNode={(id) => deleteNode(id)}
           onDeleteWire={(id) => deleteWire(id)}

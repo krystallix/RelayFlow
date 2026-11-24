@@ -49,18 +49,22 @@ export class BomExporter {
     let itemCounter = 1;
 
     for (const item of hardwareItems) {
-      // Sub-elements description (e.g. "1x Coil, 2x Contact NO")
-      let subDesc = "-";
+      // Sub-elements description (e.g. "3P Main · 1 NO 1 NC (1x Coil; 1x Contactor 3P)")
+      let rawSubDesc = "-";
       if (item.subElements && item.subElements.length > 0) {
         const counts = new Map<string, number>();
         for (const sub of item.subElements) {
           const name = sub.name || sub.role;
           counts.set(name, (counts.get(name) || 0) + 1);
         }
-        subDesc = Array.from(counts.entries())
+        rawSubDesc = Array.from(counts.entries())
           .map(([name, count]) => `${count}x ${name}`)
           .join("; ");
       }
+      const subDesc =
+        item.contactSummary && rawSubDesc !== "-"
+          ? `${item.contactSummary} (${rawSubDesc})`
+          : item.contactSummary || rawSubDesc;
 
       records.push({
         itemNo: itemCounter++,

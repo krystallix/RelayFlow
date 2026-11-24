@@ -9,19 +9,31 @@ export { TEXT_CENTERS };
 export const svgCache = new Map<string, string>();
 const fetchPromises = new Map<string, Promise<string>>();
 
-function processSvg(rawSvg: string, componentId: string, rotation: number): string {
+function processSvg(
+  rawSvg: string,
+  componentId: string,
+  rotation: number,
+  flipX: boolean = false,
+  flipY: boolean = false
+): string {
   let cleanSvg = rawSvg.replace(/<\?xml[^>]*\?>/g, "").replace(/<!--[\s\S]*?-->/g, "").trim();
 
-  if (rotation === 0) return cleanSvg;
+  if (rotation === 0 && !flipX && !flipY) return cleanSvg;
 
   const centers = TEXT_CENTERS[componentId];
   if (!centers) return cleanSvg;
 
   const rotAngle = -rotation * 90;
+  const sx = flipX ? -1 : 1;
+  const sy = flipY ? -1 : 1;
 
   for (const [id, { cx, cy }] of Object.entries(centers)) {
     const regex = new RegExp(`(<path[^>]*id="${id}"[^>]*\\/?>)`, "g");
-    cleanSvg = cleanSvg.replace(regex, `<g transform="rotate(${rotAngle} ${cx} ${cy})">$1</g>`);
+    const transformStr =
+      flipX || flipY
+        ? `translate(${cx} ${cy}) rotate(${rotAngle}) scale(${sx} ${sy}) translate(${-cx} ${-cy})`
+        : `rotate(${rotAngle} ${cx} ${cy})`;
+    cleanSvg = cleanSvg.replace(regex, `<g transform="${transformStr}">$1</g>`);
   }
 
   return cleanSvg;
@@ -32,6 +44,8 @@ interface SymbolRendererProps {
   componentId: string;
   name: string;
   rotation: number;
+  flipX?: boolean;
+  flipY?: boolean;
   isEnergized?: boolean;
   isDark: boolean;
 }
@@ -41,6 +55,8 @@ export const SymbolRenderer: React.FC<SymbolRendererProps> = React.memo(({
   componentId,
   name,
   rotation,
+  flipX = false,
+  flipY = false,
   isEnergized,
   isDark,
 }) => {
@@ -113,7 +129,7 @@ export const SymbolRenderer: React.FC<SymbolRendererProps> = React.memo(({
     );
   }
 
-  const processed = processSvg(svgContent, componentId, rotation);
+  const processed = processSvg(svgContent, componentId, rotation, flipX, flipY);
 
   return (
     <div

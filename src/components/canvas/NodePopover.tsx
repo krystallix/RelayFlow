@@ -4,6 +4,8 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   RotateCw,
   RotateCcw,
+  FlipHorizontal2,
+  FlipVertical2,
   Copy,
   ClipboardPaste,
   Trash2,
@@ -30,6 +32,8 @@ interface NodePopoverProps {
   onEditingChange?: (isEditing: boolean) => void;
   onRotateRight: () => void;
   onRotateLeft: () => void;
+  onFlipHorizontal?: () => void;
+  onFlipVertical?: () => void;
   onCopy: () => void;
   onPaste: () => void;
   onDelete: () => void;
@@ -44,6 +48,8 @@ export const NodePopover: React.FC<NodePopoverProps> = ({
   onEditingChange,
   onRotateRight,
   onRotateLeft,
+  onFlipHorizontal,
+  onFlipVertical,
   onCopy,
   onPaste,
   onDelete,
@@ -327,6 +333,56 @@ export const NodePopover: React.FC<NodePopoverProps> = ({
         >
           <RotateCcw className="w-4 h-4" />
         </button>
+
+        {/* 3.5 Flip Horizontal */}
+        {onFlipHorizontal && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onFlipHorizontal();
+            }}
+            onMouseDown={(e) => e.stopPropagation()}
+            className={`p-1.5 rounded-lg text-xs transition-colors cursor-pointer ${
+              node.flipX
+                ? isDark
+                  ? "bg-white/15 text-white"
+                  : "bg-slate-200 text-slate-900"
+                : isDark
+                ? "text-zinc-300 hover:text-white hover:bg-white/10 active:bg-white/15"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 active:bg-slate-200"
+            }`}
+            title="Flip Horizontal"
+            aria-label="Flip Horizontal"
+          >
+            <FlipHorizontal2 className="w-4 h-4" />
+          </button>
+        )}
+
+        {/* 3.6 Flip Vertical */}
+        {onFlipVertical && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onFlipVertical();
+            }}
+            onMouseDown={(e) => e.stopPropagation()}
+            className={`p-1.5 rounded-lg text-xs transition-colors cursor-pointer ${
+              node.flipY
+                ? isDark
+                  ? "bg-white/15 text-white"
+                  : "bg-slate-200 text-slate-900"
+                : isDark
+                ? "text-zinc-300 hover:text-white hover:bg-white/10 active:bg-white/15"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100 active:bg-slate-200"
+            }`}
+            title="Flip Vertical"
+            aria-label="Flip Vertical"
+          >
+            <FlipVertical2 className="w-4 h-4" />
+          </button>
+        )}
 
         <div className={`w-[1px] h-4 mx-0.5 ${isDark ? "bg-white/10" : "bg-slate-200"}`} />
 

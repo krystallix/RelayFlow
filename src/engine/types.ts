@@ -30,6 +30,8 @@ export interface CircuitNode {
   comment: string | null;
   position: Point;
   rotation: Rotation;
+  flipX?: boolean; // Horizontal mirror (left <-> right)
+  flipY?: boolean; // Vertical mirror (top <-> bottom)
   frameIndex: number; // active visual frame (0=OFF, 1=ON, etc.)
   isClosed?: boolean; // for contacts and switches
   isEnergized?: boolean; // for coils, lamps, motors

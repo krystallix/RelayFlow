@@ -32,6 +32,8 @@ function areNodePropsEqual(prev: FlowNodeProps, next: FlowNodeProps): boolean {
     if (prev.node.position.x !== next.node.position.x) return false;
     if (prev.node.position.y !== next.node.position.y) return false;
     if (prev.node.rotation !== next.node.rotation) return false;
+    if (prev.node.flipX !== next.node.flipX) return false;
+    if (prev.node.flipY !== next.node.flipY) return false;
     if (prev.node.tag !== next.node.tag) return false;
     if (prev.node.comment !== next.node.comment) return false;
     if (prev.node.isEnergized !== next.node.isEnergized) return false;
@@ -206,7 +208,9 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
       port.dx,
       port.dy,
       port.direction,
-      node.rotation
+      node.rotation,
+      Boolean(node.flipX),
+      Boolean(node.flipY)
     ),
   }));
 
@@ -484,7 +488,7 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
       >
         <div
           style={{
-            transform: `rotate(${node.rotation * 90}deg)`,
+            transform: `scale(${node.flipX ? -1 : 1}, ${node.flipY ? -1 : 1}) rotate(${node.rotation * 90}deg)`,
             transition: "transform 0.15s ease",
           }}
           className="w-full h-full flex items-center justify-center pointer-events-none relative z-10"
@@ -848,6 +852,8 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
               componentId={node.componentId}
               name={node.name}
               rotation={node.rotation}
+              flipX={Boolean(node.flipX)}
+              flipY={Boolean(node.flipY)}
               isEnergized={node.isEnergized}
               isDark={isDark}
             />
@@ -926,7 +932,8 @@ export const FlowNode: React.FC<FlowNodeProps> = React.memo(({
           node.componentId === "lampBlink" ||
           node.componentId === "buzzer" ||
           node.componentId === "ring" ||
-          node.componentId === "siren";
+          node.componentId === "siren" ||
+          node.category === "motors";
         const outwardOffset = isCompactCircleNode ? 14 : 0;
         const displayX =
           transformed.x +

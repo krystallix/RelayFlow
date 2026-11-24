@@ -349,6 +349,8 @@ export class CadSvgGenerator {
       const halfW = nw / 2;
       const halfH = nh / 2;
       const rotAngle = (node.rotation || 0) * 90;
+      const sx = node.flipX ? -1 : 1;
+      const sy = node.flipY ? -1 : 1;
 
       svgParts.push(`<g id="node-${node.id}" transform="translate(${node.position.x}, ${node.position.y})">`);
 
@@ -365,14 +367,18 @@ export class CadSvgGenerator {
           .replace(/<metadata[\s\S]*?<\/metadata>/gi, "")
           .trim();
 
-        // Counter-rotate text markings (e.g., "M" on motors, "L1/L2/L3" on power sources)
-        // so they stay upright and readable when the component is rotated
-        if (node.rotation && TEXT_CENTERS[node.componentId]) {
+        // Counter-rotate & counter-flip text markings (e.g., "M" on motors, "L1/L2/L3" on power sources)
+        // so they stay upright and readable when the component is rotated or flipped
+        if ((node.rotation || node.flipX || node.flipY) && TEXT_CENTERS[node.componentId]) {
           const centers = TEXT_CENTERS[node.componentId];
-          const counterRot = -node.rotation * 90;
+          const counterRot = -(node.rotation || 0) * 90;
           for (const [tId, { cx, cy }] of Object.entries(centers)) {
             const regex = new RegExp(`(<path[^>]*id="${tId}"[^>]*\\/?>)`, "g");
-            cleanSymbol = cleanSymbol.replace(regex, `<g transform="rotate(${counterRot} ${cx} ${cy})">$1</g>`);
+            const transformStr =
+              node.flipX || node.flipY
+                ? `translate(${cx} ${cy}) rotate(${counterRot}) scale(${sx} ${sy}) translate(${-cx} ${-cy})`
+                : `rotate(${counterRot} ${cx} ${cy})`;
+            cleanSymbol = cleanSymbol.replace(regex, `<g transform="${transformStr}">$1</g>`);
           }
         }
 
@@ -416,12 +422,12 @@ export class CadSvgGenerator {
             .replace(/fill\s*=\s*["']#(?:ffffff|fff|f9f9f9|white)["']/gi, `fill="#0f172a"`);
         }
 
-        svgParts.push(`<g transform="translate(${-halfW}, ${-halfH}) rotate(${rotAngle} ${halfW} ${halfH})">
+        svgParts.push(`<g transform="scale(${sx}, ${sy}) rotate(${rotAngle}) translate(${-halfW}, ${-halfH})">
           ${cleanSymbol}
         </g>`);
       } else {
         // Fallback: embedded image link
-        svgParts.push(`<g transform="translate(${-halfW}, ${-halfH}) rotate(${rotAngle} ${halfW} ${halfH})">
+        svgParts.push(`<g transform="scale(${sx}, ${sy}) rotate(${rotAngle}) translate(${-halfW}, ${-halfH})">
           <image href="${svgPath}" width="${nw}" height="${nh}" />
         </g>`);
       }

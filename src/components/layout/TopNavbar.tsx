@@ -44,6 +44,8 @@ import {
   Save,
   Cpu,
   Printer,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 import { useCircuitStore } from "@/store/useCircuitStore";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -161,6 +163,8 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
     isHardwareSheetOpen,
     toggleHardwareSheet,
     setIsHardwareSheetOpen,
+    isPreferencesOpen,
+    togglePreferences,
     setIsPreferencesOpen,
     setCloudProjectId,
     setIsCloudSynced,
@@ -586,6 +590,33 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
       <div className="hidden md:flex items-center gap-3">
         {/* Branding Logo */}
         <div className="flex items-center gap-2">
+          {!isReadOnlyViewer && onTogglePalette && (
+            <button
+              type="button"
+              onClick={onTogglePalette}
+              className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                isDark
+                  ? "text-zinc-300 hover:text-white hover:bg-white/10"
+                  : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+              }`}
+              title={
+                isPaletteOpen
+                  ? locale === "id"
+                    ? `Sembunyikan Library Komponen (${modKey}+B)`
+                    : `Hide Component Library (${modKey}+B)`
+                  : locale === "id"
+                  ? `Tampilkan Library Komponen (${modKey}+B)`
+                  : `Show Component Library (${modKey}+B)`
+              }
+              aria-label="Toggle Component Library Sidebar"
+            >
+              {isPaletteOpen ? (
+                <PanelLeftClose className="w-4 h-4" />
+              ) : (
+                <PanelLeftOpen className="w-4 h-4" />
+              )}
+            </button>
+          )}
           <div className={`w-8 h-8 rounded-lg border flex items-center justify-center shrink-0 overflow-hidden ${
             isDark ? "bg-zinc-800 border-zinc-700" : "bg-slate-100 border-slate-200"
           }`}>
@@ -972,6 +1003,42 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
 
                 <div className={`my-1 h-[1px] ${isDark ? "bg-white/10" : "bg-slate-200"}`} />
 
+                {!isReadOnlyViewer && onTogglePalette && (
+                  <button
+                    onClick={() => { onTogglePalette(); setActiveMenu(null); }}
+                    className={`w-full text-left px-3 py-2 rounded-lg flex items-center justify-between text-xs transition-colors ${
+                      isDark ? "hover:bg-white/10" : "hover:bg-slate-100 text-slate-800"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      {isPaletteOpen ? (
+                        <PanelLeftClose className="w-4 h-4 text-zinc-400" />
+                      ) : (
+                        <PanelLeftOpen className="w-4 h-4 text-zinc-400" />
+                      )}
+                      <span>{locale === "id" ? "Library Komponen" : "Component Library"}</span>
+                    </div>
+                    <span className="text-[10px] text-zinc-400 font-mono">{modKey}+B</span>
+                  </button>
+                )}
+
+                <button
+                  onClick={() => {
+                    setActiveMenu(null);
+                    setExportMenuOpen(false);
+                    setUserMenuOpen(false);
+                    setIsPreferencesOpen(true);
+                  }}
+                  className={`w-full text-left px-3 py-2 rounded-lg flex items-center justify-between text-xs transition-colors ${
+                    isDark ? "hover:bg-white/10" : "hover:bg-slate-100 text-slate-800"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <SlidersHorizontal className="w-4 h-4 text-zinc-400" />
+                    <span>{locale === "id" ? "Preferensi Tampilan" : "View Preferences"}</span>
+                  </div>
+                </button>
+
                 <button
                   onClick={() => { onResetZoom(); setActiveMenu(null); }}
                   className={`w-full text-left px-3 py-2 rounded-lg flex items-center justify-between text-xs transition-colors ${
@@ -1146,6 +1213,27 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
           title={locale === "id" ? "Inspeksi Perangkat & BOM" : "Hardware Inspector & BOM"}
         >
           <Cpu className="w-4 h-4" />
+        </button>
+
+        {/* View Preferences Side Sheet Toggle Button */}
+        <button
+          onClick={() => {
+            setExportMenuOpen(false);
+            setUserMenuOpen(false);
+            togglePreferences();
+          }}
+          className={`p-2 rounded-xl transition-colors cursor-pointer ${
+            isPreferencesOpen
+              ? isDark
+                ? "bg-white text-black"
+                : "bg-slate-900 text-white"
+              : isDark
+              ? "bg-[#131620] hover:bg-[#1c202e] text-zinc-200 hover:text-white"
+              : "bg-white hover:bg-slate-100 text-slate-800"
+          }`}
+          title={locale === "id" ? "Preferensi Tampilan (Tebal Kawat, Label, Grid)" : "View Preferences (Wire Width, Labels, Grid)"}
+        >
+          <SlidersHorizontal className="w-4 h-4" />
         </button>
 
         {/* 4. Cloud Autosave & Sync Indicator Button (Icon-Only, Borderless, Shadowless) */}
@@ -1857,6 +1945,22 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
             <div className="mb-4">
               <div className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-2">{t.navbar.view}</div>
               <div className="space-y-1.5 text-xs">
+                {/* View Preferences Drawer Trigger Mobile */}
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    setIsPreferencesOpen(true);
+                  }}
+                  className={`w-full flex items-center justify-between p-2 rounded-xl border ${
+                    isDark ? "bg-white/5 border-white/10" : "bg-slate-100 border-slate-200"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <SlidersHorizontal className="w-4 h-4 text-zinc-300" />
+                    <span>{locale === "id" ? "Preferensi Tampilan" : "View Preferences"}</span>
+                  </div>
+                  <ChevronRight className="w-3.5 h-3.5 opacity-60" />
+                </button>
                 {/* Language Switcher Mobile */}
                 <button
                   onClick={() => toggleLocale()}
