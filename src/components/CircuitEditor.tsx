@@ -8,6 +8,11 @@ import { FlowCanvas } from "@/components/canvas/FlowCanvas";
 import { HardwareSheet } from "@/components/layout/HardwareSheet";
 import { PreferencesSheet } from "@/components/layout/PreferencesSheet";
 import { SheetTabsBar } from "@/components/layout/SheetTabsBar";
+import { ChangelogModal } from "@/components/modals/ChangelogModal";
+import {
+  hasSeenCurrentChangelog,
+  markCurrentChangelogSeen,
+} from "@/constants/changelog";
 import { useCircuitStore } from "@/store/useCircuitStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { ProjectsService } from "@/lib/projectsService";
@@ -21,6 +26,7 @@ export const CircuitEditor: React.FC<CircuitEditorProps> = ({ viewerProjectId })
   const [zoomScale, setZoomScale] = useState(0.85);
   const [panOffset, setPanOffset] = useState({ x: 100, y: 15 });
   const [isPaletteOpen, setIsPaletteOpen] = useState(false);
+  const [isChangelogOpen, setIsChangelogOpen] = useState(false);
   const [loadingViewerProject, setLoadingViewerProject] = useState(Boolean(viewerProjectId));
   const [projectNotFound, setProjectNotFound] = useState(false);
 
@@ -81,6 +87,10 @@ export const CircuitEditor: React.FC<CircuitEditorProps> = ({ viewerProjectId })
       if (typeof window !== "undefined" && window.innerWidth >= 768) {
         setIsPaletteOpen(true);
       }
+      if (!hasSeenCurrentChangelog()) {
+        setIsChangelogOpen(true);
+        markCurrentChangelogSeen();
+      }
     }
   }, [
     viewerProjectId,
@@ -108,6 +118,11 @@ export const CircuitEditor: React.FC<CircuitEditorProps> = ({ viewerProjectId })
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  const handleCloseChangelog = React.useCallback(() => {
+    markCurrentChangelogSeen();
+    setIsChangelogOpen(false);
   }, []);
 
   const handleZoomIn = () => {
@@ -203,6 +218,7 @@ export const CircuitEditor: React.FC<CircuitEditorProps> = ({ viewerProjectId })
         zoomScale={zoomScale}
         isPaletteOpen={isPaletteOpen}
         onTogglePalette={() => setIsPaletteOpen((prev) => !prev)}
+        onOpenChangelog={() => setIsChangelogOpen(true)}
       />
 
       {/* Main Workspace (Sidebar on the left + Right Column: SubToolbar & Canvas) */}
@@ -234,6 +250,9 @@ export const CircuitEditor: React.FC<CircuitEditorProps> = ({ viewerProjectId })
         {/* View Preferences Side Sheet Drawer */}
         <PreferencesSheet />
       </div>
+
+      {/* Changelog Modal (auto-shown once per release version via localStorage) */}
+      <ChangelogModal isOpen={isChangelogOpen} onClose={handleCloseChangelog} />
     </div>
   );
 };

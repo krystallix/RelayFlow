@@ -68,6 +68,7 @@ interface TopNavbarProps {
   zoomScale: number;
   isPaletteOpen?: boolean;
   onTogglePalette?: () => void;
+  onOpenChangelog?: () => void;
 }
 
 const CloudCheckIcon: React.FC<{ className?: string }> = ({ className = "w-4 h-4" }) => (
@@ -99,6 +100,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
   zoomScale,
   isPaletteOpen,
   onTogglePalette,
+  onOpenChangelog,
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
@@ -1101,10 +1103,22 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                   <span>{t.navbar.keyboardShortcuts}</span>
                 </button>
 
+                {onOpenChangelog && (
+                  <button
+                    onClick={() => { onOpenChangelog(); setActiveMenu(null); }}
+                    className={`w-full text-left px-3 py-2 rounded-lg flex items-center gap-2 text-xs transition-colors ${
+                      isDark ? "hover:bg-white/10 text-zinc-200" : "hover:bg-slate-100 text-slate-800"
+                    }`}
+                  >
+                    <Sparkles className="w-4 h-4 text-zinc-400" />
+                    <span>{locale === "id" ? "Pembaruan (Changelog)" : "What's New"}</span>
+                  </button>
+                )}
+
                 <div className={`my-1 h-[1px] ${isDark ? "bg-white/10" : "bg-slate-200"}`} />
 
                 <div className="px-3 py-1.5 text-[11px] text-zinc-400">
-                  <div className="font-semibold text-zinc-200">RelayFlow v1.0.0</div>
+                  <div className="font-semibold text-zinc-200">RelayFlow v1.2.0</div>
                   <div className="text-[10px] text-zinc-500">Dual .rflow & .smrl engine</div>
                 </div>
                 </div>
