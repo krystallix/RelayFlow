@@ -268,4 +268,61 @@ describe("Viewer Mode State & Forking (useCircuitStore)", () => {
     store.deleteSheet(initialSheetId);
     expect(useCircuitStore.getState().sheets).toHaveLength(1);
   });
+
+  it("blocks selection, copy/paste, duplicate, and mutations when isReadOnlyViewer is true", () => {
+    const store = useCircuitStore.getState();
+    store.setIsReadOnlyViewer(false);
+    store.resetCanvas();
+
+    store.addNode("lamp", { x: 90, y: 90 });
+    store.addNode("coil", { x: 180, y: 90 });
+    const [n1, n2] = useCircuitStore.getState().nodes;
+    expect(useCircuitStore.getState().nodes).toHaveLength(2);
+
+    // Select and copy before entering viewer mode
+    store.selectNode(n1.id, false);
+    store.copySelection();
+    expect(useCircuitStore.getState().selectedNodeIds.size).toBe(1);
+    expect(useCircuitStore.getState().clipboard?.nodes.length).toBe(1);
+
+    // Enter Read-Only Viewer Mode — must immediately clear selection and clipboard
+    store.setCurrentProjectOwnerId("owner_123");
+    store.setIsReadOnlyViewer(true);
+    expect(useCircuitStore.getState().currentProjectOwnerId).toBe("owner_123");
+    expect(useCircuitStore.getState().selectedNodeIds.size).toBe(0);
+    expect(useCircuitStore.getState().selectedWireIds.size).toBe(0);
+    expect(useCircuitStore.getState().clipboard).toBeNull();
+
+    // All selection, clipboard, and mutation actions must be no-ops
+    store.selectNode(n1.id, false);
+    expect(useCircuitStore.getState().selectedNodeIds.size).toBe(0);
+
+    store.selectAll();
+    expect(useCircuitStore.getState().selectedNodeIds.size).toBe(0);
+
+    store.copySelection();
+    expect(useCircuitStore.getState().clipboard).toBeNull();
+
+    store.pasteSelection();
+    expect(useCircuitStore.getState().nodes).toHaveLength(2);
+
+    store.duplicateSelection();
+    expect(useCircuitStore.getState().nodes).toHaveLength(2);
+
+    store.addNode("switchNO", { x: 270, y: 90 });
+    expect(useCircuitStore.getState().nodes).toHaveLength(2);
+
+    store.rotateNode(n1.id, "cw");
+    expect(useCircuitStore.getState().nodes.find((n) => n.id === n1.id)?.rotation).toBe(0);
+
+    store.flipNode(n2.id, "x");
+    expect(useCircuitStore.getState().nodes.find((n) => n.id === n2.id)?.flipX).toBeUndefined();
+
+    store.deleteSelection();
+    expect(useCircuitStore.getState().nodes).toHaveLength(2);
+
+    // Clean up viewer mode for subsequent tests
+    store.setIsReadOnlyViewer(false);
+    store.setCurrentProjectOwnerId(null);
+  });
 });

@@ -97,8 +97,8 @@ export const ShareModal: React.FC<ShareModalProps> = ({
         </div>
         <ul className="list-disc list-inside space-y-0.5 pl-1 text-[10.5px]">
           <li>Full live simulation (switches, coils, motors, lamps)</li>
-          <li>Multimeter / Voltage Probe HUD measurement</li>
-          <li>Circuit layout protected against unauthorized edits</li>
+          <li>Multimeter / Voltage Probe HUD &amp; CAD PDF/SVG export</li>
+          <li>View-only protection: no copying, forking, or raw source downloads</li>
         </ul>
       </div>
     </Modal>

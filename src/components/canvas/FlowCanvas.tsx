@@ -1279,12 +1279,17 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
         setIsSpacePressed(true);
       }
 
-      // In Read-Only Viewer Mode, permit simulation controls & panning but strictly block canvas mutations
+      // In Read-Only Viewer Mode, permit simulation controls & panning but strictly block selection, copy/paste, and mutations
       if (isReadOnlyViewer) {
         if (e.key === "F5") {
           e.preventDefault();
           if (isSimulating) stopSimulation();
           else startSimulation();
+        } else if (
+          (e.ctrlKey || e.metaKey) &&
+          ["c", "v", "x", "a", "d", "s"].includes(e.key.toLowerCase())
+        ) {
+          e.preventDefault();
         }
         return;
       }
@@ -2082,7 +2087,7 @@ export const FlowCanvas: React.FC<FlowCanvasProps> = ({
         </div>
 
         {/* Top SVG Overlay for Active Wire Corner Handles (never blocked by FlowNode 120x120 boxes) */}
-        {!isSimulating && !wireDraft && wireRoutingMode === "orthogonal" && (
+        {!isSimulating && !isReadOnlyViewer && !wireDraft && wireRoutingMode === "orthogonal" && (
           <svg className="w-full h-full absolute inset-0 pointer-events-none overflow-visible z-20">
             {wires
               .filter((w) => selectedWireIds.has(w.id) || hoveredWireId === w.id || draggingCornerState?.wireId === w.id)

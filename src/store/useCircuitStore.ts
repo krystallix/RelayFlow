@@ -242,6 +242,7 @@ interface CircuitStoreState {
 
   // Cloud & Sharing state
   currentProjectId: string | null;
+  currentProjectOwnerId: string | null;
   isCloudSynced: boolean;
   isReadOnlyViewer: boolean;
   isHardwareSheetOpen: boolean;
@@ -251,6 +252,7 @@ interface CircuitStoreState {
   // Actions
   hydrateFromLocalStorage: () => void;
   setCloudProjectId: (id: string | null) => void;
+  setCurrentProjectOwnerId: (ownerId: string | null) => void;
   setIsCloudSynced: (synced: boolean) => void;
   setIsReadOnlyViewer: (viewer: boolean) => void;
   setIsHardwareSheetOpen: (open: boolean) => void;
@@ -383,6 +385,7 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
     recentComponentIds: ["switchNO", "coil", "lamp", "motor3ph", "breaker3p", "sourcePlus", "sourceNegative"],
 
     currentProjectId: null,
+    currentProjectOwnerId: null,
     isCloudSynced: false,
     isReadOnlyViewer: false,
     isHardwareSheetOpen: false,
@@ -393,8 +396,20 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
       set({ currentProjectId: id });
       saveToLocalStorage({ currentProjectId: id }, true);
     },
+    setCurrentProjectOwnerId: (ownerId) => set({ currentProjectOwnerId: ownerId }),
     setIsCloudSynced: (synced) => set({ isCloudSynced: synced }),
-    setIsReadOnlyViewer: (viewer) => set({ isReadOnlyViewer: viewer }),
+    setIsReadOnlyViewer: (viewer) =>
+      set((state) => ({
+        isReadOnlyViewer: viewer,
+        ...(viewer
+          ? {
+              selectedNodeIds: new Set<string | number>(),
+              selectedWireIds: new Set<string | number>(),
+              clipboard: null,
+              wireDraft: null,
+            }
+          : {}),
+      })),
     setIsHardwareSheetOpen: (open) =>
       set({
         isHardwareSheetOpen: open,
@@ -1158,6 +1173,7 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
     },
 
     selectNode: (id, multi = false) => {
+      if (get().isReadOnlyViewer) return;
       set((state) => {
         const next = multi ? new Set(state.selectedNodeIds) : new Set<string | number>();
         if (next.has(id)) next.delete(id);
@@ -1167,6 +1183,7 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
     },
 
     selectWire: (id, multi = false) => {
+      if (get().isReadOnlyViewer) return;
       set((state) => {
         const next = multi ? new Set(state.selectedWireIds) : new Set<string | number>();
         if (next.has(id)) next.delete(id);
@@ -1178,6 +1195,7 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
     clearSelection: () => set({ selectedNodeIds: new Set(), selectedWireIds: new Set() }),
 
     selectAll: () => {
+      if (get().isReadOnlyViewer) return;
       set((state) => ({
         selectedNodeIds: new Set(state.nodes.map((n) => n.id)),
         selectedWireIds: new Set(state.wires.map((w) => w.id)),
@@ -1185,6 +1203,7 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
     },
 
     addNode: (componentId, position) => {
+      if (get().isReadOnlyViewer) return;
       set((state) => {
         const history = pushHistory(state);
         const comp = catalog[componentId];
@@ -1340,6 +1359,7 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
     },
 
     rotateSelectedNodes: (direction = "cw") => {
+      if (get().isReadOnlyViewer) return;
       set((state) => {
         if (state.selectedNodeIds.size === 0) return {};
         const history = pushHistory(state);
@@ -1402,6 +1422,7 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
     },
 
     rotateNode: (nodeId, direction = "cw") => {
+      if (get().isReadOnlyViewer) return;
       set((state) => {
         const history = pushHistory(state);
         const delta = direction === "ccw" ? 3 : 1;
@@ -1417,6 +1438,7 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
     },
 
     flipSelectedNodes: (axis) => {
+      if (get().isReadOnlyViewer) return;
       set((state) => {
         if (state.selectedNodeIds.size === 0) return {};
         const history = pushHistory(state);
@@ -1431,6 +1453,7 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
     },
 
     flipNode: (nodeId, axis) => {
+      if (get().isReadOnlyViewer) return;
       set((state) => {
         const history = pushHistory(state);
         const updatedNodes = state.nodes.map((n) => {
@@ -1444,6 +1467,7 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
     },
 
     deleteSelection: () => {
+      if (get().isReadOnlyViewer) return;
       set((state) => {
         if (state.selectedNodeIds.size === 0 && state.selectedWireIds.size === 0) return {};
         const history = pushHistory(state);
@@ -1559,6 +1583,7 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
     },
 
     duplicateSelection: () => {
+      if (get().isReadOnlyViewer) return;
       set((state) => {
         if (state.selectedNodeIds.size === 0) return {};
         const history = pushHistory(state);
@@ -1615,6 +1640,7 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
 
     copySelection: () => {
       const state = get();
+      if (state.isReadOnlyViewer) return;
       if (state.selectedNodeIds.size === 0) return;
       const selectedNodes = state.nodes.filter((n) => state.selectedNodeIds.has(n.id));
       const selectedIds = new Set(selectedNodes.map((n) => n.id));
@@ -1631,6 +1657,7 @@ export const useCircuitStore = create<CircuitStoreState>((set, get) => {
     },
 
     pasteSelection: (targetPos) => {
+      if (get().isReadOnlyViewer) return;
       set((state) => {
         if (!state.clipboard || state.clipboard.nodes.length === 0) return {};
         const history = pushHistory(state);

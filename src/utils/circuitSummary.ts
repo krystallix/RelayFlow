@@ -54,11 +54,13 @@ export function isVirtualSymbol(cid: string): boolean {
 }
 
 /**
- * Strictly checks if a node is a Power Contactor main contact block (e.g. contactor1p..4p, contactorNC1p..4p).
- * Auxiliary contacts (category === "auxiliaries") such as "On-Delay Contact NO for Contactors" are NOT power contactors.
+ * Strictly checks if a node is a multi-pole Power Contactor main contact block (2P, 3P, 4P).
+ * Single-pole contactor1p / contactorNC1p and auxiliary contacts (category === "auxiliaries")
+ * are treated as auxiliary contacts (1 NO / 1 NC) rather than standalone Power Contactors.
  */
 export function isPowerContactorNode(n: CircuitNode): boolean {
   const cid = (n.componentId || "").toLowerCase();
+  if (cid === "contactor1p" || cid === "contactornc1p") return false;
   return n.category === "contactors" || cid.startsWith("contactor");
 }
 
@@ -90,6 +92,8 @@ export function isRelayCoilNode(n: CircuitNode): boolean {
 export function isAuxiliaryContactNode(n: CircuitNode): boolean {
   const cid = (n.componentId || "").toLowerCase();
   return (
+    cid === "contactor1p" ||
+    cid === "contactornc1p" ||
     n.category === "auxiliaries" ||
     (cid.startsWith("contact") && !cid.startsWith("contactor"))
   );
@@ -99,6 +103,17 @@ export function extractContactorPoles(n: CircuitNode): string {
   const cid = (n.componentId || "").toLowerCase();
   const match = cid.match(/(\d)p$/);
   return match ? `${match[1]}P` : "3P";
+}
+
+function getHighestContactorPoles(powerContactorNodes: CircuitNode[]): string {
+  let maxPole = 0;
+  for (const n of powerContactorNodes) {
+    const cid = (n.componentId || "").toLowerCase();
+    const match = cid.match(/(\d)p$/);
+    const poleNum = match ? parseInt(match[1], 10) : 3;
+    if (poleNum > maxPole) maxPole = poleNum;
+  }
+  return maxPole > 0 ? `${maxPole}P` : "3P";
 }
 
 export function getTimerSubtypeLabel(n: CircuitNode): string {
@@ -136,10 +151,10 @@ export function countAuxiliaryContacts(group: CircuitNode[]): AuxContactCounts {
     } else if (cid.startsWith("contactcon")) {
       co += 1;
       totalContacts += 1;
-    } else if (cid.startsWith("contactnc")) {
+    } else if (cid.startsWith("contactnc") || cid === "contactornc1p") {
       nc += 1;
       totalContacts += 1;
-    } else if (cid.startsWith("contactno")) {
+    } else if (cid.startsWith("contactno") || cid === "contactor1p") {
       no += 1;
       totalContacts += 1;
     }
@@ -166,6 +181,9 @@ export function classifyDeviceType(cid: string, name: string, cat: string): stri
   if (c.includes("overload")) return "Thermal Overload";
   if (c === "coildelayon" || c === "coildelayoff" || c === "coildelayonoff" || c === "coilflasher") return "Timer";
   if (c.includes("solenoid")) return "Solenoid";
+  if (c === "contactor1p" || c === "contactornc1p") {
+    return "Auxiliary Contact (Untagged)";
+  }
   if (cat === "contactors" || c.startsWith("contactor")) return "Contactor";
   if (cat === "coils" || c.startsWith("coil")) return "Relay";
   if (cat === "auxiliaries" || (c.startsWith("contact") && !c.startsWith("contactor"))) {
@@ -307,7 +325,7 @@ export function getDetailedBomGroups(nodes: CircuitNode[]): BomCategoryGroup[] {
         tag,
       });
     } else if (hasPowerContactor) {
-      const poles = extractContactorPoles(powerContactorNodes[0]);
+      const poles = getHighestContactorPoles(powerContactorNodes);
       const label =
         auxCounts.totalContacts > 0
           ? `Contactor ${poles} + ${auxCounts.totalContacts} Aux`
@@ -414,7 +432,7 @@ export function getDetailedHardwareList(nodes: CircuitNode[]): DetailedHardwareI
       type = "Timer";
       category = "coils";
     } else if (hasPowerContactor) {
-      const poles = extractContactorPoles(powerContactorNodes[0]);
+      const poles = getHighestContactorPoles(powerContactorNodes);
       type = "Contactor";
       category = "contactors";
       contactSummary = [`${poles} Main`, auxDesc, !hasCoil ? "Missing Coil" : ""].filter(Boolean).join(" · ");
@@ -435,8 +453,8 @@ export function getDetailedHardwareList(nodes: CircuitNode[]): DetailedHardwareI
       else if (isOverloadNode(n)) role = "overload";
       else if (cid.startsWith("contactnonc")) role = "aux-nonc";
       else if (cid.startsWith("contactcon")) role = "aux-co";
-      else if (cid.startsWith("contactnc")) role = "aux-nc";
-      else if (cid.startsWith("contactno")) role = "aux-no";
+      else if (cid.startsWith("contactnc") || cid === "contactornc1p") role = "aux-nc";
+      else if (cid.startsWith("contactno") || cid === "contactor1p") role = "aux-no";
 
       let state = "Normal";
       if (role === "coil") {

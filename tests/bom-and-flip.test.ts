@@ -112,4 +112,19 @@ describe("BOM Calculation & Detailed Relay / Contactor Breakdown", () => {
     expect(relayGroup).toBeUndefined();
     expect(untaggedGroup?.total).toBe(1);
   });
+
+  it("treats single-pole contactor1p/contactorNC1p as auxiliary contacts rather than Contactor 1P", () => {
+    const nodes: CircuitNode[] = [
+      makeNode({ id: "1", componentId: "coil", category: "coils", name: "Coil", tag: "KM1" }),
+      makeNode({ id: "2", componentId: "contactor1p", category: "contactors", name: "Contactor 1P", tag: "KM1" }),
+      makeNode({ id: "3", componentId: "contactorNC1p", category: "contactors", name: "Contactor NC 1P", tag: "KM1" }),
+    ];
+
+    const groups = getDetailedBomGroups(nodes);
+    expect(groups).toHaveLength(1);
+    expect(groups[0].type).toBe("Relay");
+    expect(groups[0].total).toBe(1);
+    expect(groups[0].variants[0].label).toBe("Relay 2 Contact");
+    expect(groups[0].variants[0].description).toBe("1 NO 1 NC");
+  });
 });

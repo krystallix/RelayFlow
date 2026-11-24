@@ -163,6 +163,7 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
 }) => {
   const selectWire = useCircuitStore((s) => s.selectWire);
   const isSimulating = useCircuitStore((s) => s.isSimulating);
+  const isReadOnlyViewer = useCircuitStore((s) => s.isReadOnlyViewer);
   const hasWireDraft = useCircuitStore((s) => Boolean(s.wireDraft));
   const connectWireToWire = useCircuitStore((s) => s.connectWireToWire);
   const theme = useCircuitStore((s) => s.theme);
@@ -261,6 +262,7 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
   };
 
   const handleWireMouseDown = (e: React.MouseEvent) => {
+    if (isReadOnlyViewer) return;
     e.stopPropagation();
 
     // If currently drafting a wire from a component terminal, clicking anywhere on the wire attaches to it!
@@ -278,6 +280,7 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
   };
 
   const handleWireClick = (e: React.MouseEvent) => {
+    if (isReadOnlyViewer) return;
     e.stopPropagation();
     if (useCircuitStore.getState().wireDraft) return;
     selectWire(wire.id, e.shiftKey);
@@ -342,10 +345,11 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
       onContextMenu={(e) => {
         e.preventDefault();
         e.stopPropagation();
+        if (isReadOnlyViewer) return;
         onContextMenu?.(wire, e);
       }}
       onMouseEnter={(e) => {
-        setIsHovered(true);
+        if (!isReadOnlyViewer) setIsHovered(true);
         onWireHover?.(wire, e);
       }}
       onMouseLeave={() => {
@@ -353,7 +357,7 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
         setHoverPos(null);
         onWireLeave?.();
       }}
-      className="cursor-pointer group"
+      className={isReadOnlyViewer ? "cursor-grab" : "cursor-pointer group"}
     >
       {/* 1. Broad Invisible Click / Hit Target */}
       <path
@@ -364,6 +368,7 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
         className="pointer-events-auto"
         onMouseDown={handleWireMouseDown}
         onTouchStart={(e) => {
+          if (isReadOnlyViewer) return;
           e.stopPropagation();
           onWireTouchSelect?.();
           const touch = e.touches[0];
@@ -517,7 +522,7 @@ export const FlowWire: React.FC<FlowWireProps> = React.memo(({
       )}
 
       {/* 7. Interactive Corner Handles (Sudut Garis) - appear immediately on hover or selection */}
-      {(isHovered || isSelected) && !isSimulating && !hasWireDraft && (
+      {(isHovered || isSelected) && !isSimulating && !hasWireDraft && !isReadOnlyViewer && (
         <g className="corner-handles">
           {cornerPoints.map((corner, idx) => (
             <g

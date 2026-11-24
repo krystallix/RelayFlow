@@ -29,6 +29,7 @@ export const CircuitEditor: React.FC<CircuitEditorProps> = ({ viewerProjectId })
   const hydrateFromLocalStorage = useCircuitStore((state) => state.hydrateFromLocalStorage);
   const loadProject = useCircuitStore((state) => state.loadProject);
   const setCloudProjectId = useCircuitStore((state) => state.setCloudProjectId);
+  const setCurrentProjectOwnerId = useCircuitStore((state) => state.setCurrentProjectOwnerId);
   const setIsCloudSynced = useCircuitStore((state) => state.setIsCloudSynced);
   const setIsReadOnlyViewer = useCircuitStore((state) => state.setIsReadOnlyViewer);
   const setProjectTitle = useCircuitStore((state) => state.setProjectTitle);
@@ -60,6 +61,7 @@ export const CircuitEditor: React.FC<CircuitEditorProps> = ({ viewerProjectId })
               activeSheetId: project.data.activeSheetId,
             });
             setCloudProjectId(project.id);
+            setCurrentProjectOwnerId(project.owner_id ?? null);
             setProjectTitle(project.title);
             setIsCloudSynced(true);
             setIsReadOnlyViewer(true);
@@ -74,6 +76,7 @@ export const CircuitEditor: React.FC<CircuitEditorProps> = ({ viewerProjectId })
         });
     } else {
       hydrateFromLocalStorage();
+      setCurrentProjectOwnerId(null);
       setIsReadOnlyViewer(false);
       if (typeof window !== "undefined" && window.innerWidth >= 768) {
         setIsPaletteOpen(true);
@@ -85,6 +88,7 @@ export const CircuitEditor: React.FC<CircuitEditorProps> = ({ viewerProjectId })
     initAuth,
     loadProject,
     setCloudProjectId,
+    setCurrentProjectOwnerId,
     setIsCloudSynced,
     setIsReadOnlyViewer,
     setProjectTitle,
@@ -120,9 +124,12 @@ export const CircuitEditor: React.FC<CircuitEditorProps> = ({ viewerProjectId })
   };
 
   const handleLocateNode = React.useCallback((nodeId: string | number) => {
-    const node = useCircuitStore.getState().nodes.find((n) => n.id === nodeId);
+    const state = useCircuitStore.getState();
+    const node = state.nodes.find((n) => n.id === nodeId);
     if (!node) return;
-    useCircuitStore.getState().selectNode(nodeId);
+    if (!state.isReadOnlyViewer) {
+      state.selectNode(nodeId);
+    }
     if (typeof window !== "undefined") {
       const screenW = window.innerWidth;
       const screenH = window.innerHeight;

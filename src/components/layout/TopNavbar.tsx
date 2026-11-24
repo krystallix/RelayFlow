@@ -46,6 +46,7 @@ import {
   Printer,
   PanelLeftClose,
   PanelLeftOpen,
+  Pencil,
 } from "lucide-react";
 import { useCircuitStore } from "@/store/useCircuitStore";
 import { useAuthStore } from "@/store/useAuthStore";
@@ -158,6 +159,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
     nodes,
     wires,
     currentProjectId,
+    currentProjectOwnerId,
     isCloudSynced,
     isReadOnlyViewer,
     isHardwareSheetOpen,
@@ -341,19 +343,20 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
     }
   };
 
-  const handleForkToEdit = () => {
-    if (!user) {
-      setAuthCustomMessage(t.auth.loginToFork);
-      setPendingAction("fork");
-      setShowAuthModal(true);
-      return;
-    }
-    setCloudProjectId(null);
-    setIsCloudSynced(false);
+  const isProjectOwner = Boolean(
+    user && currentProjectOwnerId && user.id === currentProjectOwnerId
+  );
+
+  const handleOpenInEditor = () => {
+    if (!isProjectOwner) return;
     setIsReadOnlyViewer(false);
-    setProjectTitle(`${projectTitle} (Fork)`);
-    if (typeof window !== "undefined" && window.location.pathname.startsWith("/c/")) {
-      window.history.pushState({}, "", "/");
+    if (typeof window !== "undefined") {
+      if (window.innerWidth >= 768 && !isPaletteOpen && onTogglePalette) {
+        onTogglePalette();
+      }
+      if (window.location.pathname.startsWith("/c/")) {
+        window.history.pushState({}, "", "/");
+      }
     }
   };
 
@@ -476,6 +479,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
   };
 
   const handleExportRflow = () => {
+    if (isReadOnlyViewer) return;
     const storeState = useCircuitStore.getState();
     const syncedSheets = storeState.sheets.map((s) =>
       s.id === storeState.activeSheetId ? { ...s, nodes, wires } : s
@@ -505,6 +509,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
   };
 
   const handleExportSmrl = () => {
+    if (isReadOnlyViewer) return;
     const project = {
       format: "relayflow" as const,
       version: "1.0.0" as const,
@@ -658,6 +663,8 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                       : "bg-white border-slate-200 text-slate-700"
                   }`}
                 >
+                {!isReadOnlyViewer && (
+                  <>
                 <button
                   onClick={handleNewCircuit}
                   className={`w-full text-left px-3 py-2 rounded-lg flex items-center gap-2.5 text-xs transition-colors ${
@@ -738,6 +745,8 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                     <span className="text-[10px] font-mono bg-white/10 text-zinc-300 px-1 py-0.5 rounded">Simurelay</span>
                   </div>
                 </button>
+                  </>
+                )}
 
                 <button
                   onClick={handleExportBom}
@@ -772,7 +781,8 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
             )}
           </div>
 
-          {/* Edit Menu */}
+          {/* Edit Menu (Hidden in Read-Only Viewer Mode) */}
+          {!isReadOnlyViewer && (
           <div
             className="relative"
             onMouseEnter={() => setActiveMenu("edit")}
@@ -898,6 +908,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
               </div>
             )}
           </div>
+          )}
 
           {/* View Menu */}
           <div
@@ -1342,6 +1353,8 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
 
               <div className={`my-1 h-[1px] ${isDark ? "bg-white/10" : "bg-slate-200"}`} />
 
+              {!isReadOnlyViewer && (
+                <>
               {/* Export .rflow */}
               <button
                 onClick={() => {
@@ -1379,6 +1392,8 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                   .smrl
                 </span>
               </button>
+                </>
+              )}
 
               {/* Export BOM */}
               <button
@@ -1440,14 +1455,15 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
           </button>
         )}
 
-        {/* 7. Fork to Edit (Icon-Only Solid Button, Borderless, Shadowless, if in Viewer Mode) */}
-        {isReadOnlyViewer && (
+        {/* 7. Open in Editor (Owner Only, when opening own shared link) */}
+        {isReadOnlyViewer && isProjectOwner && (
           <button
-            onClick={handleForkToEdit}
-            className="p-2 rounded-xl transition-all bg-blue-600 hover:bg-blue-500 text-white flex items-center justify-center cursor-pointer"
-            title={t.cloudNavbar.forkToEdit}
+            onClick={handleOpenInEditor}
+            className="px-2.5 py-1.5 rounded-xl transition-all bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+            title={locale === "id" ? "Buka di Editor" : "Open in Editor"}
           >
-            <GitFork className="w-4 h-4" />
+            <Pencil className="w-3.5 h-3.5" />
+            <span>{locale === "id" ? "Buka di Editor" : "Open in Editor"}</span>
           </button>
         )}
 
@@ -1455,7 +1471,7 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
         {isReadOnlyViewer && (
           <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-mono font-medium bg-[#0b1c2e] text-sky-300">
             <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" />
-            <span>{t.cloudNavbar.viewerMode}</span>
+            <span>{locale === "id" ? "View Only" : "View Only"}</span>
           </div>
         )}
 
@@ -1730,7 +1746,8 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
               </div>
             </div>
 
-            {/* Quick Actions (Auto layout, Undo, Redo) */}
+            {/* Quick Actions (Auto layout, Undo, Redo) - Editor Only */}
+            {!isReadOnlyViewer && (
             <div className="mb-4">
               <div className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-2">Circuit Actions</div>
               <div className="space-y-1.5">
@@ -1773,19 +1790,27 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                 </div>
               </div>
             </div>
+            )}
 
             {/* Cloud & Sharing Mobile Section */}
             <div className="mb-4">
               <div className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-2">Cloud & Sharing</div>
               <div className="space-y-1.5 text-xs">
                 {isReadOnlyViewer ? (
-                  <button
-                    onClick={() => { setMobileMenuOpen(false); handleForkToEdit(); }}
-                    className="w-full flex items-center justify-center gap-2 p-2 rounded-xl font-bold bg-blue-600 text-white"
-                  >
-                    <GitFork className="w-4 h-4" />
-                    <span>{t.cloudNavbar.forkToEdit}</span>
-                  </button>
+                  isProjectOwner ? (
+                    <button
+                      onClick={() => { setMobileMenuOpen(false); handleOpenInEditor(); }}
+                      className="w-full flex items-center justify-center gap-2 p-2 rounded-xl font-bold bg-blue-600 text-white"
+                    >
+                      <Pencil className="w-4 h-4" />
+                      <span>{locale === "id" ? "Buka di Editor" : "Open in Editor"}</span>
+                    </button>
+                  ) : (
+                    <div className="w-full flex items-center justify-center gap-1.5 p-2 rounded-xl text-[11px] font-mono bg-[#0b1c2e] text-sky-300">
+                      <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" />
+                      <span>View Only</span>
+                    </div>
+                  )
                 ) : (
                   <>
                     <button
@@ -1863,6 +1888,8 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
             <div className="mb-4">
               <div className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-2">{t.navbar.file}</div>
               <div className="space-y-1 text-xs">
+                {!isReadOnlyViewer && (
+                  <>
                 <button
                   onClick={handleNewCircuit}
                   className={`w-full text-left p-2 rounded-xl flex items-center gap-2.5 ${
@@ -1914,6 +1941,8 @@ export const TopNavbar: React.FC<TopNavbarProps> = ({
                   </div>
                   <span className="text-[10px] font-mono bg-white/10 px-1.5 py-0.5 rounded">Simurelay</span>
                 </button>
+                  </>
+                )}
                 <button
                   onClick={() => { handleExportBom(); setMobileMenuOpen(false); }}
                   className={`w-full text-left p-2 rounded-xl flex items-center justify-between ${
